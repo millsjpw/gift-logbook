@@ -8,6 +8,13 @@
       "when": 1774295331307,
       "tag": "0000_spicy_smiling_tiger",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1774370669306,
+      "tag": "0001_slim_santa_claus",
+      "breakpoints": true
     }
   ]
 }

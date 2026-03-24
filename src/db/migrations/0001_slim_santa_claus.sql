@@ -1,0 +1,1 @@
+ALTER TABLE "sessions" RENAME COLUMN "revoked" TO "revoked_at";
