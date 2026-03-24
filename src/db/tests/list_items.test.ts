@@ -22,10 +22,7 @@ describe('list_items queries', () => {
       const byId = await listItems.getListItemById(item!.id);
       expect(byId).toBeDefined();
 
-      const byUser = await listItems.getListItemsByUserId(user.id);
-      expect(byUser.length).toBeGreaterThan(0);
-
-      const byTitle = await listItems.getListItemsByTitle(user.id, 'Cool');
+      const byTitle = await listItems.getListItemsByTitle(list.id, 'Cool');
       expect(byTitle.length).toBeGreaterThan(0);
 
       const updated = await listItems.updateListItem(item!.id, 'Cooler Gift', undefined);

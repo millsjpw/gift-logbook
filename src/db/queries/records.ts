@@ -9,7 +9,7 @@ export async function addRecord(userId: string, personId: string, itemText: stri
         itemText,
         amount: amount !== undefined ? String(amount) : null,
         date: date ?? new Date(),
-        meta: meta ?? null,
+        meta: meta ?? {},
     };
     const [createdRecord] = await db.insert(records).values(record).returning();
     return createdRecord;
