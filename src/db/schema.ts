@@ -91,8 +91,8 @@ export const records = pgTable("records", {
     check("amount_non_negative", sql`${table.amount} >= 0`),
 ]);
 
-export type NewRecord = typeof records.$inferInsert;
-export type Record = typeof records.$inferSelect;
+export type NewGiftRecord = typeof records.$inferInsert;
+export type GiftRecord = typeof records.$inferSelect;
 
 export const tags = pgTable("tags", {
     id: uuid("id").primaryKey().defaultRandom(),

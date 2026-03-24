@@ -2,7 +2,7 @@ import { db } from '../db.js';
 import { persons } from '../schema.js';
 import { eq, and, like } from 'drizzle-orm';
 
-export async function createPerson(userId: string, name: string, meta: object) {
+export async function createPerson(userId: string, name: string, meta: any) {
     const person = {
         userId,
         name,
@@ -32,7 +32,7 @@ export async function getPersonsByName(userId: string, name: string) {
     return personsList;
 }
 
-export async function updatePerson(id: string, name?: string, meta?: object) {
+export async function updatePerson(id: string, name?: string, meta?: any) {
     const updateData: Partial<typeof persons.$inferInsert> = {};
     if (name) updateData.name = name;
     if (meta) updateData.meta = meta;

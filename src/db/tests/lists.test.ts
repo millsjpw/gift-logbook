@@ -1,14 +1,14 @@
 import { describe, it, expect } from 'vitest';
-import * as users from '../queries/users.js';
 import * as lists from '../queries/lists.js';
 import * as persons from '../queries/persons.js';
 import { createTestUser, createTestPerson, cleanupTestUser } from './testUtils.js';
+import { List } from '../schema.js';
 
 describe('lists queries', () => {
   it('create, read, update, delete list', async () => {
     let user;
     let person;
-    let created;
+    let created: List | undefined;
     try {
       user = (await createTestUser('list')).user;
       person = await createTestPerson(user.id, 'ListPerson');
@@ -19,15 +19,16 @@ describe('lists queries', () => {
       expect(byUser.length).toBeGreaterThan(0);
 
       const byPerson = await lists.getListsByPersonId(user.id, person.id);
-      expect(byPerson.some(l => l.id === created.id)).toBeTruthy();
+      expect(created).toBeDefined();
+      expect(byPerson.some(l => l.id === created!.id)).toBeTruthy();
 
-      const fetched = await lists.getListById(created.id);
+      const fetched = await lists.getListById(created!.id);
       expect(fetched).toBeDefined();
 
       const byName = await lists.getListsByName(user.id, 'Wish');
       expect(byName.length).toBeGreaterThan(0);
 
-      const updated = await lists.updateList(created.id, 'NewName', null);
+      const updated = await lists.updateList(created!.id, 'NewName', undefined);
       expect(updated.name).toBe('NewName');
     } finally {
       if (created?.id) await lists.deleteList(created.id);

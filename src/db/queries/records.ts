@@ -1,9 +1,9 @@
 import { db } from '../db.js';
-import { NewRecord, records } from '../schema.js';
+import { NewGiftRecord, records } from '../schema.js';
 import { eq, and, like } from 'drizzle-orm';
 
-export async function addRecord(userId: string, personId: string, itemText: string, amount?: number, date?: Date, meta?: object) {
-    const record: NewRecord = {
+export async function addRecord(userId: string, personId: string, itemText: string, amount?: number, date?: Date, meta?: any) {
+    const record: NewGiftRecord = {
         userId,
         personId,
         itemText,
@@ -45,8 +45,8 @@ export async function getRecordsByItemText(userId: string, itemText: string) {
     return recordsList;
 }
 
-export async function updateRecord(id: string, itemText?: string, amount?: number, date?: Date, meta?: object) {
-    const updateData: Partial<NewRecord> = {};
+export async function updateRecord(id: string, itemText?: string, amount?: number, date?: Date, meta?: any) {
+    const updateData: Partial<NewGiftRecord> = {};
     if (itemText) updateData.itemText = itemText;
     if (amount !== undefined) updateData.amount = String(amount);
     if (date) updateData.date = date;

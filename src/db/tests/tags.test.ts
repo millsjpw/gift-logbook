@@ -1,5 +1,4 @@
 import { describe, it, expect } from 'vitest';
-import * as users from '../queries/users.js';
 import * as tags from '../queries/tags.js';
 import { createTestUser, cleanupTestUser } from './testUtils.js';
 
