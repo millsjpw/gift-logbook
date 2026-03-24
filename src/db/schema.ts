@@ -83,7 +83,7 @@ export const records = pgTable("records", {
     itemText: varchar("item_text", { length: 256 }).notNull(),
     amount: numeric("amount", { precision: 10, scale: 2 }),
     date: timestamp("date").notNull(),
-    meta: jsonb("meta").notNull().default("{}"),
+    meta: jsonb("meta").default("{}"),
 }, (table) => [
     index("user_record_date_index").on(table.userId, table.date),
     index("user_record_person_index").on(table.userId, table.personId),
