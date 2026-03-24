@@ -1,0 +1,167 @@
+import * as exchangesDb from '../db/queries/exchanges.js';
+import * as exchParticipantsDb from '../db/queries/exchange_participants.js';
+import * as exchAssignmentsDb from '../db/queries/exchange_assignments.js';
+import * as exchExclusionsDb from '../db/queries/exchange_exclusions.js';
+import { Exchange, ExchangeParticipant, ExchangeAssignment, ExchangeExclusion } from '../db/schema.js';
+
+type FullExchange = {
+    exchange: Exchange;
+    participants: ExchangeParticipant[];
+    assignments: ExchangeAssignment[];
+    exclusions: ExchangeExclusion[];
+};
+
+export async function getFullExchange(exchangeId: string): Promise<FullExchange> {
+    const [exchange, participants, assignments, exclusions] = await Promise.all([
+        exchangesDb.getExchangeById(exchangeId),
+        exchParticipantsDb.getParticipantsByExchangeId(exchangeId),
+        exchAssignmentsDb.getAssignmentsByExchangeId(exchangeId),
+        exchExclusionsDb.getExclusionsByExchangeId(exchangeId),
+    ]);
+
+    if (!exchange) {
+        throw new Error("Exchange not found");
+    }
+
+    return { exchange, participants, assignments, exclusions };
+}
+
+export async function createExchange(userId: string, name: string) {
+    return await exchangesDb.createExchange(userId, name);
+}
+
+export async function addParticipant(exchangeId: string, personId: string) {
+    return await exchParticipantsDb.addParticipantToExchange(exchangeId, personId);
+}
+
+export async function setExclusions(exchangeId: string, personId: string, excludedPersonIds: string[]) {
+    await exchExclusionsDb.removeExclusionsForPersonInExchange(exchangeId, personId);
+    // bulk insert new exclusions
+    const exclusions = excludedPersonIds.map(excludedId => ({ personId1: personId, personId2: excludedId }));
+    await exchExclusionsDb.bulkInsertExclusions(exchangeId, exclusions);
+}
+
+export async function generateAssignments(exchangeId: string) {
+    const { participants, exclusions } = await getFullExchange(exchangeId);
+
+    const previousAssignments = await exchAssignmentsDb.getAssignmentsByExchangeId(exchangeId);
+    const participantIds = participants.map(p => p.personId);
+    const constraints = buildConstraintMap(participantIds, exclusions, previousAssignments ?? []);
+
+    validateParticipants(participants, constraints);
+
+    const matching = generateMatching(participantIds, constraints);
+
+    return Array.from(matching.entries()).map(([giverId, receiverId]) => ({
+        exchangeId,
+        giverId,
+        receiverId,
+    }));
+}
+
+export async function cloneExchange(exchangeId: string, userId: string) {
+    const { exchange, participants, exclusions } = await getFullExchange(exchangeId);
+
+    const newExchange = await exchangesDb.createExchange(userId, `${exchange.name} (Copy)`);
+    
+    await exchParticipantsDb.bulkInsertParticipants(newExchange.id, participants.map(p => p.personId));
+    await exchExclusionsDb.bulkInsertExclusions(newExchange.id, exclusions.map(e => ({ personId1: e.personId1, personId2: e.personId2 })));
+
+    return newExchange;
+}
+
+export async function saveAssignments(exchangeId: string, assignments: { giverId: string, receiverId: string }[]) {
+    const nextRound = await exchAssignmentsDb.getNextRound(exchangeId);
+
+    await exchAssignmentsDb.bulkInsertAssignments(
+        exchangeId,
+        assignments.map(a => ({
+            giverId: a.giverId,
+            receiverId: a.receiverId,
+            round: nextRound,
+        }))
+    );
+}
+
+function validateParticipants(
+  participants: ExchangeParticipant[],
+  constraints: ConstraintMap
+) {
+  if (participants.length < 2) {
+    throw new Error("At least 2 participants are required");
+  }
+
+  for (const p of participants) {
+    const invalid = constraints.get(p.personId) ?? new Set();
+
+    // must have at least 1 valid receiver
+    if (invalid.size >= participants.length) {
+      throw new Error(
+        `Participant ${p.personId} has no valid recipients`
+      );
+    }
+  }
+}
+
+type ConstraintMap = Map<string, Set<string>>;
+
+function buildConstraintMap(
+    participants: string[], 
+    exclusions: ExchangeExclusion[],
+    previousAssignments: ExchangeAssignment[]
+): ConstraintMap {
+    const map: ConstraintMap = new Map();
+
+    for (const personId of participants) {
+        map.set(personId, new Set([personId])); // A participant cannot be assigned to themselves
+    }
+
+    // exclusions (one-way)
+    for (const e of exclusions) {
+        map.get(e.personId1)?.add(e.personId2);
+    }
+
+    // previous recipients
+    for (const a of previousAssignments) {
+        map.get(a.giverId)?.add(a.receiverId);
+    }
+
+  return map;
+}
+
+function shuffle<T>(arr: T[]): T[] {
+    return [...arr].sort(() => Math.random() - 0.5);
+}
+
+function tryGenerate(
+    participantIds: string[],
+    constraints: ConstraintMap
+): Map<string, string> | null {
+    const receivers = shuffle(participantIds);
+    const result = new Map<string, string>();
+
+    for (let i = 0; i < participantIds.length; i++) {
+        const giver = participantIds[i];
+        const receiver = receivers[i];
+
+        if (constraints.get(giver)?.has(receiver)) {
+            return null; // invalid assignment
+        }
+        result.set(giver, receiver);
+    }
+    return result;
+}
+
+function generateMatching(
+    participantIds: string[],
+    constraints: ConstraintMap,
+    maxAttempts = 1000
+): Map<string, string> {
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        const assignment = tryGenerate(participantIds, constraints);
+        if (assignment) {
+            return assignment;
+        }
+    }
+    throw new Error("Failed to generate valid assignments after multiple attempts");
+}

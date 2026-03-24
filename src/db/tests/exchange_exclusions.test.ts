@@ -1,5 +1,4 @@
 import { describe, it, expect } from 'vitest';
-import * as users from '../queries/users.js';
 import * as exchanges from '../queries/exchanges.js';
 import * as persons from '../queries/persons.js';
 import * as exclusions from '../queries/exchange_exclusions.js';

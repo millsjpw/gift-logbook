@@ -4,7 +4,6 @@ import { eq, and, like } from 'drizzle-orm';
 
 export async function createListItem(userId: string, listId: string, title: string, url: string) {
     const listItem: NewListItem = {
-        userId,
         listId,
         title,
         url,
@@ -23,15 +22,10 @@ export async function getListItemById(id: string) {
     return item;
 }
 
-export async function getListItemsByUserId(userId: string) {
-    const items = await db.select().from(listItems).where(eq(listItems.userId, userId));
-    return items;
-}
-
-export async function getListItemsByTitle(userId: string, title: string) {
+export async function getListItemsByTitle(listId: string, title: string) {
     const items = await db.select().from(listItems).where(
         and(
-            eq(listItems.userId, userId),
+            eq(listItems.listId, listId),
             like(listItems.title, `%${title}%`)
         )
     );
@@ -53,8 +47,4 @@ export async function deleteListItem(id: string) {
 
 export async function deleteListItemsByListId(listId: string) {
     await db.delete(listItems).where(eq(listItems.listId, listId));
-}
-
-export async function deleteListItemsByUserId(userId: string) {
-    await db.delete(listItems).where(eq(listItems.userId, userId));
 }

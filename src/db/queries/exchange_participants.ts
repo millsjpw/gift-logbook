@@ -11,6 +11,15 @@ export async function addParticipantToExchange(exchangeId: string, personId: str
     return createdParticipant;
 }
 
+export async function bulkInsertParticipants(exchangeId: string, personIds: string[]) {
+    const participants = personIds.map(personId => ({
+        exchangeId,
+        personId,
+    }));
+    const createdParticipants = await db.insert(exchangeParticipants).values(participants).returning();
+    return createdParticipants;
+}
+
 export async function getParticipantsByExchangeId(exchangeId: string) {
     const participantsList = await db.select().from(exchangeParticipants).where(eq(exchangeParticipants.exchangeId, exchangeId));
     return participantsList;
