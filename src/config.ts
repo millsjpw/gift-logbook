@@ -3,7 +3,7 @@ import type { MigrationConfig } from "drizzle-orm/migrator";
 type Config = {
     api: APIConfig;
     db: DBConfig;
-    jwt: JWTConfig;
+    session: SessionConfig;
 }
 
 type APIConfig = {
@@ -16,7 +16,7 @@ type DBConfig = {
     migrationConfig: MigrationConfig;
 }
 
-type JWTConfig = {
+type SessionConfig = {
     defaultDuration: number;
     refreshDuration: number;
     secret: string;
@@ -46,7 +46,7 @@ export const config: Config = {
         url: envOrThrow("DB_URL"),
         migrationConfig,
     },
-    jwt: {
+    session: {
         defaultDuration: Number(envOrThrow("JWT_DEFAULT_DURATION")),
         refreshDuration: Number(envOrThrow("JWT_REFRESH_DURATION")),
         secret: envOrThrow("JWT_SECRET"),
