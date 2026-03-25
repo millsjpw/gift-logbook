@@ -6,6 +6,7 @@ import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import { middlewareErrorHandler, middlewareLogResponses, middlewareRequireAuth } from './api/middleware.js';
 import * as usersApi from './api/users.js';
 import * as authApi from './api/auth.js';
+import * as personsApi from './api/persons.js';
 
 const migrationClient = postgres(config.db.url, { max: 1, onnotice: () => {} });
 await migrate(drizzle(migrationClient), config.db.migrationConfig);
@@ -29,6 +30,15 @@ app.post('/users', usersApi.handleCreateUser);
 app.get('/users/:id', middlewareRequireAuth, usersApi.handleGetUser);
 app.put('/users/:id', middlewareRequireAuth, usersApi.handleUpdateUser);
 app.delete('/users/:id', middlewareRequireAuth, usersApi.handleDeleteUser);
+
+// Persons API
+app.post('/persons', middlewareRequireAuth, personsApi.handleCreatePerson);
+app.get('/persons/:id', middlewareRequireAuth, personsApi.handleGetPerson);
+app.put('/persons/:id', middlewareRequireAuth, personsApi.handleUpdatePerson);
+app.delete('/persons/:id', middlewareRequireAuth, personsApi.handleDeletePerson);
+app.get('/persons', middlewareRequireAuth, personsApi.handleGetPeopleCreatedByUser);
+app.get('/persons/search', middlewareRequireAuth, personsApi.handleSearchPeopleByName);
+app.delete('/persons', middlewareRequireAuth, personsApi.handleDeletePeopleCreatedByUser);
 
 app.use(middlewareErrorHandler);
 
