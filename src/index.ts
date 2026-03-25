@@ -8,6 +8,7 @@ import * as usersApi from './api/users.js';
 import * as authApi from './api/auth.js';
 import * as personsApi from './api/persons.js';
 import * as listsApi from './api/lists.js';
+import * as recordsApi from './api/records.js';
 
 const migrationClient = postgres(config.db.url, { max: 1, onnotice: () => {} });
 await migrate(drizzle(migrationClient), config.db.migrationConfig);
@@ -50,6 +51,20 @@ app.put('/lists/:id', middlewareRequireAuth, listsApi.handleUpdateList);
 app.get('/lists', middlewareRequireAuth, listsApi.handleGetListsByUserId);
 app.delete('/lists/:id', middlewareRequireAuth, listsApi.handleDeleteList);
 app.delete('/lists/:listId/items/:itemId', middlewareRequireAuth, listsApi.handleDeleteItemFromList);
+
+// Records API
+app.post('/records', middlewareRequireAuth, recordsApi.handleAddRecord);
+app.get('/records/search', middlewareRequireAuth, recordsApi.handleGetRecordsByItemText);
+app.get('/records', middlewareRequireAuth, recordsApi.handleGetRecordsByUserId);
+app.get('/records/person/:personId', middlewareRequireAuth, recordsApi.handleGetRecordsByPersonId);
+app.get('/records/:id', middlewareRequireAuth, recordsApi.handleGetRecordById);
+app.put('/records/:id', middlewareRequireAuth, recordsApi.handleUpdateRecord);
+app.post('/records/:id/tags', middlewareRequireAuth, recordsApi.handleAddTagToRecord);
+app.get('/records/:id/tags', middlewareRequireAuth, recordsApi.handleGetTagsForRecord);
+app.delete('/records/:id', middlewareRequireAuth, recordsApi.handleDeleteRecord);
+app.delete('/records', middlewareRequireAuth, recordsApi.handleDeleteRecordsByUserId);
+app.delete('/records/person/:personId', middlewareRequireAuth, recordsApi.handleDeleteRecordsByPersonId);
+app.delete('/records/:id/tags/:tag', middlewareRequireAuth, recordsApi.handleRemoveTagFromRecord);
 
 app.use(middlewareErrorHandler);
 

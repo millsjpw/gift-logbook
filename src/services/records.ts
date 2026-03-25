@@ -6,20 +6,52 @@ export async function addRecord(userId: string, personId: string, itemText: stri
     return await recordsDb.addRecord(userId, personId, itemText, amount, date, meta);
 }
 
-export async function getRecordById(id: string): Promise<GiftRecord | null> {
-    return await recordsDb.getRecordById(id);
+export async function getRecordById(id: string) {
+    const record = await recordsDb.getRecordById(id);
+    if (!record) {
+        return null;
+    }
+    const tags = await recordTagsDb.getTagsByRecordId(id);
+    return { ...record, tags: tags.map(t => t.tagId) };
 }
 
 export async function getRecordsByUserId(userId: string): Promise<GiftRecord[]> {
-    return await recordsDb.getRecordsByUserId(userId);
+    const records = await recordsDb.getRecordsByUserId(userId);
+    if (!records) {
+        return [];
+    }
+    const recordsWithTags = [];
+    for (const record of records) {
+        const tags = await recordTagsDb.getTagsByRecordId(record.id);
+        recordsWithTags.push({ ...record, tags: tags.map(t => t.tagId) });
+    }
+    return recordsWithTags;
 }
 
 export async function getRecordsByPersonId(userId: string, personId: string): Promise<GiftRecord[]> {
-    return await recordsDb.getRecordsByPersonId(userId, personId);
+    const records = await recordsDb.getRecordsByPersonId(userId, personId);
+    if (!records) {
+        return [];
+    }
+    const recordsWithTags = [];
+    for (const record of records) {
+        const tags = await recordTagsDb.getTagsByRecordId(record.id);
+        recordsWithTags.push({ ...record, tags: tags.map(t => t.tagId) });
+    }
+    return recordsWithTags;
 }
 
 export async function getRecordsByItemText(userId: string, itemText: string): Promise<GiftRecord[]> {
-    return await recordsDb.getRecordsByItemText(userId, itemText);
+    const records = await recordsDb.getRecordsByItemText(userId, itemText);
+    if (!records) {
+        return [];
+    }
+    const recordsWithTags = [];
+    for (const record of records) {
+        const tags = await recordTagsDb.getTagsByRecordId(record.id);
+        recordsWithTags.push({ ...record, tags: tags.map(t => t.tagId) });
+    }
+    return recordsWithTags;
 }
 
 export async function updateRecord(userId: string, id: string, itemText?: string, amount?: number, date?: Date, meta?: any): Promise<GiftRecord> {
@@ -36,7 +68,7 @@ export async function updateRecord(userId: string, id: string, itemText?: string
 export async function deleteRecord(userId: string, id: string): Promise<void> {
     const record = await recordsDb.getRecordById(id);
     if (!record) {
-        throw new Error("Record not found");
+        return; // record already doesn't exist, so consider it deleted
     }
     if (record.userId !== userId) {
         throw new Error("User does not own this record");
