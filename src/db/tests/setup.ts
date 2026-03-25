@@ -23,8 +23,6 @@ function loadDotEnvFile(filePath: string) {
 
 // Exported setup for Vitest `globalSetup` usage. Runs once before the suite and returns a teardown.
 export async function setup() {
-  loadDotEnvFile(resolve(process.cwd(), '.env.test'));
-  // Also load regular .env so DB_URL_TEST set there is picked up
   loadDotEnvFile(resolve(process.cwd(), '.env'));
 
   // Ensure tests use the test DB when provided
