@@ -6,6 +6,7 @@ export default defineConfig({
   schema: "./src/db/schema.ts",
   out: "./src/db/migrations",
   dialect: "postgresql",
+  verbose: false,
   dbCredentials: {
     url: config.db.url,
   },

@@ -12,7 +12,12 @@ export const users = pgTable("users", {
 
 export type NewUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
-export type UserResponse = Omit<User, "hashedPassword">;
+export type UserResponse = Omit<typeof users.$inferSelect, 'hashedPassword'>;
+
+export function omitPassword(user: any): UserResponse {
+    const { hashedPassword, ...rest } = user as any;
+    return rest;
+}
 
 export const sessions = pgTable("sessions", {
     token: varchar("token", {length: 512 }).primaryKey(),

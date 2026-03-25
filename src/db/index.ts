@@ -4,5 +4,10 @@ import postgres from "postgres";
 import { config } from "../config.js";
 import * as schema from "./schema.js";
 
-const conn = postgres(config.db.url);
-export const db = drizzle(conn, { schema });
+export function createDb(url?: string) {
+	const conn = postgres(url ?? config.db.url);
+	return drizzle(conn, { schema });
+}
+
+// default export for application code
+export const db = createDb();
