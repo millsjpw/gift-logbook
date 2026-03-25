@@ -13,6 +13,9 @@ export async function createUser(name: string, email: string, hashedPassword: st
         .values(user)
         .onConflictDoNothing()
         .returning();
+    if (!createdUser) {
+        throw new Error('User with this email already exists');
+    }
     return omitPassword(createdUser) as UserResponse;
 }
 
@@ -23,7 +26,10 @@ export async function getUserByEmail(email: string) {
 
 export async function getUserById(id: string) {
     const [user] = await db.select().from(users).where(eq(users.id, id)).limit(1);
-    return user;
+    if (!user) {
+        throw new Error('User not found');
+    }
+    return omitPassword(user) as UserResponse;
 }
 
 export async function updateUser(id: string, name?: string, email?: string, hashedPassword?: string) {
@@ -33,6 +39,9 @@ export async function updateUser(id: string, name?: string, email?: string, hash
     if (hashedPassword) updateData.hashedPassword = hashedPassword;
 
     const [updatedUser] = await db.update(users).set(updateData).where(eq(users.id, id)).returning();
+    if (!updatedUser) {
+        throw new Error('User not found');
+    }
     return omitPassword(updatedUser) as UserResponse;
 }
 

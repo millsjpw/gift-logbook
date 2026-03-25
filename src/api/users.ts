@@ -22,13 +22,13 @@ export async function handleCreateUser(req: Request, res: Response) {
 }
 
 export async function handleGetUser(req: Request, res: Response) {
-    const [userId] = req.params.id;
+    const userId = req.params.id as string;
     const user = await userService.getUserById(userId);
     respondWithJSON(res, 200, user);
 }
 
 export async function handleUpdateUser(req: Request, res: Response) {
-    const [userId] = req.params.id;
+    const userId = req.params.id as string;
     const { name, email, password } = req.body;
 
     if (!name && !email && !password) {
@@ -40,7 +40,7 @@ export async function handleUpdateUser(req: Request, res: Response) {
 }
 
 export async function handleDeleteUser(req: Request, res: Response) {
-    const [userId] = req.params.id;
+    const userId = req.params.id as string;
     await userService.deleteUser(userId);
     res.status(204).send();
 }
