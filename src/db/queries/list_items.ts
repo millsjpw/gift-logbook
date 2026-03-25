@@ -12,6 +12,17 @@ export async function createListItem(userId: string, listId: string, title: stri
     return createdListItem;
 }
 
+export async function bulkInsertListItems(userId: string, listId: string, items: { title: string; url: string }[]) {
+    const newItems: NewListItem[] = items.map(item => ({
+        listId,
+        title: item.title,
+        url: item.url,
+    }));
+
+    const createdItems = await db.insert(listItems).values(newItems).returning();
+    return createdItems;
+}
+
 export async function getListItemsByListId(listId: string) {
     const items = await db.select().from(listItems).where(eq(listItems.listId, listId));
     return items;

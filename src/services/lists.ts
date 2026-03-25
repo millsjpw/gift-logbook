@@ -4,8 +4,12 @@ import { List, ListItem } from '../db/schema.js';
 
 type FullList = List & { items: ListItem[] };
 
-export async function createList(userId: string, name: string, personId?: string): Promise<List> {
-    return await listsDb.createList(userId, name, personId);
+export async function createList(userId: string, name: string, personId?: string, items?: { title: string; url: string }[]): Promise<List> {
+    const list = await listsDb.createList(userId, name, personId);
+    if (items && items.length > 0) {
+        await listItemsDb.bulkInsertListItems(userId, list.id, items);
+    }
+    return list;
 }
 
 export async function getListById(id: string): Promise<FullList | null> {
@@ -66,10 +70,25 @@ export async function updateList(userId: string, list: FullList): Promise<List> 
 export async function deleteList(userId: string, id: string): Promise<void> {
     const list = await listsDb.getListById(id);
     if (!list) {
-        throw new Error("List not found");
+        return; // already deleted, treat as success
     }
     if (list.userId !== userId) {
         throw new Error("User does not own this list");
     }
     await listsDb.deleteList(id);
+}
+
+export async function deleteItemFromList(userId: string, listId: string, itemId: string): Promise<void> {
+    const item = await listItemsDb.getListItemById(itemId);
+    if (!item) {
+        return; // already deleted, treat as success
+    }
+    const list = await listsDb.getListById(listId);
+    if (!list) {
+        return; // list doesn't exist, treat as success
+    }
+    if (list.userId !== userId) {
+        throw new Error("User does not own this list item");
+    }
+    await listItemsDb.deleteListItem(itemId);
 }

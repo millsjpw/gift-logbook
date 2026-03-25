@@ -7,6 +7,7 @@ import { middlewareErrorHandler, middlewareLogResponses, middlewareRequireAuth }
 import * as usersApi from './api/users.js';
 import * as authApi from './api/auth.js';
 import * as personsApi from './api/persons.js';
+import * as listsApi from './api/lists.js';
 
 const migrationClient = postgres(config.db.url, { max: 1, onnotice: () => {} });
 await migrate(drizzle(migrationClient), config.db.migrationConfig);
@@ -33,12 +34,22 @@ app.delete('/users/:id', middlewareRequireAuth, usersApi.handleDeleteUser);
 
 // Persons API
 app.post('/persons', middlewareRequireAuth, personsApi.handleCreatePerson);
+app.get('/persons/search', middlewareRequireAuth, personsApi.handleSearchPeopleByName);
 app.get('/persons/:id', middlewareRequireAuth, personsApi.handleGetPerson);
 app.put('/persons/:id', middlewareRequireAuth, personsApi.handleUpdatePerson);
-app.delete('/persons/:id', middlewareRequireAuth, personsApi.handleDeletePerson);
 app.get('/persons', middlewareRequireAuth, personsApi.handleGetPeopleCreatedByUser);
-app.get('/persons/search', middlewareRequireAuth, personsApi.handleSearchPeopleByName);
+app.delete('/persons/:id', middlewareRequireAuth, personsApi.handleDeletePerson);
 app.delete('/persons', middlewareRequireAuth, personsApi.handleDeletePeopleCreatedByUser);
+
+// Lists API
+app.post('/lists', middlewareRequireAuth, listsApi.handleCreateList);
+app.get('/lists/search', middlewareRequireAuth, listsApi.handleGetListsByName);
+app.get('/lists/person/:personId', middlewareRequireAuth, listsApi.handleGetListsByPersonId);
+app.get('/lists/:id', middlewareRequireAuth, listsApi.handleGetListById);
+app.put('/lists/:id', middlewareRequireAuth, listsApi.handleUpdateList);
+app.get('/lists', middlewareRequireAuth, listsApi.handleGetListsByUserId);
+app.delete('/lists/:id', middlewareRequireAuth, listsApi.handleDeleteList);
+app.delete('/lists/:listId/items/:itemId', middlewareRequireAuth, listsApi.handleDeleteItemFromList);
 
 app.use(middlewareErrorHandler);
 
