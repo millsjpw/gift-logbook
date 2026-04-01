@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { BadRequestError } from "./errors.js";
+import { BadRequestError, NotFoundError, UserForbiddenError } from "./errors.js";
 import { respondWithJSON } from "./json.js";
 import * as recordsService from "../services/records.js";
 import { GiftRecord } from "../db/schema.js";
@@ -21,8 +21,11 @@ export async function handleGetRecordById(req: Request, res: Response) {
     const recordId = req.params.id as string;
 
     const record = await recordsService.getRecordById(recordId);
-    if (!record || record.userId !== userId) {
-        throw new BadRequestError("Record not found");
+    if (!record) {
+        throw new NotFoundError("Record not found");
+    }
+    if (record.userId !== userId) {
+        throw new UserForbiddenError("You do not have permission to view this record");
     }
 
     respondWithJSON(res, 200, record);

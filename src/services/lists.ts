@@ -1,6 +1,7 @@
 import * as listsDb from '../db/queries/lists.js';
 import * as listItemsDb from '../db/queries/list_items.js';
 import { List, ListItem } from '../db/schema.js';
+import { UserForbiddenError } from '../api/errors.js';
 
 type FullList = List & { items: ListItem[] };
 
@@ -53,7 +54,7 @@ export async function getListsByName(userId: string, name: string): Promise<Full
 
 export async function updateList(userId: string, list: FullList): Promise<List> {
     if (list.userId !== userId) {
-        throw new Error("User does not own this list");
+        throw new UserForbiddenError("You do not have permission to update this list");
     }
     const { id, name, personId } = list;
     const updatedList = await listsDb.updateList(id, name, personId ?? undefined);
@@ -73,7 +74,7 @@ export async function deleteList(userId: string, id: string): Promise<void> {
         return; // already deleted, treat as success
     }
     if (list.userId !== userId) {
-        throw new Error("User does not own this list");
+        throw new UserForbiddenError("You do not have permission to delete this list");
     }
     await listsDb.deleteList(id);
 }
@@ -88,7 +89,7 @@ export async function deleteItemFromList(userId: string, listId: string, itemId:
         return; // list doesn't exist, treat as success
     }
     if (list.userId !== userId) {
-        throw new Error("User does not own this list item");
+        throw new UserForbiddenError("You do not have permission to delete items from this list");
     }
     await listItemsDb.deleteListItem(itemId);
 }

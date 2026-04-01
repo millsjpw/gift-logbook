@@ -3,6 +3,7 @@ import * as exchParticipantsDb from '../db/queries/exchange_participants.js';
 import * as exchAssignmentsDb from '../db/queries/exchange_assignments.js';
 import * as exchExclusionsDb from '../db/queries/exchange_exclusions.js';
 import { Exchange, ExchangeParticipantResponse, ExchangeAssignmentResponse, ExchangeExclusionResponse } from '../db/schema.js';
+import { BadRequestError, NotFoundError } from '../api/errors.js';
 
 export type FullExchange = {
     exchange: Exchange;
@@ -20,7 +21,7 @@ export async function getFullExchange(exchangeId: string): Promise<FullExchange>
     ]);
 
     if (!exchange) {
-        throw new Error("Exchange not found");
+        throw new NotFoundError("Exchange not found");
     }
 
     return { exchange, participants, assignments, exclusions };
@@ -103,7 +104,7 @@ function validateParticipants(
   constraints: ConstraintMap
 ) {
   if (participants.length < 2) {
-    throw new Error("At least 2 participants are required");
+    throw new BadRequestError("At least 2 participants are required to generate assignments");
   }
 
   for (const p of participants) {
@@ -111,8 +112,8 @@ function validateParticipants(
 
     // must have at least 1 valid receiver
     if (invalid.size >= participants.length) {
-      throw new Error(
-        `Participant ${p.personId} has no valid recipients`
+      throw new BadRequestError(
+        `Participant ${p.personId} has no valid recipients due to exclusions`
       );
     }
   }
@@ -178,5 +179,5 @@ function generateMatching(
             return assignment;
         }
     }
-    throw new Error("Failed to generate valid assignments after multiple attempts");
+    throw new BadRequestError("Failed to generate valid assignments: too many exclusions or constraints");
 }

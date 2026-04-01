@@ -28,6 +28,7 @@ import * as exchangesDb from '../../db/queries/exchanges.js';
 import * as participantsDb from '../../db/queries/exchange_participants.js';
 import * as assignmentsDb from '../../db/queries/exchange_assignments.js';
 import * as exclusionsDb from '../../db/queries/exchange_exclusions.js';
+import { NotFoundError, BadRequestError } from '../../api/errors.js';
 
 beforeEach(() => vi.clearAllMocks());
 
@@ -45,9 +46,9 @@ describe('exchanges service', () => {
     expect(res.exclusions.length).toBe(1);
   });
 
-  it('getFullExchange throws when not found', async () => {
+  it('getFullExchange throws NotFoundError when exchange not found', async () => {
     (exchangesDb.getExchangeById as any).mockResolvedValue(null);
-    await expect(exchService.getFullExchange('nope')).rejects.toThrow();
+    await expect(exchService.getFullExchange('nope')).rejects.toThrow(NotFoundError);
   });
 
   it('createExchange and addParticipant delegate to db', async () => {
@@ -74,13 +75,13 @@ describe('exchanges service', () => {
     ]);
   });
 
-  it('generateAssignments throws with <2 participants', async () => {
+  it('generateAssignments throws BadRequestError with <2 participants', async () => {
     (exchangesDb.getExchangeById as any).mockResolvedValue({ id: 'e1', name: 'E' });
     (participantsDb.getParticipantsByExchangeId as any).mockResolvedValue([{ personId: 'p1' }]);
     (exclusionsDb.getExclusionsByExchangeId as any).mockResolvedValue([]);
     (assignmentsDb.getAssignmentsByExchangeId as any).mockResolvedValue([]);
 
-    await expect(exchService.generateAssignments('e1')).rejects.toThrow();
+    await expect(exchService.generateAssignments('e1')).rejects.toThrow(BadRequestError);
   });
 
   it('generateAssignments returns assignments with valid mapping', async () => {

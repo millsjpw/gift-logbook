@@ -39,16 +39,9 @@ export async function handleAddParticipant(req: Request, res: Response) {
     if (!personId) {
         throw new BadRequestError("Missing required field: personId");
     }
-    
-    try {
-        const participant = await exchangeService.addParticipant(exchangeId, personId);
-        respondWithJSON(res, 201, participant);
-    } catch (error) {
-        if (error instanceof Error && error.message === "Participant already exists in this exchange") {
-            throw new BadRequestError(error.message);
-        }
-        throw error;
-    }
+
+    const participant = await exchangeService.addParticipant(exchangeId, personId);
+    respondWithJSON(res, 201, participant);
 }
 
 export async function handleSetExclusions(req: Request, res: Response) {
