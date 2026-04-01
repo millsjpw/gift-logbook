@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import * as users from '../queries/users.js';
 import { createTestUser, cleanupTestUser } from './testUtils.js';
+import { NotFoundError } from '../../api/errors.js';
 
 describe('users queries', () => {
   it('create, read, update, delete user', async () => {
@@ -22,8 +23,7 @@ describe('users queries', () => {
       expect(updated.name).toBe('Renamed');
     } finally {
       if (created?.id) await cleanupTestUser(created.id);
-      const after = created ? await users.getUserById(created.id) : undefined;
-      expect(after).toBeUndefined();
+      await expect(users.getUserById(created!.id)).rejects.toThrow(NotFoundError);
     }
   });
 });

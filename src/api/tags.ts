@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { BadRequestError } from "./errors.js";
+import { BadRequestError, NotFoundError } from "./errors.js";
 import { respondWithJSON } from "./json.js";
 import * as tagsService from "../services/tags.js";
 import { Tag } from "../db/schema.js";
@@ -22,7 +22,7 @@ export async function handleGetTagById(req: Request, res: Response) {
 
     const tag = await tagsService.getTagById(tagId);
     if (!tag || tag.userId !== userId) {
-        throw new BadRequestError("Tag not found");
+        throw new NotFoundError("Tag not found");
     }
 
     respondWithJSON(res, 200, tag);

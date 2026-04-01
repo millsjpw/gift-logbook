@@ -20,16 +20,19 @@ vi.mock('../../db/queries/record_tags.js', () => ({
 
 import * as recordsService from '../records.js';
 import * as recordsDb from '../../db/queries/records.js';
+import { NotFoundError, UserForbiddenError } from '../../api/errors.js';
 
 beforeEach(() => vi.clearAllMocks());
 
 describe('records service', () => {
-  it('updateRecord throws when not found or not owner', async () => {
+  it('updateRecord throws NotFoundError when record not found', async () => {
     (recordsDb.getRecordById as any).mockResolvedValue(null);
-    await expect(recordsService.updateRecord('u1', 'r1', 'x')).rejects.toThrow();
+    await expect(recordsService.updateRecord('u1', 'r1', 'x')).rejects.toThrow(NotFoundError);
+  });
 
+  it('updateRecord throws UserForbiddenError when not owner', async () => {
     (recordsDb.getRecordById as any).mockResolvedValue({ id: 'r1', userId: 'other' });
-    await expect(recordsService.updateRecord('u1', 'r1', 'x')).rejects.toThrow();
+    await expect(recordsService.updateRecord('u1', 'r1', 'x')).rejects.toThrow(UserForbiddenError);
   });
 
   it('addTagToRecord validates ownership', async () => {

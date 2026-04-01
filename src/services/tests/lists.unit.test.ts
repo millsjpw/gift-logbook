@@ -19,6 +19,7 @@ vi.mock('../../db/queries/list_items.js', () => ({
 import * as listsService from '../lists.js';
 import * as listsDb from '../../db/queries/lists.js';
 import * as itemsDb from '../../db/queries/list_items.js';
+import { UserForbiddenError } from '../../api/errors.js';
 
 beforeEach(() => vi.clearAllMocks());
 
@@ -31,8 +32,8 @@ describe('lists service', () => {
     expect((res as any).items.length).toBe(1);
   });
 
-  it('updateList enforces ownership', async () => {
+  it('updateList throws UserForbiddenError when not owner', async () => {
     const list = { id: 'l1', userId: 'u1', name: 'L', items: [] } as any;
-    await expect(listsService.updateList('other', list)).rejects.toThrow();
+    await expect(listsService.updateList('other', list)).rejects.toThrow(UserForbiddenError);
   });
 });

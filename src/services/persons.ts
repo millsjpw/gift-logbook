@@ -1,5 +1,6 @@
 import * as personsDb from '../db/queries/persons.js';
 import { Person } from '../db/schema.js';
+import { NotFoundError, UserForbiddenError } from '../api/errors.js';
 
 export async function addPerson(userId: string, name: string, meta?: Record<string, unknown>): Promise<Person> {
     return await personsDb.createPerson(userId, name, meta);
@@ -20,10 +21,10 @@ export async function searchPeopleByName(userId: string, name: string): Promise<
 export async function updatePerson(userId: string, id: string, name?: string, meta?: Record<string, unknown>): Promise<Person> {
     const person = await personsDb.getPersonById(id);
     if (!person) {
-        throw new Error("Person not found");
+        throw new NotFoundError("Person not found");
     }
     if (person.userId !== userId) {
-        throw new Error("User does not own this person");
+        throw new UserForbiddenError("You do not have permission to update this person");
     }
     return await personsDb.updatePerson(id, name, meta);
 }
@@ -34,7 +35,7 @@ export async function deletePerson(userId: string, id: string): Promise<void> {
         return; // If the person doesn't exist, we can consider it "deleted"
     }
     if (person.userId !== userId) {
-        throw new Error("User does not own this person");
+        throw new UserForbiddenError("You do not have permission to delete this person");
     }
     await personsDb.deletePerson(id);
 }

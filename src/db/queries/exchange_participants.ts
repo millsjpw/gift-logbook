@@ -2,6 +2,7 @@ import { PostgresError } from 'postgres';
 import { db } from '../db.js';
 import { exchangeParticipants, persons, ExchangeParticipantResponse } from '../schema.js';
 import { eq, and } from 'drizzle-orm';
+import { BadRequestError } from '../../api/errors.js';
 
 
 export async function addParticipantToExchange(exchangeId: string, personId: string) {
@@ -13,7 +14,7 @@ export async function addParticipantToExchange(exchangeId: string, personId: str
         const [createdParticipant] = await db.insert(exchangeParticipants).values(participant).returning();
         return createdParticipant;
     } catch (error) {
-        throw new Error("Participant already exists in this exchange");
+        throw new BadRequestError("Participant already exists in this exchange");
     }
     
 }

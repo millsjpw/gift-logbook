@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { BadRequestError } from "./errors.js";
+import { BadRequestError, NotFoundError, UserForbiddenError } from "./errors.js";
 import { respondWithJSON } from "./json.js";
 import * as listService from "../services/lists.js";
 
@@ -19,8 +19,7 @@ export async function handleGetListById(req: Request, res: Response) {
     const listId = req.params.id as string;
     const list = await listService.getListById(listId);
     if (!list) {
-        res.status(404).send("List not found");
-        return;
+        throw new NotFoundError("List not found");
     }
     respondWithJSON(res, 200, list);
 }
@@ -59,12 +58,10 @@ export async function handleUpdateList(req: Request, res: Response) {
 
     const existingList = await listService.getListById(listId);
     if (!existingList) {
-        res.status(404).send("List not found");
-        return;
+        throw new NotFoundError("List not found");
     }
     if (existingList.userId !== userId) {
-        res.status(403).send("User does not own this list");
-        return;
+        throw new UserForbiddenError("You do not have permission to update this list");
     }
 
     const updatedList = await listService.updateList(userId, { ...existingList, name, personId, items });
