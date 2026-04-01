@@ -1,6 +1,10 @@
 import { db } from '../db.js';
-import { exchangeExclusions, NewExchangeExclusion } from '../schema.js';
-import { eq, and, or } from 'drizzle-orm';
+import { ExchangeExclusionResponse, exchangeExclusions, NewExchangeExclusion, persons } from '../schema.js';
+import { eq, and } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/pg-core'
+
+const person1 = alias(persons, 'person1');
+const person2 = alias(persons, 'person2');
 
 export async function addExclusionToExchange(exchangeId: string, personId1: string, personId2: string) {
     const exclusion: NewExchangeExclusion = {
@@ -23,18 +27,39 @@ export async function bulkInsertExclusions(exchangeId: string, exclusions: { per
 }
 
 export async function getExclusionsByExchangeId(exchangeId: string) {
-    const exclusionsList = await db.select().from(exchangeExclusions).where(eq(exchangeExclusions.exchangeId, exchangeId));
-    return exclusionsList;
+    const exclusionsList = await db.select({
+        exchangeId: exchangeExclusions.exchangeId,
+        personId1: exchangeExclusions.personId1,
+        personId2: exchangeExclusions.personId2,
+        personName1: person1.name,
+        personName2: person2.name,
+    }
+    ).from(exchangeExclusions)
+    .where(eq(exchangeExclusions.exchangeId, exchangeId))
+    .innerJoin(person1, eq(exchangeExclusions.personId1, person1.id))
+    .innerJoin(person2, eq(exchangeExclusions.personId2, person2.id));
+    return exclusionsList as ExchangeExclusionResponse[];
 }
 
 export async function getExclusionsForPersonInExchange(exchangeId: string, personId: string) {
-    const exclusionsList = await db.select().from(exchangeExclusions).where(
+    const exclusionsList = await db.select({
+        exchangeId: exchangeExclusions.exchangeId,
+        personId1: exchangeExclusions.personId1,
+        personId2: exchangeExclusions.personId2,
+        personName1: person1.name,
+        personName2: person2.name,
+    })
+    .from(exchangeExclusions)
+    .innerJoin(person1, eq(exchangeExclusions.personId1, person1.id))
+    .innerJoin(person2, eq(exchangeExclusions.personId2, person2.id))
+    .where(
         and(
             eq(exchangeExclusions.exchangeId, exchangeId),
             eq(exchangeExclusions.personId1, personId)
         )
     );
-    return exclusionsList;
+
+    return exclusionsList as ExchangeExclusionResponse[];
 }
 
 export async function removeExclusionFromExchange(exchangeId: string, personId1: string, personId2: string) {

@@ -2,13 +2,13 @@ import * as exchangesDb from '../db/queries/exchanges.js';
 import * as exchParticipantsDb from '../db/queries/exchange_participants.js';
 import * as exchAssignmentsDb from '../db/queries/exchange_assignments.js';
 import * as exchExclusionsDb from '../db/queries/exchange_exclusions.js';
-import { Exchange, ExchangeParticipant, ExchangeAssignment, ExchangeExclusion } from '../db/schema.js';
+import { Exchange, ExchangeParticipantResponse, ExchangeAssignmentResponse, ExchangeExclusionResponse } from '../db/schema.js';
 
-type FullExchange = {
+export type FullExchange = {
     exchange: Exchange;
-    participants: ExchangeParticipant[];
-    assignments: ExchangeAssignment[];
-    exclusions: ExchangeExclusion[];
+    participants: ExchangeParticipantResponse[];
+    assignments: ExchangeAssignmentResponse[];
+    exclusions: ExchangeExclusionResponse[];
 };
 
 export async function getFullExchange(exchangeId: string): Promise<FullExchange> {
@@ -28,6 +28,14 @@ export async function getFullExchange(exchangeId: string): Promise<FullExchange>
 
 export async function createExchange(userId: string, name: string) {
     return await exchangesDb.createExchange(userId, name);
+}
+
+export async function updateExchange(exchangeId: string, name?: string) {
+    return await exchangesDb.updateExchange(exchangeId, name);
+}
+
+export async function deleteExchange(exchangeId: string) {
+    await exchangesDb.deleteExchange(exchangeId);
 }
 
 export async function addParticipant(exchangeId: string, personId: string) {
@@ -56,6 +64,8 @@ export async function generateAssignments(exchangeId: string) {
         exchangeId,
         giverId,
         receiverId,
+        giverName: participants.find(p => p.personId === giverId)?.personName ?? "",
+        receiverName: participants.find(p => p.personId === receiverId)?.personName ?? "",
     }));
 }
 
@@ -83,8 +93,13 @@ export async function saveAssignments(exchangeId: string, assignments: { giverId
     );
 }
 
+export async function getAllFullExchangesForUser(userId: string) {
+    const exchanges = await exchangesDb.getExchangesByUserId(userId);
+    return await Promise.all(exchanges.map(e => getFullExchange(e.id)));
+}
+
 function validateParticipants(
-  participants: ExchangeParticipant[],
+  participants: ExchangeParticipantResponse[],
   constraints: ConstraintMap
 ) {
   if (participants.length < 2) {
@@ -107,8 +122,8 @@ type ConstraintMap = Map<string, Set<string>>;
 
 function buildConstraintMap(
     participants: string[], 
-    exclusions: ExchangeExclusion[],
-    previousAssignments: ExchangeAssignment[]
+    exclusions: ExchangeExclusionResponse[],
+    previousAssignments: ExchangeAssignmentResponse[]
 ): ConstraintMap {
     const map: ConstraintMap = new Map();
 

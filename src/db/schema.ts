@@ -211,6 +211,7 @@ export const exchangeParticipants = pgTable("exchange_participants", {
 
 export type NewExchangeParticipant = typeof exchangeParticipants.$inferInsert;
 export type ExchangeParticipant = typeof exchangeParticipants.$inferSelect;
+export type ExchangeParticipantResponse = Omit<ExchangeParticipant, "createdAt" | "updatedAt"> & { personName: string };
 
 // =====================
 // Exchange Exclusions (one-way)
@@ -243,6 +244,7 @@ export const exchangeExclusions = pgTable("exchange_exclusions", {
 
 export type NewExchangeExclusion = typeof exchangeExclusions.$inferInsert;
 export type ExchangeExclusion = typeof exchangeExclusions.$inferSelect;
+export type ExchangeExclusionResponse = Omit<ExchangeExclusion, "createdAt" | "updatedAt"> & { personName1: string, personName2: string };
 
 // =====================
 // Exchange Assignments
@@ -286,3 +288,4 @@ export const exchangeAssignments = pgTable("exchange_assignments", {
 
 export type NewExchangeAssignment = typeof exchangeAssignments.$inferInsert;
 export type ExchangeAssignment = typeof exchangeAssignments.$inferSelect;
+export type ExchangeAssignmentResponse = Omit<ExchangeAssignment, "createdAt" | "updatedAt" | "round"> & { giverName: string, receiverName: string };

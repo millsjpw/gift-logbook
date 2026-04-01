@@ -10,6 +10,7 @@ import * as personsApi from './api/persons.js';
 import * as listsApi from './api/lists.js';
 import * as recordsApi from './api/records.js';
 import * as tagsApi from './api/tags.js';
+import * as exchangesApi from './api/exchanges.js';
 
 const migrationClient = postgres(config.db.url, { max: 1, onnotice: () => {} });
 await migrate(drizzle(migrationClient), config.db.migrationConfig);
@@ -73,6 +74,18 @@ app.get('/tags', middlewareRequireAuth, tagsApi.handleGetTagsByUserId);
 app.get('/tags/:id', middlewareRequireAuth, tagsApi.handleGetTagById);
 app.put('/tags/:id', middlewareRequireAuth, tagsApi.handleUpdateTag);
 app.delete('/tags/:id', middlewareRequireAuth, tagsApi.handleDeleteTag);
+
+// Exchanges API
+app.post('/exchanges', middlewareRequireAuth, exchangesApi.handleCreateExchange);
+app.get('/exchanges', middlewareRequireAuth, exchangesApi.handleGetAllUserExchanges);
+app.get('/exchanges/:id', middlewareRequireAuth, exchangesApi.handleGetFullExchange);
+app.put('/exchanges/:id', middlewareRequireAuth, exchangesApi.handleUpdateExchange);
+app.delete('/exchanges/:id', middlewareRequireAuth, exchangesApi.handleDeleteExchange);
+app.post('/exchanges/:id/participants', middlewareRequireAuth, exchangesApi.handleAddParticipant);
+app.post('/exchanges/:id/exclusions', middlewareRequireAuth, exchangesApi.handleSetExclusions);
+app.get('/exchanges/:id/generate', middlewareRequireAuth, exchangesApi.handleGenerateAssignments);
+app.post('/exchanges/:id/clone', middlewareRequireAuth, exchangesApi.handleCloneExchange);
+app.post('/exchanges/:id/assignments', middlewareRequireAuth, exchangesApi.handleSaveAssignments);
 
 app.use(middlewareErrorHandler);
 
