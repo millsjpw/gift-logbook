@@ -9,6 +9,7 @@ import * as authApi from './api/auth.js';
 import * as personsApi from './api/persons.js';
 import * as listsApi from './api/lists.js';
 import * as recordsApi from './api/records.js';
+import * as tagsApi from './api/tags.js';
 
 const migrationClient = postgres(config.db.url, { max: 1, onnotice: () => {} });
 await migrate(drizzle(migrationClient), config.db.migrationConfig);
@@ -65,6 +66,13 @@ app.delete('/records/:id', middlewareRequireAuth, recordsApi.handleDeleteRecord)
 app.delete('/records', middlewareRequireAuth, recordsApi.handleDeleteRecordsByUserId);
 app.delete('/records/person/:personId', middlewareRequireAuth, recordsApi.handleDeleteRecordsByPersonId);
 app.delete('/records/:id/tags/:tag', middlewareRequireAuth, recordsApi.handleRemoveTagFromRecord);
+
+// Tags API
+app.post('/tags', middlewareRequireAuth, tagsApi.handleCreateTag);
+app.get('/tags', middlewareRequireAuth, tagsApi.handleGetTagsByUserId);
+app.get('/tags/:id', middlewareRequireAuth, tagsApi.handleGetTagById);
+app.put('/tags/:id', middlewareRequireAuth, tagsApi.handleUpdateTag);
+app.delete('/tags/:id', middlewareRequireAuth, tagsApi.handleDeleteTag);
 
 app.use(middlewareErrorHandler);
 
