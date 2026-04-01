@@ -1,5 +1,5 @@
 import { db } from '../db.js';
-import { NewUser, users } from '../schema.js';
+import { NewUser, UserResponse, users, omitPassword } from '../schema.js';
 import { eq } from 'drizzle-orm';
 
 export async function createUser(name: string, email: string, hashedPassword: string) {
@@ -8,8 +8,15 @@ export async function createUser(name: string, email: string, hashedPassword: st
         email,
         hashedPassword,
     };
-    const [createdUser] = await db.insert(users).values(user).returning();
-    return createdUser;
+    const [createdUser] = await db.
+        insert(users)
+        .values(user)
+        .onConflictDoNothing()
+        .returning();
+    if (!createdUser) {
+        throw new Error('User with this email already exists');
+    }
+    return omitPassword(createdUser) as UserResponse;
 }
 
 export async function getUserByEmail(email: string) {
@@ -19,7 +26,10 @@ export async function getUserByEmail(email: string) {
 
 export async function getUserById(id: string) {
     const [user] = await db.select().from(users).where(eq(users.id, id)).limit(1);
-    return user;
+    if (!user) {
+        throw new Error('User not found');
+    }
+    return omitPassword(user) as UserResponse;
 }
 
 export async function updateUser(id: string, name?: string, email?: string, hashedPassword?: string) {
@@ -29,7 +39,10 @@ export async function updateUser(id: string, name?: string, email?: string, hash
     if (hashedPassword) updateData.hashedPassword = hashedPassword;
 
     const [updatedUser] = await db.update(users).set(updateData).where(eq(users.id, id)).returning();
-    return updatedUser;
+    if (!updatedUser) {
+        throw new Error('User not found');
+    }
+    return omitPassword(updatedUser) as UserResponse;
 }
 
 export async function deleteUser(id: string) {

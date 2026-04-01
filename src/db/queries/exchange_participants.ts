@@ -1,14 +1,21 @@
+import { PostgresError } from 'postgres';
 import { db } from '../db.js';
-import { exchangeParticipants } from '../schema.js';
+import { exchangeParticipants, persons, ExchangeParticipantResponse } from '../schema.js';
 import { eq, and } from 'drizzle-orm';
+
 
 export async function addParticipantToExchange(exchangeId: string, personId: string) {
     const participant = {
         exchangeId,
         personId,
     };
-    const [createdParticipant] = await db.insert(exchangeParticipants).values(participant).returning();
-    return createdParticipant;
+    try {
+        const [createdParticipant] = await db.insert(exchangeParticipants).values(participant).returning();
+        return createdParticipant;
+    } catch (error) {
+        throw new Error("Participant already exists in this exchange");
+    }
+    
 }
 
 export async function bulkInsertParticipants(exchangeId: string, personIds: string[]) {
@@ -21,8 +28,16 @@ export async function bulkInsertParticipants(exchangeId: string, personIds: stri
 }
 
 export async function getParticipantsByExchangeId(exchangeId: string) {
-    const participantsList = await db.select().from(exchangeParticipants).where(eq(exchangeParticipants.exchangeId, exchangeId));
-    return participantsList;
+    const participantsList = await db
+        .select({
+            exchangeId: exchangeParticipants.exchangeId,
+            personId: exchangeParticipants.personId,
+            personName: persons.name,
+        })
+        .from(exchangeParticipants)
+        .where(eq(exchangeParticipants.exchangeId, exchangeId))
+        .innerJoin(persons, eq(exchangeParticipants.personId, persons.id))
+    return participantsList as ExchangeParticipantResponse[];
 }
 
 export async function removeParticipantFromExchange(exchangeId: string, personId: string) {

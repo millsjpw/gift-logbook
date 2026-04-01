@@ -31,7 +31,7 @@ export async function updatePerson(userId: string, id: string, name?: string, me
 export async function deletePerson(userId: string, id: string): Promise<void> {
     const person = await personsDb.getPersonById(id);
     if (!person) {
-        throw new Error("Person not found");
+        return; // If the person doesn't exist, we can consider it "deleted"
     }
     if (person.userId !== userId) {
         throw new Error("User does not own this person");

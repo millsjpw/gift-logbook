@@ -1,6 +1,10 @@
 import { db } from '../db.js';
-import { exchangeAssignments, NewExchangeAssignment } from '../schema.js';
+import { exchangeAssignments, NewExchangeAssignment, persons } from '../schema.js';
 import { eq, and, or, desc } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/pg-core'
+
+const person1 = alias(persons, 'person1');
+const person2 = alias(persons, 'person2');
 
 export async function addAssignmentToExchange(exchangeId: string, giverId: string, receiverId: string) {
     const assignment: NewExchangeAssignment = {
@@ -35,17 +39,47 @@ export async function getNextRound(exchangeId: string) {
 }
 
 export async function getAssignmentsByExchangeId(exchangeId: string) {
-    const assignmentsList = await db.select().from(exchangeAssignments).where(eq(exchangeAssignments.exchangeId, exchangeId));
+    const assignmentsList = await db
+    .select({
+        exchangeId: exchangeAssignments.exchangeId,
+        giverId: exchangeAssignments.giverId,
+        receiverId: exchangeAssignments.receiverId,
+        giverName: person1.name,
+        receiverName: person2.name,
+    })
+    .from(exchangeAssignments)
+    .where(eq(exchangeAssignments.exchangeId, exchangeId))
+    .innerJoin(
+        person1, eq(exchangeAssignments.giverId, person1.id)
+    )
+    .innerJoin(
+        person2, eq(exchangeAssignments.receiverId, person2.id)
+    );
     return assignmentsList;
 }
 
 export async function getAssignmentForGiverInExchange(exchangeId: string, giverId: string) {
-    const [assignment] = await db.select().from(exchangeAssignments).where(
+    const [assignment] = await db.select(
+        {
+            exchangeId: exchangeAssignments.exchangeId,
+            giverId: exchangeAssignments.giverId,
+            receiverId: exchangeAssignments.receiverId,
+            giverName: person1.name,
+            receiverName: person2.name,
+        }
+    ).from(exchangeAssignments).where(
         and(
             eq(exchangeAssignments.exchangeId, exchangeId),
             eq(exchangeAssignments.giverId, giverId)
         )
-    ).limit(1);
+    )
+    .innerJoin(
+        person1, eq(exchangeAssignments.giverId, person1.id)
+    )
+    .innerJoin(
+        person2, eq(exchangeAssignments.receiverId, person2.id)
+    )
+    .limit(1);
     return assignment;
 }
 

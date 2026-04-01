@@ -1,5 +1,5 @@
 {
-  "id": "811a186b-6c13-4917-8e78-26d0eb15449a",
+  "id": "c7f3a2bc-b09d-4b23-9078-5a6e12dfae7a",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -13,6 +13,13 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
+        },
+        "round": {
+          "name": "round",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
         },
         "giver_id": {
           "name": "giver_id",
@@ -52,6 +59,12 @@
               "nulls": "last"
             },
             {
+              "expression": "round",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
               "expression": "giver_id",
               "isExpression": false,
               "asc": true,
@@ -68,6 +81,12 @@
           "columns": [
             {
               "expression": "exchange_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "round",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -172,12 +191,12 @@
         }
       },
       "compositePrimaryKeys": {
-        "exchange_assignments_exchange_id_giver_id_receiver_id_pk": {
-          "name": "exchange_assignments_exchange_id_giver_id_receiver_id_pk",
+        "exchange_assignments_exchange_id_round_giver_id_pk": {
+          "name": "exchange_assignments_exchange_id_round_giver_id_pk",
           "columns": [
             "exchange_id",
-            "giver_id",
-            "receiver_id"
+            "round",
+            "giver_id"
           ]
         }
       },
@@ -224,33 +243,6 @@
         }
       },
       "indexes": {
-        "exchange_exclusion_unique": {
-          "name": "exchange_exclusion_unique",
-          "columns": [
-            {
-              "expression": "exchange_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "person_id_1",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "person_id_2",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
         "exchange_exclusion_exchange_index": {
           "name": "exchange_exclusion_exchange_index",
           "columns": [
@@ -385,27 +377,6 @@
         }
       },
       "indexes": {
-        "exchange_participant_unique": {
-          "name": "exchange_participant_unique",
-          "columns": [
-            {
-              "expression": "exchange_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "person_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
         "exchange_participant_exchange_index": {
           "name": "exchange_participant_exchange_index",
           "columns": [
@@ -461,7 +432,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -598,12 +569,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
         "url": {
           "name": "url",
           "type": "varchar(2048)",
@@ -616,7 +581,7 @@
           "name": "user_list_item_title_index",
           "columns": [
             {
-              "expression": "user_id",
+              "expression": "list_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -637,12 +602,6 @@
           "name": "user_list_item_list_index",
           "columns": [
             {
-              "expression": "user_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
               "expression": "list_id",
               "isExpression": false,
               "asc": true,
@@ -662,19 +621,6 @@
           "tableTo": "lists",
           "columnsFrom": [
             "list_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "list_items_user_id_users_id_fk": {
-          "name": "list_items_user_id_users_id_fk",
-          "tableFrom": "list_items",
-          "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
           ],
           "columnsTo": [
             "id"
@@ -1188,8 +1134,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "revoked": {
-          "name": "revoked",
+        "revoked_at": {
+          "name": "revoked_at",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false
@@ -1318,27 +1264,6 @@
             }
           ],
           "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "user_tag_name_index": {
-          "name": "user_tag_name_index",
-          "columns": [
-            {
-              "expression": "user_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "lower(\"name\")",
-              "asc": true,
-              "isExpression": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
           "concurrently": false,
           "method": "btree",
           "with": {}

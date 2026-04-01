@@ -1,8 +1,12 @@
 import { vi, describe, it, expect } from 'vitest';
 
-// mock config before importing auth
+// mock config before importing auth. Include a db.url so other modules that import config don't break.
 vi.mock('../../config.js', () => ({
-  config: { session: { issuer: 'test-issuer', defaultDuration: 3600, secret: 'shh' } }
+  config: {
+    session: { issuer: 'test-issuer', defaultDuration: 3600, secret: 'shh' },
+    db: { url: process.env.DB_URL_TEST || process.env.DB_URL || 'postgres://localhost:5432/postgres' },
+    api: { port: 0, platform: 'test' }
+  }
 }));
 
 import * as auth from '../auth.js';

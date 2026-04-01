@@ -1,10 +1,11 @@
 CREATE TABLE "exchange_assignments" (
 	"exchange_id" uuid NOT NULL,
+	"round" integer DEFAULT 1 NOT NULL,
 	"giver_id" uuid NOT NULL,
 	"receiver_id" uuid NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "exchange_assignments_exchange_id_giver_id_receiver_id_pk" PRIMARY KEY("exchange_id","giver_id","receiver_id")
+	CONSTRAINT "exchange_assignments_exchange_id_round_giver_id_pk" PRIMARY KEY("exchange_id","round","giver_id")
 );
 --> statement-breakpoint
 CREATE TABLE "exchange_exclusions" (
@@ -38,7 +39,6 @@ CREATE TABLE "list_items" (
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	"list_id" uuid NOT NULL,
-	"user_id" uuid NOT NULL,
 	"url" varchar(2048)
 );
 --> statement-breakpoint
@@ -85,7 +85,7 @@ CREATE TABLE "sessions" (
 	"token" varchar(512) PRIMARY KEY NOT NULL,
 	"user_id" uuid NOT NULL,
 	"expires_at" timestamp NOT NULL,
-	"revoked" timestamp,
+	"revoked_at" timestamp,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
@@ -115,10 +115,9 @@ ALTER TABLE "exchange_exclusions" ADD CONSTRAINT "exchange_exclusions_exchange_i
 ALTER TABLE "exchange_exclusions" ADD CONSTRAINT "exchange_exclusions_person_id_1_persons_id_fk" FOREIGN KEY ("person_id_1") REFERENCES "public"."persons"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "exchange_exclusions" ADD CONSTRAINT "exchange_exclusions_person_id_2_persons_id_fk" FOREIGN KEY ("person_id_2") REFERENCES "public"."persons"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "exchange_participants" ADD CONSTRAINT "exchange_participants_exchange_id_exchanges_id_fk" FOREIGN KEY ("exchange_id") REFERENCES "public"."exchanges"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "exchange_participants" ADD CONSTRAINT "exchange_participants_person_id_persons_id_fk" FOREIGN KEY ("person_id") REFERENCES "public"."persons"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "exchange_participants" ADD CONSTRAINT "exchange_participants_person_id_persons_id_fk" FOREIGN KEY ("person_id") REFERENCES "public"."persons"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "exchanges" ADD CONSTRAINT "exchanges_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "list_items" ADD CONSTRAINT "list_items_list_id_lists_id_fk" FOREIGN KEY ("list_id") REFERENCES "public"."lists"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "list_items" ADD CONSTRAINT "list_items_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "lists" ADD CONSTRAINT "lists_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "lists" ADD CONSTRAINT "lists_person_id_persons_id_fk" FOREIGN KEY ("person_id") REFERENCES "public"."persons"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "persons" ADD CONSTRAINT "persons_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -128,21 +127,19 @@ ALTER TABLE "records" ADD CONSTRAINT "records_user_id_users_id_fk" FOREIGN KEY (
 ALTER TABLE "records" ADD CONSTRAINT "records_person_id_persons_id_fk" FOREIGN KEY ("person_id") REFERENCES "public"."persons"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "sessions" ADD CONSTRAINT "sessions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "tags" ADD CONSTRAINT "tags_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-CREATE UNIQUE INDEX "exchange_assignment_unique" ON "exchange_assignments" USING btree ("exchange_id","giver_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "exchange_receiver_unique" ON "exchange_assignments" USING btree ("exchange_id","receiver_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "exchange_assignment_unique" ON "exchange_assignments" USING btree ("exchange_id","round","giver_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "exchange_receiver_unique" ON "exchange_assignments" USING btree ("exchange_id","round","receiver_id");--> statement-breakpoint
 CREATE INDEX "exchange_assignment_exchange_index" ON "exchange_assignments" USING btree ("exchange_id");--> statement-breakpoint
 CREATE INDEX "exchange_assignment_giver_index" ON "exchange_assignments" USING btree ("giver_id");--> statement-breakpoint
 CREATE INDEX "exchange_assignment_receiver_index" ON "exchange_assignments" USING btree ("receiver_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "exchange_exclusion_unique" ON "exchange_exclusions" USING btree ("exchange_id","person_id_1","person_id_2");--> statement-breakpoint
 CREATE INDEX "exchange_exclusion_exchange_index" ON "exchange_exclusions" USING btree ("exchange_id");--> statement-breakpoint
 CREATE INDEX "exchange_exclusion_person1_index" ON "exchange_exclusions" USING btree ("person_id_1");--> statement-breakpoint
 CREATE INDEX "exchange_exclusion_person2_index" ON "exchange_exclusions" USING btree ("person_id_2");--> statement-breakpoint
-CREATE UNIQUE INDEX "exchange_participant_unique" ON "exchange_participants" USING btree ("exchange_id","person_id");--> statement-breakpoint
 CREATE INDEX "exchange_participant_exchange_index" ON "exchange_participants" USING btree ("exchange_id");--> statement-breakpoint
 CREATE INDEX "exchange_participant_person_index" ON "exchange_participants" USING btree ("person_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "user_exchange_unique" ON "exchanges" USING btree ("user_id",lower("name"));--> statement-breakpoint
-CREATE INDEX "user_list_item_title_index" ON "list_items" USING btree ("user_id",lower("title"));--> statement-breakpoint
-CREATE INDEX "user_list_item_list_index" ON "list_items" USING btree ("user_id","list_id");--> statement-breakpoint
+CREATE INDEX "user_list_item_title_index" ON "list_items" USING btree ("list_id",lower("title"));--> statement-breakpoint
+CREATE INDEX "user_list_item_list_index" ON "list_items" USING btree ("list_id");--> statement-breakpoint
 CREATE INDEX "user_list_name_index" ON "lists" USING btree ("user_id",lower("name"));--> statement-breakpoint
 CREATE INDEX "user_list_person_index" ON "lists" USING btree ("user_id","person_id");--> statement-breakpoint
 CREATE INDEX "user_person_name_index" ON "persons" USING btree ("user_id",lower("name"));--> statement-breakpoint
@@ -153,5 +150,4 @@ CREATE INDEX "user_record_person_index" ON "records" USING btree ("user_id","per
 CREATE INDEX "person_record_index" ON "records" USING btree ("person_id");--> statement-breakpoint
 CREATE INDEX "session_user_index" ON "sessions" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "session_expires_index" ON "sessions" USING btree ("expires_at");--> statement-breakpoint
-CREATE UNIQUE INDEX "user_tag_unique" ON "tags" USING btree ("user_id",lower("name"));--> statement-breakpoint
-CREATE INDEX "user_tag_name_index" ON "tags" USING btree ("user_id",lower("name"));
+CREATE UNIQUE INDEX "user_tag_unique" ON "tags" USING btree ("user_id",lower("name"));

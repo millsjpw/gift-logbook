@@ -1,5 +1,5 @@
 import { db } from '../db.js';
-import { sessions, users } from '../schema.js';
+import { omitPassword, sessions, users } from '../schema.js';
 import { eq, and, gt, isNull } from 'drizzle-orm';
 import { config } from '../../config.js';
 
@@ -20,7 +20,7 @@ export async function getSessionByToken(token: string) {
 }
 
 export async function getUserBySessionToken(token: string) {
-    const [user] = await db.select()
+    const [user] = await db.select({ user: users })
         .from(users)
         .innerJoin(sessions, eq(users.id, sessions.userId))
         .where(
@@ -30,7 +30,15 @@ export async function getUserBySessionToken(token: string) {
                 gt(sessions.expiresAt, new Date())
         ))
         .limit(1);
-    return user;
+    return omitPassword(user);
+}
+
+export async function updateSessionToken(oldToken: string, newToken: string) {
+    const [updatedSession] = await db.update(sessions)
+        .set({ token: newToken, expiresAt: new Date(Date.now() + config.session.refreshDuration * 1000) })
+        .where(eq(sessions.token, oldToken))
+        .returning();
+    return updatedSession;
 }
 
 export async function revokeSession(token: string) {

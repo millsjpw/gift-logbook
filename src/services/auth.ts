@@ -5,8 +5,16 @@ import type { JwtPayload } from "jsonwebtoken";
 import crypto from "crypto";
 import { BadRequestError, UserNotAuthenticatedError } from "../api/errors.js";
 import { config } from "../config.js";
+import * as userDb from "../db/queries/users.js";
+import * as sessionsDb from "../db/queries/sessions.js";
+import { sessions, UserResponse } from "../db/schema.js";
 
 type payload = Pick<JwtPayload, "iss" | "sub" | "iat" | "exp">;
+
+type LoginResponse = UserResponse & {
+    token: string;
+    refreshToken: string;
+};
 
 export async function hashPassword(password: string): Promise<string> {
     return await argon2.hash(password);
@@ -65,4 +73,62 @@ function extractBearerToken(authHeader: string): string {
 
 export function makeRefreshToken() {
     return crypto.randomBytes(32).toString("hex");
+}
+
+export async function login(email: string, password: string): Promise<LoginResponse> {
+    // Find the user by email
+    const user = await userDb.getUserByEmail(email);
+    if (!user) {
+        throw new UserNotAuthenticatedError("Invalid email or password");
+    }
+
+    // Verify the password
+    const passwordValid = await verifyPassword(user.hashedPassword, password);
+    if (!passwordValid) {
+        throw new UserNotAuthenticatedError("Invalid email or password");
+    }
+
+    // Generate tokens and create session
+    const accessToken = generateToken(user.id);
+    const refreshToken = makeRefreshToken();
+
+    await sessionsDb.createSession(user.id, refreshToken);
+
+    return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        token: accessToken,
+        refreshToken
+    } satisfies LoginResponse;
+}
+
+export async function refreshAccessToken(refreshToken: string) {
+    const session = await sessionsDb.getSessionByToken(refreshToken);
+    if (!session) {
+        throw new UserNotAuthenticatedError("Invalid refresh token");
+    }
+
+    const user = await sessionsDb.getUserBySessionToken(refreshToken);
+    if (!user) {
+        throw new UserNotAuthenticatedError("Invalid refresh token");
+    }
+
+    const newRefreshToken = makeRefreshToken();
+    await sessionsDb.updateSessionToken(refreshToken, newRefreshToken);
+
+    return {
+        token: generateToken(user.id),
+        refreshToken: newRefreshToken
+    };
+}
+
+export async function logout(refreshToken: string): Promise<void> {
+    try {
+        await sessionsDb.revokeSession(refreshToken);
+    } catch {
+        // ignore — logout should never fail
+    }
 }
