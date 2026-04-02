@@ -33,7 +33,7 @@ A REST API for tracking gifts, people, lists, and exchanges (e.g. Secret Santa).
 ## Quick Start
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/millsjpw/gift-logbook.git
 cd gift-logbook
 npm install
 npm run migrate
