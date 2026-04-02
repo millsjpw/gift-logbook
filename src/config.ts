@@ -23,7 +23,7 @@ type SessionConfig = {
     issuer: string;
 }
 
-process.loadEnvFile();
+try { process.loadEnvFile(); } catch { /* no .env file; rely on environment variables */ }
 
 function envOrThrow(key: string) {
     const value = process.env[key];

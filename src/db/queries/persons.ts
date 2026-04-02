@@ -1,3 +1,4 @@
+import { BadRequestError } from '../../api/errors.js';
 import { db } from '../db.js';
 import { persons } from '../schema.js';
 import { eq, and, like } from 'drizzle-orm';
@@ -8,8 +9,18 @@ export async function createPerson(userId: string, name: string, meta: any) {
         name,
         meta,
     };
-    const [createdPerson] = await db.insert(persons).values(person).returning();
-    return createdPerson;
+    try {
+        const [createdPerson] = await db.insert(persons).values(person).returning();
+        if (!createdPerson) {
+            throw new BadRequestError("You already have a person with that name");
+        }
+        return createdPerson;
+    } catch (err: any) {
+        if (err.cause?.code === "23505") { // Unique constraint violation
+            throw new BadRequestError("You already have a person with that name");
+        }
+        throw err;
+    }
 }
 
 export async function getPersonsByUserId(userId: string) {
@@ -37,8 +48,18 @@ export async function updatePerson(id: string, name?: string, meta?: any) {
     if (name) updateData.name = name;
     if (meta) updateData.meta = meta;
 
-    const [updatedPerson] = await db.update(persons).set(updateData).where(eq(persons.id, id)).returning();
-    return updatedPerson;
+    try {
+        const [updatedPerson] = await db.update(persons).set(updateData).where(eq(persons.id, id)).returning();
+        if (!updatedPerson) {
+            throw new BadRequestError("You already have a person with that name");
+        }
+        return updatedPerson;
+    } catch (err: any) {
+        if (err.cause?.code === "23505") { // Unique constraint violation
+            throw new BadRequestError("You already have a person with that name");
+        }
+        throw err;
+    }
 }
 
 export async function deletePerson(id: string) {

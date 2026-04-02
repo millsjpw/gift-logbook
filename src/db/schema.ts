@@ -54,7 +54,7 @@ export const persons = pgTable("persons", {
     userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
     meta: jsonb("meta").notNull().default("{}"),
 }, (table) => [
-    index("user_person_name_index").on(table.userId, lower(table.name)),
+    uniqueIndex("user_person_name_index").on(table.userId, lower(table.name)),
 ]);
 
 export type NewPerson = typeof persons.$inferInsert;
@@ -72,7 +72,7 @@ export const lists = pgTable("lists", {
     userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
     personId: uuid("person_id").references(() => persons.id, { onDelete: "set null" }),
 }, (table) => [
-    index("user_list_name_index").on(table.userId, lower(table.name)),
+    uniqueIndex("user_list_name_index").on(table.userId, lower(table.name)),
     index("user_list_person_index").on(table.userId, table.personId),
 ]);
 
