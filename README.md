@@ -94,7 +94,7 @@ npm test
 - `GET /users/:id — retrieve`
 - `PUT /users/:id — update`
 - `DELETE /users/:id — delete`
-- `Persons (auth required)`
+#### Persons (auth required)
 - `POST /persons — create`
 - `GET /persons — list`
 - `GET /persons/search?name=... — search`
