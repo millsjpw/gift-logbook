@@ -1,4 +1,5 @@
 import express from 'express';
+import path from 'path';
 import { config } from './config.js';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
@@ -22,6 +23,27 @@ app.use(middlewareLogResponses);
 
 app.get('/health', (_, res) => {
     res.send('OK');
+});
+
+// Serve OpenAPI spec and Redoc UI
+app.get('/openapi.json', (_, res) => {
+        res.sendFile(path.join(process.cwd(), 'openapi.json'));
+});
+
+app.get('/docs', (_, res) => {
+    res.type('html').send(`
+    <!DOCTYPE html>
+    <html>
+        <head>
+            <meta charset="utf-8" />
+            <title>Gift Logbook API Docs</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+        </head>
+        <body>
+            <redoc spec-url="/openapi.json"></redoc>
+            <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
+        </body>
+    </html>`);
 });
 
 // Auth API
