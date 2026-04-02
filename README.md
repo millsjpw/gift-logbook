@@ -2,6 +2,10 @@
 
 A REST API for tracking gifts, people, lists, and exchanges (e.g. Secret Santa).
 
+## Motivation
+My family needed a way to keep track of what we plan to get for gifts, what we _have_ bought over the years, and to be able to run "name drawing" for gift exchanges. 
+Nothing out there would be able to meet our specific needs, so I built it myself.
+
 ## Features
 - JWT-based authentication
 - Gift tracking by person and list
@@ -35,9 +39,7 @@ A REST API for tracking gifts, people, lists, and exchanges (e.g. Secret Santa).
 ```bash
 git clone https://github.com/millsjpw/gift-logbook.git
 cd gift-logbook
-npm install
-npm run migrate
-npm run dev
+docker compose up -d --build
 ```
 ## Environment Variables
 
@@ -63,7 +65,7 @@ JWT_SECRET=change-me-to-a-secure-secret
 JWT_ISSUER=gift-logbook
 ```
 
-## Running the App
+## Usage
 ### Development
 ```
 npm run dev
@@ -146,3 +148,23 @@ For full request/response schemas, see `/docs` or `openapi.json`.
 ## Notes
 Ensure PostgreSQL is running and accessible via DB_URL before running migrations.
 The app serves OpenAPI docs at `/docs`.
+
+## Contributing
+### Clone the repo
+```bash
+git clone https://github.com/millsjpw/gift-logbook
+cd gift-logbook
+```
+
+### Build the project
+```bash
+npm run dev
+```
+
+### Run the tests
+```bash
+npm run dev
+```
+
+### Submit a pull request
+If you'd like to contribute, please fork the repository and open a pull request to the `master` branch.
