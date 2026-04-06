@@ -17,9 +17,9 @@ services:
       timeout: 5s
       retries: 10
 
-  app:
-    container_name: gift-logbook-app
-    build: .
+  server:
+    container_name: gift-logbook-server
+    build: ./server
     restart: unless-stopped
     ports:
       - "3000:3000"

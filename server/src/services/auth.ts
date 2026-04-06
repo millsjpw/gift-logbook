@@ -12,7 +12,7 @@ import { sessions, UserResponse } from "../db/schema.js";
 type payload = Pick<JwtPayload, "iss" | "sub" | "iat" | "exp">;
 
 type LoginResponse = UserResponse & {
-    token: string;
+    accessToken: string;
     refreshToken: string;
 };
 
@@ -100,7 +100,7 @@ export async function login(email: string, password: string): Promise<LoginRespo
         email: user.email,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
-        token: accessToken,
+        accessToken: accessToken,
         refreshToken
     } satisfies LoginResponse;
 }
@@ -120,7 +120,7 @@ export async function refreshAccessToken(refreshToken: string) {
     await sessionsDb.updateSessionToken(refreshToken, newRefreshToken);
 
     return {
-        token: generateToken(user.id),
+        accessToken: generateToken(user.id),
         refreshToken: newRefreshToken
     };
 }

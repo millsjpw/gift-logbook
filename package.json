@@ -1,34 +1,11 @@
 {
-  "name": "gift-logbook",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "gift-logbook-root",
+  "private": true,
   "scripts": {
-    "build": "npx tsc",
-    "start": "node dist/index.js",
-    "dev": "npx tsc && node dist/index.js",
-    "test": "vitest --config vitest.config.ts --run",
-    "generate": "drizzle-kit generate",
-    "migrate": "drizzle-kit migrate"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "module",
-  "devDependencies": {
-    "@types/express": "^5.0.6",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^25.5.0",
-    "@vitest/coverage-v8": "^4.1.1",
-    "typescript": "^6.0.2",
-    "vitest": "^4.1.1"
-  },
-  "dependencies": {
-    "argon2": "^0.44.0",
-    "drizzle-orm": "^0.45.1",
-    "express": "^5.2.1",
-    "jsonwebtoken": "^9.0.3",
-    "postgres": "^3.4.8",
-    "drizzle-kit": "^0.31.10"
+    "test": "npm --prefix server run test",
+    "dev:server": "npm --prefix server run dev",
+    "dev:app": "npm --prefix app run dev",
+    "build:server": "npm --prefix server run build",
+    "build:app": "npm --prefix app run build"
   }
 }
