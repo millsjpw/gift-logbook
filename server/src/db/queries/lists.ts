@@ -1,6 +1,7 @@
 import { db } from '../db.js';
 import { lists, NewList } from '../schema.js';
 import { and, eq, like } from 'drizzle-orm';
+import { BadRequestError, NotFoundError } from '../../api/errors.js';
 
 export async function createList(userId: string, name: string, personId?: string) {
     const list: NewList = {
@@ -8,8 +9,18 @@ export async function createList(userId: string, name: string, personId?: string
         name,
         personId: personId || null,
     };
-    const [createdList] = await db.insert(lists).values(list).returning();
-    return createdList;
+    try {
+        const [createdList] = await db.insert(lists).values(list).returning();
+        return createdList;
+    } catch (err: any) {
+        if (err.cause?.code === '23505') {
+            throw new BadRequestError('You already have a list with that name');
+        }
+        if (err.cause?.code === '23503') {
+            throw new BadRequestError('The specified person does not exist');
+        }
+        throw err;
+    }
 }
 
 export async function getListsByUserId(userId: string) {
@@ -47,8 +58,21 @@ export async function updateList(id: string, name?: string, personId?: string) {
     if (name) updateData.name = name;
     if (personId !== undefined) updateData.personId = personId;
 
-    const [updatedList] = await db.update(lists).set(updateData).where(eq(lists.id, id)).returning();
-    return updatedList;
+    try {
+        const [updatedList] = await db.update(lists).set(updateData).where(eq(lists.id, id)).returning();
+        if (!updatedList) {
+            throw new NotFoundError('List not found');
+        }
+        return updatedList;
+    } catch (err: any) {
+        if (err.cause?.code === '23505') {
+            throw new BadRequestError('You already have a list with that name');
+        }
+        if (err.cause?.code === '23503') {
+            throw new BadRequestError('The specified person does not exist');
+        }
+        throw err;
+    }
 }
 
 export async function deleteList(id: string) {

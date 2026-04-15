@@ -1,6 +1,7 @@
 import { db } from '../db.js';
 import { listItems, NewListItem } from '../schema.js';
 import { eq, and, like } from 'drizzle-orm';
+import { BadRequestError } from '../../api/errors.js';
 
 export async function createListItem(userId: string, listId: string, title: string, url: string) {
     const listItem: NewListItem = {
@@ -8,8 +9,15 @@ export async function createListItem(userId: string, listId: string, title: stri
         title,
         url,
     };
-    const [createdListItem] = await db.insert(listItems).values(listItem).returning();
-    return createdListItem;
+    try {
+        const [createdListItem] = await db.insert(listItems).values(listItem).returning();
+        return createdListItem;
+    } catch (err: any) {
+        if (err.cause?.code === '23505') {
+            throw new BadRequestError('This list already has an item with that title');
+        }
+        throw err;
+    }
 }
 
 export async function bulkInsertListItems(userId: string, listId: string, items: { title: string; url: string }[]) {
@@ -19,8 +27,15 @@ export async function bulkInsertListItems(userId: string, listId: string, items:
         url: item.url,
     }));
 
-    const createdItems = await db.insert(listItems).values(newItems).returning();
-    return createdItems;
+    try {
+        const createdItems = await db.insert(listItems).values(newItems).returning();
+        return createdItems;
+    } catch (err: any) {
+        if (err.cause?.code === '23505') {
+            throw new BadRequestError('One or more items have duplicate titles in this list');
+        }
+        throw err;
+    }
 }
 
 export async function getListItemsByListId(listId: string) {

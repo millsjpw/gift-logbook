@@ -2,16 +2,9 @@ import { useEffect, useState } from "react";
 import { apiFetch } from "../api/client";
 import { formatTimeAgo } from "../utils/time";
 import Layout from "../components/Layout";
-import PersonForm from "../components/PersonForm";
 import { ArrowDownIcon, ArrowUpIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/solid";
+import { type Person } from "../models/Person";
 
-type Person = {
-    id: string;
-    name: string;
-    createdAt: string;
-    updatedAt: string;
-    meta?: [];
-};
 
 type SortKey = 'name' | 'updatedAt';
 type SortOrder = 'asc' | 'desc';
@@ -20,7 +13,12 @@ export default function MyPeople() {
     const [people, setPeople] = useState<Person[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [addName, setAddName] = useState('');
+    const [addSaving, setAddSaving] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
+    const [editDraft, setEditDraft] = useState('');
+    const [editSaving, setEditSaving] = useState(false);
+    const [rowError, setRowError] = useState<string | null>(null);
 
     const [sortKey, setSortKey] = useState<SortKey>('name');
     const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
@@ -33,7 +31,7 @@ export default function MyPeople() {
         setLoading(true);
         setError(null);
         try {
-            const data = await apiFetch('/persons');
+            const data: Person[] = await apiFetch('/persons');
             setPeople(data);
         } catch (err: any) {
             setError(err.message || 'Failed to load people');
@@ -42,28 +40,55 @@ export default function MyPeople() {
         }
     }
 
-    async function handleAdd(name: string) {
+    async function handleAdd(e: React.SubmitEvent<HTMLFormElement>) {
+        e.preventDefault();
+        const trimmed = addName.trim();
+        if (!trimmed) return;
+        setAddSaving(true);
         try {
-            const newPerson = await apiFetch('/persons', {
+            const newPerson: Person = await apiFetch('/persons', {
                 method: 'POST',
-                body: JSON.stringify({ name }),
+                body: JSON.stringify({ name: trimmed }),
             });
-            setPeople([...people, newPerson]);
+            setPeople(prev => [...prev, newPerson]);
+            setAddName('');
         } catch (err: any) {
             setError(err.message || 'Failed to add person');
+        } finally {
+            setAddSaving(false);
         }
     }
 
-    async function handleUpdate(id: string, name: string) {
+    function startEditing(person: Person) {
+        setEditingId(person.id);
+        setEditDraft(person.name);
+        setRowError(null);
+    }
+
+    function exitEditing() {
+        setEditingId(null);
+        setEditDraft('');
+        setRowError(null);
+    }
+
+    async function handleSave(id: string) {
+        const trimmed = editDraft.trim();
+        if (!trimmed) return;
+        setEditSaving(true);
+        setRowError(null);
         try {
             await apiFetch(`/persons/${id}`, {
                 method: 'PUT',
-                body: JSON.stringify({ name }),
+                body: JSON.stringify({ name: trimmed }),
             });
-            setPeople(people.map(p => p.id === id ? { ...p, name, updatedAt: new Date().toISOString() } : p));
-            setEditingId(null);
+            setPeople(prev => prev.map(p =>
+                p.id === id ? { ...p, name: trimmed, updatedAt: new Date().toISOString() } : p
+            ));
+            exitEditing();
         } catch (err: any) {
-            setError(err.message || 'Failed to update person');
+            setRowError(err.message || 'Failed to update person');
+        } finally {
+            setEditSaving(false);
         }
     }
 
@@ -72,7 +97,7 @@ export default function MyPeople() {
 
         try {
             await apiFetch(`/persons/${id}`, { method: 'DELETE' });
-            setPeople(people.filter(p => p.id !== id));
+            setPeople(prev => prev.filter(p => p.id !== id));
         } catch (err: any) {
             setError(err.message || 'Failed to delete person');
         }
@@ -107,16 +132,32 @@ export default function MyPeople() {
             {error && <p className="text-red-600 mb-2">{error}</p>}
 
             {/* Add New Person Form */}
-            <div className="mb-4">
-                <PersonForm onSave={handleAdd} />
-            </div>
+            <form onSubmit={handleAdd} className="mb-4 inline-flex items-center space-x-2">
+                <input
+                    type="text"
+                    value={addName}
+                    onChange={e => setAddName(e.target.value)}
+                    disabled={addSaving}
+                    placeholder="New person name"
+                    className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                />
+                <button
+                    type="submit"
+                    disabled={addSaving || !addName.trim()}
+                    className={`px-3 py-1 rounded-md text-white ${
+                        addSaving || !addName.trim() ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-700'
+                    }`}
+                >
+                    Add
+                </button>
+            </form>
 
             {/* People List */}
             {people.length === 0 ? (
                 <p>You haven't created any people yet.</p>
             ) : (
-                <div className="mx-auto overflow-x-auto mt-6">
-                    <table className="border border-gray-200 divide-y divide-gray-300">
+                <div className="max-w-4xl mx-auto overflow-x-auto mt-6">
+                    <table className="table-fixed w-full border border-gray-200 divide-y divide-gray-300">
                         <thead className="bg-gray-50">
                             <tr>
                                 <th className="px-4 py-2 text-left w-3/4 cursor-pointer"
@@ -127,48 +168,81 @@ export default function MyPeople() {
                                         sortOrder === 'asc' ? <ArrowUpIcon className="h-4 w-4 inline m-2" /> : <ArrowDownIcon className="h-4 w-4 inline m-2" />
                                     )}
                                 </th>
-                                <th className="px-4 py-2 text-left w-1/4">Actions</th>
+                                <th className="px-4 py-2 text-center w-1/4">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-300">
-                            {sortedPeople.map((person) => (
-                                <tr key={person.id}>
-                                    <td className="px-4 py-2 align-top">
-                                        {editingId === person.id ? (
-                                            <PersonForm
-                                                initialName={person.name}
-                                                onSave={(name) => handleUpdate(person.id, name)}
-                                                onCancel={() => setEditingId(null)}
-                                            />
-                                        ) : (
-                                            <div>
-                                                <span className="font-medium">{person.name}</span>
-                                                <div className="text-gray-400 text-xs">
-                                                    updated {formatTimeAgo(person.updatedAt)}
+                            {sortedPeople.map((person) => {
+                                const isEditing = editingId === person.id;
+                                return (
+                                    <tr key={person.id}>
+                                        <td className="px-4 py-2 align-middle">
+                                            {isEditing ? (
+                                                <input
+                                                    type="text"
+                                                    value={editDraft}
+                                                    onChange={e => setEditDraft(e.target.value)}
+                                                    disabled={editSaving}
+                                                    className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                                                />
+                                            ) : (
+                                                <div className="flex flex-col justify-center">
+                                                    <span className="font-medium">{person.name}</span>
+                                                    <div className="text-gray-400 text-tiny">
+                                                        updated {formatTimeAgo(person.updatedAt)}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        )}
-                                    </td>
-                                    <td className="px-4 py-2 align-top">
-                                        {editingId !== person.id && (
-                                            <div className="space-x-2">
-                                                <button
-                                                    onClick={() => setEditingId(person.id)}
-                                                    className="px-2 py-1 rounded"
-                                                >
-                                                    <PencilSquareIcon className="h-6 w-6 text-blue-500 hover:text-blue-700" />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(person.id)}
-                                                    className="px-2 py-1 rounded"
-                                                >
-                                                    <TrashIcon className="h-6 w-6 text-red-500 hover:text-red-700" />
-                                                </button>
-                                            </div>
-                                        )}
-                                    </td>
-                                </tr>
-                            ))}
+                                            )}
+                                        </td>
+                                        <td className="px-4 py-2 align-middle">
+                                            {isEditing ? (
+                                                <div className="flex flex-col items-center gap-1">
+                                                    <div className="flex gap-2 justify-center">
+                                                        <button
+                                                            onClick={() => handleSave(person.id)}
+                                                            disabled={editSaving || !editDraft.trim()}
+                                                            className={`px-3 py-1 rounded-md text-white ${
+                                                                editSaving || !editDraft.trim()
+                                                                    ? 'bg-gray-400 cursor-not-allowed'
+                                                                    : 'bg-blue-500 hover:bg-blue-700'
+                                                            }`}
+                                                        >
+                                                            Save
+                                                        </button>
+                                                        <button
+                                                            onClick={exitEditing}
+                                                            disabled={editSaving}
+                                                            className={`px-3 py-1 rounded-md text-white ${
+                                                                editSaving ? 'bg-gray-400 cursor-not-allowed' : 'bg-gray-400 hover:bg-gray-500'
+                                                            }`}
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                    </div>
+                                                    {rowError && (
+                                                        <p className="text-red-600 text-sm">{rowError}</p>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <div className="justify-center gap-2 flex">
+                                                    <button
+                                                        onClick={() => startEditing(person)}
+                                                        className="p-1 rounded hover:bg-gray-100"
+                                                    >
+                                                        <PencilSquareIcon className="h-5 w-5 text-blue-500 hover:text-blue-700" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(person.id)}
+                                                        className="p-1 rounded hover:bg-gray-100"
+                                                    >
+                                                        <TrashIcon className="h-5 w-5 text-red-500 hover:text-red-700" />
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>
