@@ -75,6 +75,8 @@ app.put('/lists/:id', middlewareRequireAuth, listsApi.handleUpdateList);
 app.get('/lists', middlewareRequireAuth, listsApi.handleGetListsByUserId);
 app.delete('/lists/:id', middlewareRequireAuth, listsApi.handleDeleteList);
 app.delete('/lists/:listId/items/:itemId', middlewareRequireAuth, listsApi.handleDeleteItemFromList);
+app.post('/lists/:listId/items/:itemId/tags', middlewareRequireAuth, listsApi.handleAddTagToListItem);
+app.delete('/lists/:listId/items/:itemId/tags/:tagId', middlewareRequireAuth, listsApi.handleRemoveTagFromListItem);
 
 // Records API
 app.post('/records', middlewareRequireAuth, recordsApi.handleAddRecord);

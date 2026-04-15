@@ -1,16 +1,26 @@
 import * as listsDb from '../db/queries/lists.js';
 import * as listItemsDb from '../db/queries/list_items.js';
-import { List, ListItem } from '../db/schema.js';
-import { UserForbiddenError } from '../api/errors.js';
+import * as listItemTagsDb from '../db/queries/list_item_tags.js';
+import { List, ListItem, Tag } from '../db/schema.js';
+import { UserForbiddenError, NotFoundError } from '../api/errors.js';
 
-type FullList = List & { items: ListItem[] };
+type FullListItem = ListItem & { tags: Tag[] };
+type FullList = List & { items: FullListItem[] };
 
-export async function createList(userId: string, name: string, personId?: string, items?: { title: string; url: string }[]): Promise<List> {
+async function hydrateItems(listId: string): Promise<FullListItem[]> {
+    const items = await listItemsDb.getListItemsByListId(listId);
+    return Promise.all(items.map(async item => ({
+        ...item,
+        tags: await listItemTagsDb.getTagsByListItemId(item.id),
+    })));
+}
+
+export async function createList(userId: string, name: string, personId?: string, items?: { title: string; url: string }[]): Promise<FullList> {
     const list = await listsDb.createList(userId, name, personId);
     if (items && items.length > 0) {
         await listItemsDb.bulkInsertListItems(userId, list.id, items);
     }
-    return list;
+    return { ...list, items: await hydrateItems(list.id) };
 }
 
 export async function getListById(id: string): Promise<FullList | null> {
@@ -18,41 +28,35 @@ export async function getListById(id: string): Promise<FullList | null> {
     if (!list) {
         return null;
     }
-    const items = await listItemsDb.getListItemsByListId(id);
-    return { ...list, items } satisfies FullList;
+    const items = await hydrateItems(id);
+    return { ...list, items };
 }
 
 export async function getListsByUserId(userId: string): Promise<FullList[]> {
     const lists = await listsDb.getListsByUserId(userId);
-    const fullLists: FullList[] = [];
-    for (const list of lists) {
-        const items = await listItemsDb.getListItemsByListId(list.id);
-        fullLists.push({ ...list, items } satisfies FullList);
-    }
-    return fullLists;
+    return Promise.all(lists.map(async list => ({
+        ...list,
+        items: await hydrateItems(list.id),
+    })));
 }
 
 export async function getListsByPersonId(userId: string, personId: string): Promise<FullList[]> {
     const lists = await listsDb.getListsByPersonId(userId, personId);
-    const fullLists: FullList[] = [];
-    for (const list of lists) {
-        const items = await listItemsDb.getListItemsByListId(list.id);
-        fullLists.push({ ...list, items } satisfies FullList);
-    }
-    return fullLists;
+    return Promise.all(lists.map(async list => ({
+        ...list,
+        items: await hydrateItems(list.id),
+    })));
 }
 
 export async function getListsByName(userId: string, name: string): Promise<FullList[]> {
     const lists = await listsDb.getListsByName(userId, name);
-    const fullLists: FullList[] = [];
-    for (const list of lists) {
-        const items = await listItemsDb.getListItemsByListId(list.id);
-        fullLists.push({ ...list, items } satisfies FullList);
-    }
-    return fullLists;
+    return Promise.all(lists.map(async list => ({
+        ...list,
+        items: await hydrateItems(list.id),
+    })));
 }
 
-export async function updateList(userId: string, list: FullList): Promise<List> {
+export async function updateList(userId: string, list: FullList): Promise<FullList> {
     if (list.userId !== userId) {
         throw new UserForbiddenError("You do not have permission to update this list");
     }
@@ -65,7 +69,7 @@ export async function updateList(userId: string, list: FullList): Promise<List> 
             await listItemsDb.createListItem(userId, list.id, item.title, item.url ?? '');
         }
     }
-    return updatedList;
+    return { ...updatedList, items: await hydrateItems(updatedList.id) };
 }
 
 export async function deleteList(userId: string, id: string): Promise<void> {
@@ -92,4 +96,18 @@ export async function deleteItemFromList(userId: string, listId: string, itemId:
         throw new UserForbiddenError("You do not have permission to delete items from this list");
     }
     await listItemsDb.deleteListItem(itemId);
+}
+
+export async function addTagToListItem(userId: string, listId: string, itemId: string, tagId: string): Promise<void> {
+    const list = await listsDb.getListById(listId);
+    if (!list) throw new NotFoundError("List not found");
+    if (list.userId !== userId) throw new UserForbiddenError("You do not have permission to modify this list");
+    await listItemTagsDb.addTagToListItem(itemId, tagId);
+}
+
+export async function removeTagFromListItem(userId: string, listId: string, itemId: string, tagId: string): Promise<void> {
+    const list = await listsDb.getListById(listId);
+    if (!list) throw new NotFoundError("List not found");
+    if (list.userId !== userId) throw new UserForbiddenError("You do not have permission to modify this list");
+    await listItemTagsDb.removeTagFromListItem(itemId, tagId);
 }

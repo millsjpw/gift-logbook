@@ -162,6 +162,24 @@ export type NewRecordTag = typeof recordTags.$inferInsert;
 export type RecordTag = typeof recordTags.$inferSelect;
 
 // =====================
+// List Item Tags
+// =====================
+
+export const listItemTags = pgTable("list_item_tags", {
+    listItemId: uuid("list_item_id").notNull().references(() => listItems.id, { onDelete: "cascade" }),
+    tagId: uuid("tag_id").notNull().references(() => tags.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow().$onUpdate(() => new Date()),
+}, (table) => [
+    primaryKey({ columns: [table.listItemId, table.tagId] }),
+    index("list_item_tag_item_index").on(table.listItemId),
+    index("list_item_tag_tag_index").on(table.tagId),
+]);
+
+export type NewListItemTag = typeof listItemTags.$inferInsert;
+export type ListItemTag = typeof listItemTags.$inferSelect;
+
+// =====================
 // Exchanges
 // =====================
 

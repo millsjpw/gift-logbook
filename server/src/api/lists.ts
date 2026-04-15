@@ -84,3 +84,27 @@ export async function handleDeleteItemFromList(req: Request, res: Response) {
     await listService.deleteItemFromList(userId, listId, itemId);
     res.status(204).send();
 }
+
+export async function handleAddTagToListItem(req: Request, res: Response) {
+    const userId = req.auth!.userId;
+    const listId = req.params.listId as string;
+    const itemId = req.params.itemId as string;
+    const { tagId } = req.body;
+
+    if (!tagId) {
+        throw new BadRequestError("Missing required field: tagId");
+    }
+
+    await listService.addTagToListItem(userId, listId, itemId, tagId);
+    res.status(204).send();
+}
+
+export async function handleRemoveTagFromListItem(req: Request, res: Response) {
+    const userId = req.auth!.userId;
+    const listId = req.params.listId as string;
+    const itemId = req.params.itemId as string;
+    const tagId = req.params.tagId as string;
+
+    await listService.removeTagFromListItem(userId, listId, itemId, tagId);
+    res.status(204).send();
+}
