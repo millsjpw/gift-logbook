@@ -1,12 +1,16 @@
+![test badge](https://github.com/millsjpw/gift-logbook/actions/workflows/Tests.yml/badge.svg)
+
 # Gift Logbook API
 
 A REST API for tracking gifts, people, lists, and exchanges (e.g. Secret Santa).
 
 ## Motivation
-My family needed a way to keep track of what we plan to get for gifts, what we _have_ bought over the years, and to be able to run "name drawing" for gift exchanges. 
+
+My family needed a way to keep track of what we plan to get for gifts, what we _have_ bought over the years, and to be able to run "name drawing" for gift exchanges.
 Nothing out there would be able to meet our specific needs, so I built it myself.
 
 ## Features
+
 - JWT-based authentication
 - Gift tracking by person and list
 - Tagging system
@@ -14,6 +18,7 @@ Nothing out there would be able to meet our specific needs, so I built it myself
 - OpenAPI documentation with Redoc UI
 
 ## Tech Stack
+
 - Node.js
 - Express
 - PostgreSQL
@@ -24,6 +29,7 @@ Nothing out there would be able to meet our specific needs, so I built it myself
 ---
 
 ## Table of Contents
+
 - [Quick Start](#quick-start)
 - [Environment Variables](#environment-variables)
 - [Running the App](#running-the-app)
@@ -41,20 +47,22 @@ git clone https://github.com/millsjpw/gift-logbook.git
 cd gift-logbook
 docker compose up -d --build
 ```
+
 ## Environment Variables
 
 Create a .env file or export these in your shell:
-| Variable             | Description                      | Default      |
+| Variable | Description | Default |
 | -------------------- | -------------------------------- | ------------ |
-| PORT                 | Server port                      | 3000         |
-| PLATFORM             | Runtime environment              | local        |
-| DB_URL               | PostgreSQL connection string     | —            |
-| JWT_SECRET           | Secret for signing tokens        | —            |
-| JWT_DEFAULT_DURATION | Access token lifetime (seconds)  | 3600         |
-| JWT_REFRESH_DURATION | Refresh token lifetime (seconds) | 86400        |
-| JWT_ISSUER           | Token issuer                     | gift-logbook |
+| PORT | Server port | 3000 |
+| PLATFORM | Runtime environment | local |
+| DB_URL | PostgreSQL connection string | — |
+| JWT_SECRET | Secret for signing tokens | — |
+| JWT_DEFAULT_DURATION | Access token lifetime (seconds) | 3600 |
+| JWT_REFRESH_DURATION | Refresh token lifetime (seconds) | 86400 |
+| JWT_ISSUER | Token issuer | gift-logbook |
 
 ### Example
+
 ```
 PORT=3000
 PLATFORM=local
@@ -66,44 +74,61 @@ JWT_ISSUER=gift-logbook
 ```
 
 ## Usage
+
 ### Development
+
 ```
 npm run dev
 ```
+
 ### Production
+
 ```
 npm run build
 npm start
 ```
+
 ## API Docs
+
 - Redoc UI: `http://localhost:<PORT>/docs`
 - OpenAPI JSON: `http://localhost:<PORT>/openapi.json`
 
 ## Testing
+
 ```
 npm test
 ```
 
 ## Endpoints (Summary)
+
 #### Health
+
 - `GET /health — check service status`
+
 #### Auth
+
 - `POST /auth/login — login`
 - `POST /auth/refresh — refresh token`
 - `POST /auth/logout — logout`
+
 #### Users
+
 - `POST /users — create`
 - `GET /users/:id — retrieve`
 - `PUT /users/:id — update`
 - `DELETE /users/:id — delete`
+
 #### Persons (auth required)
+
 - `POST /persons — create`
 - `GET /persons — list`
 - `GET /persons/search?name=... — search`
 - `GET /persons/:id — retrieve`
 - `PUT /persons/:id — update`
 - `DELETE /persons/:id — delete`
+
 #### Lists (auth required)
+
 - `POST /lists — create`
 - `GET /lists — list all`
 - `GET /lists/:id — retrieve`
@@ -112,7 +137,9 @@ npm test
 - `PUT /lists/:id — update`
 - `DELETE /lists/:id — delete list`
 - `DELETE /lists/:listId/items/:itemId — delete item`
+
 #### Records (auth required)
+
 - `POST /records — create`
 - `GET /records — list`
 - `GET /records/:id — retrieve`
@@ -125,13 +152,17 @@ npm test
 - `POST /records/:id/tags — add tag`
 - `GET /records/:id/tags — list tags`
 - `DELETE /records/:id/tags/:tag — remove tag from record`
+
 #### Tags (auth required)
+
 - `POST /tags — create`
 - `GET /tags — list`
 - `GET /tags/:id — retrieve`
 - `PUT /tags/:id — update`
 - `DELETE /tags/:id — delete`
+
 #### Exchanges (auth required)
+
 - `POST /exchanges — create`
 - `GET /exchanges — list`
 - `GET /exchanges/:id — retrieve`
@@ -146,25 +177,31 @@ npm test
 For full request/response schemas, see `/docs` or `openapi.json`.
 
 ## Notes
+
 Ensure PostgreSQL is running and accessible via DB_URL before running migrations.
 The app serves OpenAPI docs at `/docs`.
 
 ## Contributing
+
 ### Clone the repo
+
 ```bash
 git clone https://github.com/millsjpw/gift-logbook
 cd gift-logbook
 ```
 
 ### Build the project
+
 ```bash
 npm run dev
 ```
 
 ### Run the tests
+
 ```bash
 npm run dev
 ```
 
 ### Submit a pull request
+
 If you'd like to contribute, please fork the repository and open a pull request to the `master` branch.
