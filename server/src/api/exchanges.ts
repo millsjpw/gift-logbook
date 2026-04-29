@@ -74,6 +74,7 @@ export async function handleCloneExchange(req: Request, res: Response) {
 export async function handleSaveAssignments(req: Request, res: Response) {
     const exchangeId = req.params.id as string;
     const { assignments } = req.body;
+    console.log("Received assignments:", assignments);
 
     if (!Array.isArray(assignments)) {
         throw new BadRequestError("Missing required field: assignments (array)");
