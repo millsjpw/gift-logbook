@@ -28,7 +28,7 @@ export async function handleRefreshToken(req: Request, res: Response) {
 }
 
 export async function handleLogout(req: Request, res: Response) {
-  let refreshToken = authService.getBearerToken(req);
+  const refreshToken = authService.getBearerToken(req);
   await authService.logout(refreshToken);
   res.status(204).send();
 }

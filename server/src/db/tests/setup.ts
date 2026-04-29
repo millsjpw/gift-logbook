@@ -10,7 +10,8 @@ function loadDotEnvFile(filePath: string) {
     for (const line of content.split(/\r?\n/)) {
       const m = line.match(/^\s*([A-Za-z0-9_]+)\s*=\s*(.*)\s*$/);
       if (!m) continue;
-      let [, key, val] = m;
+      const [, key] = m;
+      let val = m[2];
       if (
         (val.startsWith('"') && val.endsWith('"')) ||
         (val.startsWith("'") && val.endsWith("'"))
@@ -19,7 +20,7 @@ function loadDotEnvFile(filePath: string) {
       }
       if (!process.env[key]) process.env[key] = val;
     }
-  } catch (err) {
+  } catch (_) {
     // ignore missing file or parse errors
   }
 }
@@ -49,7 +50,7 @@ export async function setup() {
   try {
     const checkSql = postgres(process.env.DB_URL as string);
     try {
-      const info = await checkSql.unsafe(
+      const _ = await checkSql.unsafe(
         "select current_database() as db, inet_server_port() as port",
       );
     } catch (err) {

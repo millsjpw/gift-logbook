@@ -34,8 +34,8 @@ export type NewUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 export type UserResponse = Omit<typeof users.$inferSelect, "hashedPassword">;
 
-export function omitPassword(user: any): UserResponse {
-  const { hashedPassword, ...rest } = user as any;
+export function omitPassword(user: User): UserResponse {
+  const { hashedPassword: _hashedPassword, ...rest } = user;
   return rest;
 }
 

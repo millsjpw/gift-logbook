@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-import { config } from "../config.js";
 import { respondWithError } from "./json.js";
 import {
   BadRequestError,
@@ -26,7 +25,7 @@ export function middlewareErrorHandler(
   err: Error,
   req: Request,
   res: Response,
-  next: NextFunction,
+  _: NextFunction,
 ) {
   let statusCode = 500;
   let message = "Something went wrong on our end";
@@ -65,7 +64,8 @@ export function middlewareRequireAuth(
     const token = getBearerToken(req);
     req.auth = { userId: verifyToken(token) };
     return next();
-  } catch (err) {
+  } catch (err: any) {
+    console.error(`\n[AUTH ERROR] ${req.method} ${req.url}`, err.message, "\n");
     return next(new UserNotAuthenticatedError("Authentication required"));
   }
 }
@@ -81,8 +81,8 @@ export function middlewareOptionalAuth(
 
     const token = getBearerToken(req);
     req.auth = { userId: verifyToken(token) };
-  } catch {
-    // ignore errors
+  } catch (err: any) {
+    console.error(`\n[AUTH ERROR] ${req.method} ${req.url}`, err.message, "\n");
   }
   return next();
 }

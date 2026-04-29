@@ -7,7 +7,7 @@ import { BadRequestError, UserNotAuthenticatedError } from "../api/errors.js";
 import { config } from "../config.js";
 import * as userDb from "../db/queries/users.js";
 import * as sessionsDb from "../db/queries/sessions.js";
-import { sessions, UserResponse } from "../db/schema.js";
+import { UserResponse } from "../db/schema.js";
 
 type payload = Pick<JwtPayload, "iss" | "sub" | "iat" | "exp">;
 
@@ -42,7 +42,7 @@ export function verifyToken(token: string) {
   let decoded: payload;
   try {
     decoded = jwt.verify(token, config.session.secret) as payload;
-  } catch (err) {
+  } catch (_) {
     throw new UserNotAuthenticatedError("Invalid token");
   }
 

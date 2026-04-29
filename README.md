@@ -1,3 +1,5 @@
+![test badge](https://github.com/millsjpw/gift-logbook/actions/workflows/Tests.yml/badge.svg)
+
 # Gift Logbook API
 
 A REST API for tracking gifts, people, lists, and exchanges (e.g. Secret Santa).

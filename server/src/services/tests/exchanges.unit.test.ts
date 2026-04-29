@@ -66,7 +66,7 @@ describe("exchanges service", () => {
     (exchangesDb.createExchange as any).mockResolvedValue({ id: "ne" });
     (participantsDb.addParticipantToExchange as any).mockResolvedValue({});
 
-    const created = await exchService.createExchange("u1", "Name");
+    await exchService.createExchange("u1", "Name");
     expect(exchangesDb.createExchange).toHaveBeenCalledWith("u1", "Name");
 
     await exchService.addParticipant("e1", "p1");

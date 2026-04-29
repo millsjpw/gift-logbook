@@ -1,4 +1,3 @@
-import { PostgresError } from "postgres";
 import { db } from "../db.js";
 import {
   exchangeParticipants,
@@ -22,8 +21,11 @@ export async function addParticipantToExchange(
       .values(participant)
       .returning();
     return createdParticipant;
-  } catch (error) {
-    throw new BadRequestError("Participant already exists in this exchange");
+  } catch (error: any) {
+    if (error.cause?.code === "23505") {
+      throw new BadRequestError("Participant already exists in this exchange");
+    }
+    throw error;
   }
 }
 

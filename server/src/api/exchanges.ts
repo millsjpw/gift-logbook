@@ -5,7 +5,6 @@ import * as exchangeService from "../services/exchanges.js";
 import { FullExchange } from "../services/exchanges.js";
 
 export async function handleGetFullExchange(req: Request, res: Response) {
-  const userId = req.auth!.userId;
   const exchangeId = req.params.id as string;
 
   const fullExchange: FullExchange =
