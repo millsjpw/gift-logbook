@@ -1,19 +1,23 @@
-import { describe, it, expect } from 'vitest';
-import * as exchanges from '../queries/exchanges.js';
-import * as persons from '../queries/persons.js';
-import * as participants from '../queries/exchange_participants.js';
-import { createTestUser, createTestPerson, cleanupTestUser } from './testUtils.js';
+import { describe, it, expect } from "vitest";
+import * as exchanges from "../queries/exchanges.js";
+import * as persons from "../queries/persons.js";
+import * as participants from "../queries/exchange_participants.js";
+import {
+  createTestUser,
+  createTestPerson,
+  cleanupTestUser,
+} from "./testUtils.js";
 
-describe('exchange_participants queries', () => {
-  it('add and remove participants', async () => {
+describe("exchange_participants queries", () => {
+  it("add and remove participants", async () => {
     let user;
     let ex;
     let person;
     let part;
     try {
-      user = (await createTestUser('ep')).user;
-      ex = await exchanges.createExchange(user.id, 'Party');
-      person = await createTestPerson(user.id, 'P1');
+      user = (await createTestUser("ep")).user;
+      ex = await exchanges.createExchange(user.id, "Party");
+      person = await createTestPerson(user.id, "P1");
       part = await participants.addParticipantToExchange(ex.id, person.id);
       expect(part).toBeDefined();
 

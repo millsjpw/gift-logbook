@@ -5,8 +5,8 @@ import { config } from "../config.js";
 import * as schema from "./schema.js";
 
 export function createDb(url?: string) {
-	const conn = postgres(url ?? config.db.url);
-	return drizzle(conn, { schema });
+  const conn = postgres(url ?? config.db.url);
+  return drizzle(conn, { schema });
 }
 
 // default export for application code

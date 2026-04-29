@@ -1,45 +1,63 @@
-import * as personsDb from '../db/queries/persons.js';
-import { Person } from '../db/schema.js';
-import { NotFoundError, UserForbiddenError } from '../api/errors.js';
+import * as personsDb from "../db/queries/persons.js";
+import { Person } from "../db/schema.js";
+import { NotFoundError, UserForbiddenError } from "../api/errors.js";
 
-export async function addPerson(userId: string, name: string, meta?: Record<string, unknown>): Promise<Person> {
-    return await personsDb.createPerson(userId, name, meta);
+export async function addPerson(
+  userId: string,
+  name: string,
+  meta?: Record<string, unknown>,
+): Promise<Person> {
+  return await personsDb.createPerson(userId, name, meta);
 }
 
 export async function getPersonById(id: string): Promise<Person | null> {
-    return await personsDb.getPersonById(id);
+  return await personsDb.getPersonById(id);
 }
 
-export async function getAllPeopleCreatedByUser(userId: string): Promise<Person[]> {
-    return await personsDb.getPersonsByUserId(userId);
+export async function getAllPeopleCreatedByUser(
+  userId: string,
+): Promise<Person[]> {
+  return await personsDb.getPersonsByUserId(userId);
 }
 
-export async function searchPeopleByName(userId: string, name: string): Promise<Person[]> {
-    return await personsDb.getPersonsByName(userId, name);
+export async function searchPeopleByName(
+  userId: string,
+  name: string,
+): Promise<Person[]> {
+  return await personsDb.getPersonsByName(userId, name);
 }
 
-export async function updatePerson(userId: string, id: string, name?: string, meta?: Record<string, unknown>): Promise<Person> {
-    const person = await personsDb.getPersonById(id);
-    if (!person) {
-        throw new NotFoundError("Person not found");
-    }
-    if (person.userId !== userId) {
-        throw new UserForbiddenError("You do not have permission to update this person");
-    }
-    return await personsDb.updatePerson(id, name, meta);
+export async function updatePerson(
+  userId: string,
+  id: string,
+  name?: string,
+  meta?: Record<string, unknown>,
+): Promise<Person> {
+  const person = await personsDb.getPersonById(id);
+  if (!person) {
+    throw new NotFoundError("Person not found");
+  }
+  if (person.userId !== userId) {
+    throw new UserForbiddenError(
+      "You do not have permission to update this person",
+    );
+  }
+  return await personsDb.updatePerson(id, name, meta);
 }
 
 export async function deletePerson(userId: string, id: string): Promise<void> {
-    const person = await personsDb.getPersonById(id);
-    if (!person) {
-        return; // If the person doesn't exist, we can consider it "deleted"
-    }
-    if (person.userId !== userId) {
-        throw new UserForbiddenError("You do not have permission to delete this person");
-    }
-    await personsDb.deletePerson(id);
+  const person = await personsDb.getPersonById(id);
+  if (!person) {
+    return; // If the person doesn't exist, we can consider it "deleted"
+  }
+  if (person.userId !== userId) {
+    throw new UserForbiddenError(
+      "You do not have permission to delete this person",
+    );
+  }
+  await personsDb.deletePerson(id);
 }
 
 export async function deletePeopleCreatedByUser(userId: string): Promise<void> {
-    await personsDb.deletePersonsByUserId(userId);
+  await personsDb.deletePersonsByUserId(userId);
 }

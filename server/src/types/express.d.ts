@@ -7,8 +7,8 @@ declare global {
 }
 
 interface AuthContext {
-    userId: string;
-    roles?: string[];
-    sessionId?: string;
+  userId: string;
+  roles?: string[];
+  sessionId?: string;
 }
 export {};

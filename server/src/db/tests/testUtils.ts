@@ -1,14 +1,14 @@
-import * as users from '../queries/users.js';
-import * as persons from '../queries/persons.js';
+import * as users from "../queries/users.js";
+import * as persons from "../queries/persons.js";
 
-export async function createTestUser(prefix = 'test') {
+export async function createTestUser(prefix = "test") {
   const unique = Date.now() + Math.floor(Math.random() * 1000);
   const email = `${prefix}-${unique}@example.com`;
-  const user = await users.createUser(`${prefix}User`, email, 'pw');
+  const user = await users.createUser(`${prefix}User`, email, "pw");
   return { user, email };
 }
 
-export async function createTestPerson(userId: string, name = 'Person') {
+export async function createTestPerson(userId: string, name = "Person") {
   return await persons.createPerson(userId, name, {});
 }
 

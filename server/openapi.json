@@ -1,959 +1,893 @@
 {
-    "openapi": "3.0.3",
-    "info": {
-        "title": "Gift Logbook API",
-        "version": "1.0.0",
-        "description": "OpenAPI v3 specification for the Gift Logbook service."
-    },
-    "servers": [
-        {
-            "url": "http://localhost:{port}",
-            "description": "Local dev",
-            "variables": {
-                "port": {
-                    "default": "3000"
-                }
-            }
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Gift Logbook API",
+    "version": "1.0.0",
+    "description": "OpenAPI v3 specification for the Gift Logbook service."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:{port}",
+      "description": "Local dev",
+      "variables": {
+        "port": {
+          "default": "3000"
         }
-    ],
-    "components": {
-        "securitySchemes": {
-            "bearerAuth": {
-                "type": "http",
-                "scheme": "bearer",
-                "bearerFormat": "JWT"
-            }
-        },
-        "schemas": {
-            "User": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "string",
-                        "format": "uuid"
-                    },
-                    "name": {
-                        "type": "string"
-                    },
-                    "email": {
-                        "type": "string",
-                        "format": "email"
-                    },
-                    "createdAt": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "updatedAt": {
-                        "type": "string",
-                        "format": "date-time"
-                    }
-                },
-                "required": [
-                    "id",
-                    "name",
-                    "email",
-                    "createdAt",
-                    "updatedAt"
-                ]
-            },
-            "LoginRequest": {
-                "type": "object",
-                "properties": {
-                    "email": {
-                        "type": "string"
-                    },
-                    "password": {
-                        "type": "string"
-                    }
-                },
-                "required": [
-                    "email",
-                    "password"
-                ]
-            },
-            "LoginResponse": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "string"
-                    },
-                    "name": {
-                        "type": "string"
-                    },
-                    "email": {
-                        "type": "string"
-                    },
-                    "createdAt": {
-                        "type": "string"
-                    },
-                    "updatedAt": {
-                        "type": "string"
-                    },
-                    "token": {
-                        "type": "string"
-                    },
-                    "refreshToken": {
-                        "type": "string"
-                    }
-                }
-            },
-            "Person": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "string",
-                        "format": "uuid"
-                    },
-                    "name": {
-                        "type": "string"
-                    },
-                    "userId": {
-                        "type": "string",
-                        "format": "uuid"
-                    },
-                    "meta": {
-                        "type": [
-                            "object",
-                            "array",
-                            "null"
-                        ]
-                    },
-                    "createdAt": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "updatedAt": {
-                        "type": "string",
-                        "format": "date-time"
-                    }
-                }
-            },
-            "ListItem": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "string"
-                    },
-                    "title": {
-                        "type": "string"
-                    },
-                    "url": {
-                        "type": "string"
-                    },
-                    "listId": {
-                        "type": "string"
-                    }
-                }
-            },
-            "List": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "string"
-                    },
-                    "name": {
-                        "type": "string"
-                    },
-                    "userId": {
-                        "type": "string"
-                    },
-                    "personId": {
-                        "type": [
-                            "string",
-                            "null"
-                        ]
-                    },
-                    "items": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/ListItem"
-                        }
-                    }
-                }
-            },
-            "GiftRecord": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "string"
-                    },
-                    "userId": {
-                        "type": "string"
-                    },
-                    "personId": {
-                        "type": [
-                            "string",
-                            "null"
-                        ]
-                    },
-                    "itemText": {
-                        "type": "string"
-                    },
-                    "amount": {
-                        "type": [
-                            "number",
-                            "null"
-                        ]
-                    },
-                    "date": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "meta": {
-                        "type": [
-                            "object",
-                            "array",
-                            "null"
-                        ]
-                    },
-                    "tags": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "required": [
-                    "id",
-                    "userId",
-                    "itemText",
-                    "date"
-                ]
-            },
-            "Tag": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "string"
-                    },
-                    "name": {
-                        "type": "string"
-                    },
-                    "userId": {
-                        "type": "string"
-                    }
-                }
-            },
-            "Assignment": {
-                "type": "object",
-                "properties": {
-                    "giverId": {
-                        "type": "string"
-                    },
-                    "receiverId": {
-                        "type": "string"
-                    }
-                },
-                "required": [
-                    "giverId",
-                    "receiverId"
-                ]
-            },
-            "FullExchange": {
-                "type": "object",
-                "properties": {
-                    "exchange": {
-                        "type": "object"
-                    },
-                    "participants": {
-                        "type": "array",
-                        "items": {
-                            "type": "object"
-                        }
-                    },
-                    "assignments": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/Assignment"
-                        }
-                    },
-                    "exclusions": {
-                        "type": "array",
-                        "items": {
-                            "type": "object"
-                        }
-                    }
-                }
-            }
-        }
-    },
-    "security": [
-        {
-            "bearerAuth": []
-        }
-    ],
-    "paths": {
-        "/health": {
-            "get": {
-                "summary": "Health check",
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                },
-                "security": []
-            }
-        },
-        "/auth/login": {
-            "post": {
-                "summary": "Login",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/LoginRequest"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Login response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/LoginResponse"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": []
-            }
-        },
-        "/auth/refresh": {
-            "post": {
-                "summary": "Refresh access token",
-                "responses": {
-                    "200": {
-                        "description": "New tokens"
-                    }
-                }
-            }
-        },
-        "/auth/logout": {
-            "post": {
-                "summary": "Logout",
-                "responses": {
-                    "204": {
-                        "description": "No content"
-                    }
-                }
-            }
-        },
-        "/users": {
-            "post": {
-                "summary": "Create user",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "name": {
-                                        "type": "string"
-                                    },
-                                    "email": {
-                                        "type": "string"
-                                    },
-                                    "password": {
-                                        "type": "string"
-                                    }
-                                },
-                                "required": [
-                                    "name",
-                                    "email",
-                                    "password"
-                                ]
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/User"
-                                }
-                            }
-                        }
-                    },
-                    "security": []
-                }
-            }
-        },
-        "/users/{id}": {
-            "get": {
-                "summary": "Get user",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/User"
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "put": {
-                "summary": "Update user",
-                "responses": {
-                    "200": {
-                        "description": "Updated"
-                    }
-                }
-            },
-            "delete": {
-                "summary": "Delete user",
-                "responses": {
-                    "204": {
-                        "description": "No content"
-                    }
-                }
-            }
-        },
-        "/persons": {
-            "post": {
-                "summary": "Create person",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "name": {
-                                        "type": "string"
-                                    },
-                                    "meta": {
-                                        "type": [
-                                            "object",
-                                            "array"
-                                        ]
-                                    }
-                                },
-                                "required": [
-                                    "name"
-                                ]
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Person"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/persons/search": {
-            "get": {
-                "summary": "Search persons",
-                "parameters": [
-                    {
-                        "name": "name",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "List"
-                    }
-                }
-            }
-        },
-        "/persons/{id}": {
-            "get": {
-                "summary": "Get person",
-                "responses": {
-                    "200": {
-                        "description": "Person"
-                    }
-                }
-            },
-            "put": {
-                "summary": "Update person"
-            },
-            "delete": {
-                "summary": "Delete person",
-                "responses": {
-                    "204": {
-                        "description": "No content"
-                    }
-                }
-            }
-        },
-        "/lists": {
-            "post": {
-                "summary": "Create list",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "name": {
-                                        "type": "string"
-                                    },
-                                    "personId": {
-                                        "type": "string"
-                                    },
-                                    "items": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "object"
-                                        }
-                                    }
-                                },
-                                "required": [
-                                    "name"
-                                ]
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/List"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/lists/search": {
-            "get": {
-                "parameters": [
-                    {
-                        "name": "name",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
-        "/lists/{id}": {
-            "get": {
-                "responses": {
-                    "200": {
-                        "description": "List"
-                    }
-                }
-            },
-            "put": {
-                "responses": {
-                    "200": {
-                        "description": "Updated"
-                    }
-                }
-            },
-            "delete": {
-                "responses": {
-                    "204": {
-                        "description": "No content"
-                    }
-                }
-            }
-        },
-        "/records": {
-            "post": {
-                "summary": "Add record",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "personId": {
-                                        "type": "string"
-                                    },
-                                    "itemText": {
-                                        "type": "string"
-                                    },
-                                    "amount": {
-                                        "type": "number"
-                                    },
-                                    "date": {
-                                        "type": "string"
-                                    },
-                                    "meta": {
-                                        "type": [
-                                            "object",
-                                            "array"
-                                        ]
-                                    }
-                                },
-                                "required": [
-                                    "personId",
-                                    "itemText"
-                                ]
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/GiftRecord"
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "/records/search": {
-                "get": {
-                    "parameters": [
-                        {
-                            "name": "itemText",
-                            "in": "query",
-                            "required": true,
-                            "schema": {
-                                "type": "string"
-                            }
-                        }
-                    ],
-                    "responses": {
-                        "200": {
-                            "description": "OK"
-                        }
-                    }
-                }
-            },
-            "/records/{id}": {
-                "get": {
-                    "responses": {
-                        "200": {
-                            "description": "Record"
-                        }
-                    }
-                },
-                "put": {
-                    "responses": {
-                        "200": {
-                            "description": "Updated"
-                        }
-                    }
-                },
-                "delete": {
-                    "responses": {
-                        "204": {
-                            "description": "No content"
-                        }
-                    }
-                }
-            },
-            "/records/{id}/tags": {
-                "post": {
-                    "requestBody": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "tag": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "required": [
-                                        "tag"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "responses": {
-                        "200": {
-                            "description": "Updated"
-                        }
-                    }
-                },
-                "get": {
-                    "responses": {
-                        "200": {
-                            "description": "List of tags"
-                        }
-                    }
-                }
-            },
-            "/tags": {
-                "post": {
-                    "requestBody": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "name": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "required": [
-                                        "name"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "responses": {
-                        "201": {
-                            "description": "Created",
-                            "content": {
-                                "application/json": {
-                                    "schema": {
-                                        "$ref": "#/components/schemas/Tag"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "/tags/{id}": {
-                    "get": {
-                        "responses": {
-                            "200": {
-                                "description": "Tag"
-                            }
-                        }
-                    },
-                    "put": {
-                        "requestBody": {
-                            "content": {
-                                "application/json": {
-                                    "schema": {
-                                        "type": "object",
-                                        "properties": {
-                                            "name": {
-                                                "type": "string"
-                                            }
-                                        },
-                                        "required": [
-                                            "name"
-                                        ]
-                                    }
-                                }
-                            }
-                        },
-                        "responses": {
-                            "200": {
-                                "description": "Updated"
-                            }
-                        }
-                    },
-                    "delete": {
-                        "responses": {
-                            "204": {
-                                "description": "No content"
-                            }
-                        }
-                    }
-                },
-                "/exchanges": {
-                    "post": {
-                        "requestBody": {
-                            "content": {
-                                "application/json": {
-                                    "schema": {
-                                        "type": "object",
-                                        "properties": {
-                                            "name": {
-                                                "type": "string"
-                                            }
-                                        },
-                                        "required": [
-                                            "name"
-                                        ]
-                                    }
-                                }
-                            }
-                        },
-                        "responses": {
-                            "201": {
-                                "description": "Created"
-                            }
-                        }
-                    },
-                    "get": {
-                        "responses": {
-                            "200": {
-                                "description": "List"
-                            }
-                        }
-                    }
-                },
-                "/exchanges/{id}": {
-                    "get": {
-                        "responses": {
-                            "200": {
-                                "description": "FullExchange"
-                            }
-                        }
-                    },
-                    "put": {
-                        "responses": {
-                            "200": {
-                                "description": "Updated"
-                            }
-                        }
-                    },
-                    "delete": {
-                        "responses": {
-                            "204": {
-                                "description": "No content"
-                            }
-                        }
-                    }
-                },
-                "/exchanges/{id}/participants": {
-                    "post": {
-                        "requestBody": {
-                            "content": {
-                                "application/json": {
-                                    "schema": {
-                                        "type": "object",
-                                        "properties": {
-                                            "personId": {
-                                                "type": "string"
-                                            }
-                                        },
-                                        "required": [
-                                            "personId"
-                                        ]
-                                    }
-                                }
-                            }
-                        },
-                        "responses": {
-                            "201": {
-                                "description": "Created"
-                            }
-                        }
-                    }
-                },
-                "/exchanges/{id}/exclusions": {
-                    "post": {
-                        "requestBody": {
-                            "content": {
-                                "application/json": {
-                                    "schema": {
-                                        "type": "object",
-                                        "properties": {
-                                            "personId": {
-                                                "type": "string"
-                                            },
-                                            "excludedPersonIds": {
-                                                "type": "array",
-                                                "items": {
-                                                    "type": "string"
-                                                }
-                                            }
-                                        },
-                                        "required": [
-                                            "personId",
-                                            "excludedPersonIds"
-                                        ]
-                                    }
-                                }
-                            }
-                        },
-                        "responses": {
-                            "204": {
-                                "description": "No content"
-                            }
-                        }
-                    }
-                },
-                "/exchanges/{id}/generate": {
-                    "get": {
-                        "responses": {
-                            "200": {
-                                "description": "Assignments"
-                            }
-                        }
-                    }
-                },
-                "/exchanges/{id}/clone": {
-                    "post": {
-                        "responses": {
-                            "201": {
-                                "description": "Cloned"
-                            }
-                        }
-                    }
-                },
-                "/exchanges/{id}/assignments": {
-                    "post": {
-                        "requestBody": {
-                            "content": {
-                                "application/json": {
-                                    "schema": {
-                                        "type": "object",
-                                        "properties": {
-                                            "assignments": {
-                                                "type": "array",
-                                                "items": {
-                                                    "$ref": "#/components/schemas/Assignment"
-                                                }
-                                            }
-                                        },
-                                        "required": [
-                                            "assignments"
-                                        ]
-                                    }
-                                }
-                            }
-                        },
-                        "responses": {
-                            "204": {
-                                "description": "Saved"
-                            }
-                        }
-                    }
-                }
-            }
-        }
+      }
     }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["id", "name", "email", "createdAt", "updatedAt"]
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": ["email", "password"]
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          },
+          "refreshToken": {
+            "type": "string"
+          }
+        }
+      },
+      "Person": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "meta": {
+            "type": ["object", "array", "null"]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ListItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "listId": {
+            "type": "string"
+          }
+        }
+      },
+      "List": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "personId": {
+            "type": ["string", "null"]
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ListItem"
+            }
+          }
+        }
+      },
+      "GiftRecord": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "personId": {
+            "type": ["string", "null"]
+          },
+          "itemText": {
+            "type": "string"
+          },
+          "amount": {
+            "type": ["number", "null"]
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "meta": {
+            "type": ["object", "array", "null"]
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["id", "userId", "itemText", "date"]
+      },
+      "Tag": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          }
+        }
+      },
+      "Assignment": {
+        "type": "object",
+        "properties": {
+          "giverId": {
+            "type": "string"
+          },
+          "receiverId": {
+            "type": "string"
+          }
+        },
+        "required": ["giverId", "receiverId"]
+      },
+      "FullExchange": {
+        "type": "object",
+        "properties": {
+          "exchange": {
+            "type": "object"
+          },
+          "participants": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "assignments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Assignment"
+            }
+          },
+          "exclusions": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health check",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": []
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Login",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "summary": "Refresh access token",
+        "responses": {
+          "200": {
+            "description": "New tokens"
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "summary": "Logout",
+        "responses": {
+          "204": {
+            "description": "No content"
+          }
+        }
+      }
+    },
+    "/users": {
+      "post": {
+        "summary": "Create user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                },
+                "required": ["name", "email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "security": []
+        }
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "summary": "Get user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update user",
+        "responses": {
+          "200": {
+            "description": "Updated"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete user",
+        "responses": {
+          "204": {
+            "description": "No content"
+          }
+        }
+      }
+    },
+    "/persons": {
+      "post": {
+        "summary": "Create person",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "meta": {
+                    "type": ["object", "array"]
+                  }
+                },
+                "required": ["name"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Person"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/persons/search": {
+      "get": {
+        "summary": "Search persons",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List"
+          }
+        }
+      }
+    },
+    "/persons/{id}": {
+      "get": {
+        "summary": "Get person",
+        "responses": {
+          "200": {
+            "description": "Person"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update person"
+      },
+      "delete": {
+        "summary": "Delete person",
+        "responses": {
+          "204": {
+            "description": "No content"
+          }
+        }
+      }
+    },
+    "/lists": {
+      "post": {
+        "summary": "Create list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "personId": {
+                    "type": "string"
+                  },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  }
+                },
+                "required": ["name"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/List"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lists/search": {
+      "get": {
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/lists/{id}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "List"
+          }
+        }
+      },
+      "put": {
+        "responses": {
+          "200": {
+            "description": "Updated"
+          }
+        }
+      },
+      "delete": {
+        "responses": {
+          "204": {
+            "description": "No content"
+          }
+        }
+      }
+    },
+    "/records": {
+      "post": {
+        "summary": "Add record",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "personId": {
+                    "type": "string"
+                  },
+                  "itemText": {
+                    "type": "string"
+                  },
+                  "amount": {
+                    "type": "number"
+                  },
+                  "date": {
+                    "type": "string"
+                  },
+                  "meta": {
+                    "type": ["object", "array"]
+                  }
+                },
+                "required": ["personId", "itemText"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GiftRecord"
+                }
+              }
+            }
+          }
+        }
+      },
+      "/records/search": {
+        "get": {
+          "parameters": [
+            {
+              "name": "itemText",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/records/{id}": {
+        "get": {
+          "responses": {
+            "200": {
+              "description": "Record"
+            }
+          }
+        },
+        "put": {
+          "responses": {
+            "200": {
+              "description": "Updated"
+            }
+          }
+        },
+        "delete": {
+          "responses": {
+            "204": {
+              "description": "No content"
+            }
+          }
+        }
+      },
+      "/records/{id}/tags": {
+        "post": {
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "tag": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["tag"]
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Updated"
+            }
+          }
+        },
+        "get": {
+          "responses": {
+            "200": {
+              "description": "List of tags"
+            }
+          }
+        }
+      },
+      "/tags": {
+        "post": {
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["name"]
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Created",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Tag"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "/tags/{id}": {
+          "get": {
+            "responses": {
+              "200": {
+                "description": "Tag"
+              }
+            }
+          },
+          "put": {
+            "requestBody": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "required": ["name"]
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "Updated"
+              }
+            }
+          },
+          "delete": {
+            "responses": {
+              "204": {
+                "description": "No content"
+              }
+            }
+          }
+        },
+        "/exchanges": {
+          "post": {
+            "requestBody": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "required": ["name"]
+                  }
+                }
+              }
+            },
+            "responses": {
+              "201": {
+                "description": "Created"
+              }
+            }
+          },
+          "get": {
+            "responses": {
+              "200": {
+                "description": "List"
+              }
+            }
+          }
+        },
+        "/exchanges/{id}": {
+          "get": {
+            "responses": {
+              "200": {
+                "description": "FullExchange"
+              }
+            }
+          },
+          "put": {
+            "responses": {
+              "200": {
+                "description": "Updated"
+              }
+            }
+          },
+          "delete": {
+            "responses": {
+              "204": {
+                "description": "No content"
+              }
+            }
+          }
+        },
+        "/exchanges/{id}/participants": {
+          "post": {
+            "requestBody": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "personId": {
+                        "type": "string"
+                      }
+                    },
+                    "required": ["personId"]
+                  }
+                }
+              }
+            },
+            "responses": {
+              "201": {
+                "description": "Created"
+              }
+            }
+          }
+        },
+        "/exchanges/{id}/exclusions": {
+          "post": {
+            "requestBody": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "personId": {
+                        "type": "string"
+                      },
+                      "excludedPersonIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": ["personId", "excludedPersonIds"]
+                  }
+                }
+              }
+            },
+            "responses": {
+              "204": {
+                "description": "No content"
+              }
+            }
+          }
+        },
+        "/exchanges/{id}/generate": {
+          "get": {
+            "responses": {
+              "200": {
+                "description": "Assignments"
+              }
+            }
+          }
+        },
+        "/exchanges/{id}/clone": {
+          "post": {
+            "responses": {
+              "201": {
+                "description": "Cloned"
+              }
+            }
+          }
+        },
+        "/exchanges/{id}/assignments": {
+          "post": {
+            "requestBody": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "assignments": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/components/schemas/Assignment"
+                        }
+                      }
+                    },
+                    "required": ["assignments"]
+                  }
+                }
+              }
+            },
+            "responses": {
+              "204": {
+                "description": "Saved"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }

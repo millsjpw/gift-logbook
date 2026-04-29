@@ -8,6 +8,7 @@
     "start": "node dist/index.js",
     "dev": "npx tsc && node dist/index.js",
     "test": "vitest --config vitest.config.ts --run",
+    "test:unit": "vitest --config vitest.unit.config.ts --run",
     "generate": "drizzle-kit generate",
     "migrate": "drizzle-kit migrate"
   },

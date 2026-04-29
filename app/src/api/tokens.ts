@@ -1,17 +1,17 @@
 export function getAccessToken() {
-    return localStorage.getItem('accessToken');
+  return localStorage.getItem("accessToken");
 }
 
 export function getRefreshToken() {
-    return localStorage.getItem('refreshToken');
+  return localStorage.getItem("refreshToken");
 }
 
 export function setTokens(accessToken: string, refreshToken: string) {
-    localStorage.setItem('accessToken', accessToken);
-    localStorage.setItem('refreshToken', refreshToken);
+  localStorage.setItem("accessToken", accessToken);
+  localStorage.setItem("refreshToken", refreshToken);
 }
 
 export function clearTokens() {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
 }

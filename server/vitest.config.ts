@@ -1,8 +1,8 @@
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
-    environment: 'node',
-    globalSetup: ['src/db/tests/setup.ts'],
+    environment: "node",
+    globalSetup: ["src/db/tests/setup.ts"],
   },
 });

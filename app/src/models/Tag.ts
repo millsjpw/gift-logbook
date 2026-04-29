@@ -1,7 +1,7 @@
 export type Tag = {
-    id: string;
-    name: string;
-    userId: string;
-    createdAt: string;
-    updatedAt: string;
+  id: string;
+  name: string;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
 };

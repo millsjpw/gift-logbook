@@ -154,12 +154,8 @@
           "name": "exchange_assignments_exchange_id_exchanges_id_fk",
           "tableFrom": "exchange_assignments",
           "tableTo": "exchanges",
-          "columnsFrom": [
-            "exchange_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["exchange_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -167,12 +163,8 @@
           "name": "exchange_assignments_giver_id_persons_id_fk",
           "tableFrom": "exchange_assignments",
           "tableTo": "persons",
-          "columnsFrom": [
-            "giver_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["giver_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -180,12 +172,8 @@
           "name": "exchange_assignments_receiver_id_persons_id_fk",
           "tableFrom": "exchange_assignments",
           "tableTo": "persons",
-          "columnsFrom": [
-            "receiver_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["receiver_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -193,11 +181,7 @@
       "compositePrimaryKeys": {
         "exchange_assignments_exchange_id_round_giver_id_pk": {
           "name": "exchange_assignments_exchange_id_round_giver_id_pk",
-          "columns": [
-            "exchange_id",
-            "round",
-            "giver_id"
-          ]
+          "columns": ["exchange_id", "round", "giver_id"]
         }
       },
       "uniqueConstraints": {},
@@ -294,12 +278,8 @@
           "name": "exchange_exclusions_exchange_id_exchanges_id_fk",
           "tableFrom": "exchange_exclusions",
           "tableTo": "exchanges",
-          "columnsFrom": [
-            "exchange_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["exchange_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -307,12 +287,8 @@
           "name": "exchange_exclusions_person_id_1_persons_id_fk",
           "tableFrom": "exchange_exclusions",
           "tableTo": "persons",
-          "columnsFrom": [
-            "person_id_1"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["person_id_1"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -320,12 +296,8 @@
           "name": "exchange_exclusions_person_id_2_persons_id_fk",
           "tableFrom": "exchange_exclusions",
           "tableTo": "persons",
-          "columnsFrom": [
-            "person_id_2"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["person_id_2"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -333,11 +305,7 @@
       "compositePrimaryKeys": {
         "exchange_exclusions_exchange_id_person_id_1_person_id_2_pk": {
           "name": "exchange_exclusions_exchange_id_person_id_1_person_id_2_pk",
-          "columns": [
-            "exchange_id",
-            "person_id_1",
-            "person_id_2"
-          ]
+          "columns": ["exchange_id", "person_id_1", "person_id_2"]
         }
       },
       "uniqueConstraints": {},
@@ -413,12 +381,8 @@
           "name": "exchange_participants_exchange_id_exchanges_id_fk",
           "tableFrom": "exchange_participants",
           "tableTo": "exchanges",
-          "columnsFrom": [
-            "exchange_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["exchange_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -426,12 +390,8 @@
           "name": "exchange_participants_person_id_persons_id_fk",
           "tableFrom": "exchange_participants",
           "tableTo": "persons",
-          "columnsFrom": [
-            "person_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["person_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -439,10 +399,7 @@
       "compositePrimaryKeys": {
         "exchange_participants_exchange_id_person_id_pk": {
           "name": "exchange_participants_exchange_id_person_id_pk",
-          "columns": [
-            "exchange_id",
-            "person_id"
-          ]
+          "columns": ["exchange_id", "person_id"]
         }
       },
       "uniqueConstraints": {},
@@ -516,12 +473,8 @@
           "name": "exchanges_user_id_users_id_fk",
           "tableFrom": "exchanges",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -619,12 +572,8 @@
           "name": "list_items_list_id_lists_id_fk",
           "tableFrom": "list_items",
           "tableTo": "lists",
-          "columnsFrom": [
-            "list_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["list_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -728,12 +677,8 @@
           "name": "lists_user_id_users_id_fk",
           "tableFrom": "lists",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -741,12 +686,8 @@
           "name": "lists_person_id_persons_id_fk",
           "tableFrom": "lists",
           "tableTo": "persons",
-          "columnsFrom": [
-            "person_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["person_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -830,12 +771,8 @@
           "name": "persons_user_id_users_id_fk",
           "tableFrom": "persons",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -914,12 +851,8 @@
           "name": "record_tags_record_id_records_id_fk",
           "tableFrom": "record_tags",
           "tableTo": "records",
-          "columnsFrom": [
-            "record_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["record_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -927,12 +860,8 @@
           "name": "record_tags_tag_id_tags_id_fk",
           "tableFrom": "record_tags",
           "tableTo": "tags",
-          "columnsFrom": [
-            "tag_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tag_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -940,10 +869,7 @@
       "compositePrimaryKeys": {
         "record_tags_record_id_tag_id_pk": {
           "name": "record_tags_record_id_tag_id_pk",
-          "columns": [
-            "record_id",
-            "tag_id"
-          ]
+          "columns": ["record_id", "tag_id"]
         }
       },
       "uniqueConstraints": {},
@@ -1078,12 +1004,8 @@
           "name": "records_user_id_users_id_fk",
           "tableFrom": "records",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1091,12 +1013,8 @@
           "name": "records_person_id_persons_id_fk",
           "tableFrom": "records",
           "tableTo": "persons",
-          "columnsFrom": [
-            "person_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["person_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -1192,12 +1110,8 @@
           "name": "sessions_user_id_users_id_fk",
           "tableFrom": "sessions",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1274,12 +1188,8 @@
           "name": "tags_user_id_users_id_fk",
           "tableFrom": "tags",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1341,9 +1251,7 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},

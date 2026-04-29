@@ -1,14 +1,14 @@
-import { describe, it, expect } from 'vitest';
-import * as sessions from '../queries/sessions.js';
-import { createTestUser, cleanupTestUser } from './testUtils.js';
+import { describe, it, expect } from "vitest";
+import * as sessions from "../queries/sessions.js";
+import { createTestUser, cleanupTestUser } from "./testUtils.js";
 
-describe('sessions queries', () => {
-  it('create, read, revoke sessions', async () => {
+describe("sessions queries", () => {
+  it("create, read, revoke sessions", async () => {
     let user;
     let session;
     const token = `token-${Date.now()}`;
     try {
-      user = (await createTestUser('sess')).user;
+      user = (await createTestUser("sess")).user;
       session = await sessions.createSession(user.id, token);
       expect(session).toBeDefined();
 

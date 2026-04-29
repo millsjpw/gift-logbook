@@ -6,6 +6,13 @@
     "dev:server": "npm --prefix server run dev",
     "dev:app": "npm --prefix app run dev",
     "build:server": "npm --prefix server run build",
-    "build:app": "npm --prefix app run build"
+    "build:app": "npm --prefix app run build",
+    "lint": "eslint .",
+    "format:write": "prettier --write \"**/*.{js,ts,json,css,md}\"",
+    "format:check": "prettier --check \"**/*.{js,ts,json,css,md}\""
+  },
+  "devDependencies": {
+    "eslint": "^10.2.1",
+    "prettier": "^3.8.3"
   }
 }
