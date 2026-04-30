@@ -1,7 +1,9 @@
 import { clearTokens, getRefreshToken, setTokens } from "./tokens";
 
+const BASE_URL = import.meta.env.VITE_API_URL;
+
 export async function login(email: string, password: string) {
-  const response = await fetch("/auth/login", {
+  const response = await fetch(`${BASE_URL}/auth/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -17,7 +19,7 @@ export async function login(email: string, password: string) {
 }
 
 export async function register(name: string, email: string, password: string) {
-  const response = await fetch("/users", {
+  const response = await fetch(`${BASE_URL}/users`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -43,7 +45,7 @@ export async function refreshAccessToken() {
     throw new Error("No refresh token available");
   }
 
-  const response = await fetch("/auth/refresh", {
+  const response = await fetch(`${BASE_URL}/auth/refresh`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
