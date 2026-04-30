@@ -7,29 +7,34 @@ type ApiError = {
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
+async function request(
+  path: string,
+  token?: string | null,
+  options: RequestInit = {},
+) {
+  return fetch(`${BASE_URL}${path}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...options.headers,
+    },
+  });
+}
+
 export async function apiFetch(path: string, options: RequestInit = {}) {
   let accessToken = getAccessToken();
 
-  const makeRequest = (token?: string | null) =>
-    fetch(`${BASE_URL}${path}`, {
-      ...options,
-      headers: {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...options.headers,
-      },
-    });
-
-  let res = await makeRequest(accessToken);
+  let res = await request(path, accessToken, options);
 
   if (res.status === 401) {
     try {
       accessToken = await refreshAccessToken();
-      res = await makeRequest(accessToken);
-    } catch (error) {
+      res = await request(path, accessToken, options);
+    } catch (err) {
       clearTokens();
       window.location.href = "/login";
-      throw new Error("Authentication failed. Please log in again.");
+      throw err;
     }
   }
 
