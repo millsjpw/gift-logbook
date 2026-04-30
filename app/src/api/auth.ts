@@ -1,7 +1,7 @@
 import { clearTokens, getRefreshToken, setTokens } from "./tokens";
 
 export async function login(email: string, password: string) {
-  const response = await fetch("/api/auth/login", {
+  const response = await fetch("/auth/login", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -17,7 +17,7 @@ export async function login(email: string, password: string) {
 }
 
 export async function register(name: string, email: string, password: string) {
-  const response = await fetch("/api/users", {
+  const response = await fetch("/users", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -43,7 +43,7 @@ export async function refreshAccessToken() {
     throw new Error("No refresh token available");
   }
 
-  const response = await fetch("/api/auth/refresh", {
+  const response = await fetch("/auth/refresh", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
