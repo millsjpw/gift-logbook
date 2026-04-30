@@ -39,7 +39,7 @@ export async function getUserBySessionToken(token: string) {
       ),
     )
     .limit(1);
-  return omitPassword(user);
+  return user ? omitPassword(user.user) : undefined;
 }
 
 export async function updateSessionToken(oldToken: string, newToken: string) {
