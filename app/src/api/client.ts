@@ -5,30 +5,27 @@ type ApiError = {
   error: string;
 };
 
+const BASE_URL = import.meta.env.VITE_API_URL;
+
 export async function apiFetch(path: string, options: RequestInit = {}) {
   let accessToken = getAccessToken();
 
-  let res = await fetch(`/api${path}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-      ...options.headers,
-    },
-  });
+  const makeRequest = (token?: string | null) =>
+    fetch(`${BASE_URL}${path}`, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...options.headers,
+      },
+    });
+
+  let res = await makeRequest(accessToken);
 
   if (res.status === 401) {
     try {
       accessToken = await refreshAccessToken();
-
-      res = await fetch(`/api${path}`, {
-        ...options,
-        headers: {
-          "Content-Type": "application/json",
-          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-          ...options.headers,
-        },
-      });
+      res = await makeRequest(accessToken);
     } catch (error) {
       clearTokens();
       window.location.href = "/login";
@@ -41,9 +38,7 @@ export async function apiFetch(path: string, options: RequestInit = {}) {
     throw new Error(errorData.error || "API request failed");
   }
 
-  // If 204 No Content, return null
   if (res.status === 204) return null;
 
-  // Otherwise parse JSON
   return res.json();
 }

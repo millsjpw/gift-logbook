@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import path from "path";
 import { config } from "./config.js";
 import { drizzle } from "drizzle-orm/postgres-js";
@@ -17,10 +18,23 @@ import * as recordsApi from "./api/records.js";
 import * as tagsApi from "./api/tags.js";
 import * as exchangesApi from "./api/exchanges.js";
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://gift-logbook.vercel.app",
+];
+
 const migrationClient = postgres(config.db.url, { max: 1, onnotice: () => {} });
 await migrate(drizzle(migrationClient), config.db.migrationConfig);
 
 const app = express();
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  }),
+);
 
 app.use(express.json());
 app.use(middlewareLogResponses);
