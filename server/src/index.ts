@@ -22,6 +22,8 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
   "https://gift-logbook.vercel.app",
+  "https://giftlogbook.com",
+  "https://www.giftlogbook.com",
 ];
 
 const migrationClient = postgres(config.db.url, { max: 1, onnotice: () => {} });
