@@ -18,13 +18,7 @@ import * as recordsApi from "./api/records.js";
 import * as tagsApi from "./api/tags.js";
 import * as exchangesApi from "./api/exchanges.js";
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:3000",
-  "https://gift-logbook.vercel.app",
-  "https://giftlogbook.com",
-  "https://www.giftlogbook.com",
-];
+const allowedOrigins = (process.env.CORS_ORIGINS ?? "").split(",");
 
 const migrationClient = postgres(config.db.url, { max: 1, onnotice: () => {} });
 await migrate(drizzle(migrationClient), config.db.migrationConfig);
@@ -33,7 +27,17 @@ const app = express();
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+
+      const isVercelPreview = origin.endsWith(".vercel.app");
+
+      if (allowedOrigins.includes(origin) || isVercelPreview) {
+        return callback(null, true);
+      }
+
+      callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
   }),
 );

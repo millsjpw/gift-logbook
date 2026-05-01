@@ -1,7 +1,25 @@
+# dependencies
 node_modules/
-**/dist/
-.git/
+
+# git
+.git
 .gitignore
-*.md
+
+# env files
+.env
+.env.*
 **/.env
 **/.env.*
+
+# logs
+*.log
+
+# editor
+.vscode
+
+# OS junk
+.DS_Store
+
+# Neon tooling
+.agents/
+skills-lock.json

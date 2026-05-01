@@ -1,9 +1,28 @@
+# dependencies
 node_modules/
 **/node_modules/
-**/dist/
-**/server.log
-**/.env
-**/.vscode/
 
+# build output
+dist/
+**/dist/
+
+# logs
+*.log
+**/server.log
+
+# environment variables
+.env
+.env.*
+**/.env
+**/.env.*
+
+# editor
+.vscode/
+.idea/
+
+# OS junk
+.DS_Store
+
+# Neon local tooling
 .agents/
 skills-lock.json
