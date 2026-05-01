@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import type { JwtPayload } from "jsonwebtoken";
 import crypto from "crypto";
 import { BadRequestError, UserNotAuthenticatedError } from "../api/errors.js";
-import { config } from "../config.js";
+import { config } from "../config/runtime.js";
 import * as userDb from "../db/queries/users.js";
 import * as sessionsDb from "../db/queries/sessions.js";
 import { UserResponse } from "../db/schema.js";
