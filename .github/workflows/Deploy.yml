@@ -30,7 +30,7 @@ jobs:
         working-directory: ./server
         env:
           DB_URL: ${{ secrets.DB_URL }}
-        run: node dist/scripts/migrate.js
+        run: npm run drizzle-kit migrate
 
       - name: Verify build output
         working-directory: ./server
