@@ -1,3 +1,9 @@
+try {
+  process.loadEnvFile();
+} catch {
+  /* no .env file; rely on environment variables */
+}
+
 export function requireEnv(key: string): string {
   const value = process.env[key];
 
@@ -8,7 +14,10 @@ export function requireEnv(key: string): string {
   return value;
 }
 
-export function optionalEnv(key: string, fallback?: string): string | undefined {
+export function optionalEnv(
+  key: string,
+  fallback?: string,
+): string | undefined {
   return process.env[key] ?? fallback;
 }
 

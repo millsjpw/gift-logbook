@@ -1,6 +1,6 @@
 import { defineConfig } from "drizzle-kit";
 
-import { config } from "./src/config";
+import { dbConfig } from "./src/config/db";
 
 export default defineConfig({
   schema: "./src/db/schema.ts",
@@ -8,6 +8,6 @@ export default defineConfig({
   dialect: "postgresql",
   verbose: false,
   dbCredentials: {
-    url: config.db.url,
+    url: dbConfig.url,
   },
 });
