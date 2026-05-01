@@ -1,7 +1,7 @@
 import { db } from "../db.js";
 import { omitPassword, sessions, users } from "../schema.js";
 import { eq, and, gt, isNull } from "drizzle-orm";
-import { config } from "../../config.js";
+import { config } from "../../config/runtime.js";
 
 export async function createSession(userId: string, token: string) {
   const session = {

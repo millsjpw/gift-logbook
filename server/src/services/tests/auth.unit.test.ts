@@ -1,7 +1,7 @@
 import { vi, describe, it, expect } from "vitest";
 
 // mock config before importing auth. Include a db.url so other modules that import config don't break.
-vi.mock("../../config.js", () => ({
+vi.mock("../../config/runtime.js", () => ({
   config: {
     session: { issuer: "test-issuer", defaultDuration: 3600, secret: "shh" },
     db: {

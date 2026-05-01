@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import path from "path";
-import { config } from "./config.js";
+import { config } from "./config/runtime.js";
 import {
   middlewareErrorHandler,
   middlewareLogResponses,
