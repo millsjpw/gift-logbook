@@ -21,7 +21,7 @@ ENV NODE_ENV=production
 COPY package*.json ./
 RUN npm ci --omit=dev
 
-COPY --from=builder /app/server/src/db/migrations ./server/src/db/migrations
+COPY --from=builder /app/src/db/migrations ./src/db/migrations
 
 COPY --from=builder /app/dist ./dist
 

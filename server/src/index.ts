@@ -2,9 +2,6 @@ import express from "express";
 import cors from "cors";
 import path from "path";
 import { config } from "./config.js";
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
-import { migrate } from "drizzle-orm/postgres-js/migrator";
 import {
   middlewareErrorHandler,
   middlewareLogResponses,
@@ -19,9 +16,6 @@ import * as tagsApi from "./api/tags.js";
 import * as exchangesApi from "./api/exchanges.js";
 
 const allowedOrigins = (process.env.CORS_ORIGINS ?? "").split(",");
-
-const migrationClient = postgres(config.db.url, { max: 1, onnotice: () => {} });
-await migrate(drizzle(migrationClient), config.db.migrationConfig);
 
 const app = express();
 
