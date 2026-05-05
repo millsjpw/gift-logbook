@@ -162,6 +162,22 @@ export default function ListView() {
         }
     }
 
+    async function handleEditItem(itemId: string, title: string, url: string) {
+        if (!list) return;
+        const updatedItems = list.items.map(i =>
+            i.id === itemId ? { ...i, title, url: url || undefined } : i
+        );
+        const updatedList: List = await apiFetch(`/lists/${list.id}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+                name: list.name,
+                personId: list.personId ?? null,
+                items: updatedItems,
+            }),
+        });
+        setList(updatedList);
+    }
+
     const personName = list?.personId
         ? (persons.find(p => p.id === list.personId)?.name ?? null)
         : null;
@@ -273,6 +289,7 @@ export default function ListView() {
                                     key={item.id}
                                     item={item}
                                     onDelete={handleDeleteItem}
+                                    onEdit={handleEditItem}
                                 />
                             ))}
                         </div>
