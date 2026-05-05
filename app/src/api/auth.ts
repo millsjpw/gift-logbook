@@ -50,7 +50,11 @@ export async function register(name: string, email: string, password: string) {
     throw new Error("Registration failed");
   }
 
-  return response.json();
+  const data = await response.json();
+
+  setTokens(data.accessToken, data.refreshToken);
+
+  return data;
 }
 
 export async function refreshAccessToken() {
