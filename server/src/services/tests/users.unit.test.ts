@@ -48,7 +48,10 @@ describe("users service", () => {
     expect(userDb.createUser).toHaveBeenCalled();
     expect(generateToken).toHaveBeenCalledWith("u1");
     expect(makeRefreshToken).toHaveBeenCalled();
-    expect(sessionsDb.createSession).toHaveBeenCalledWith("u1", "refresh-token");
+    expect(sessionsDb.createSession).toHaveBeenCalledWith(
+      "u1",
+      "refresh-token",
+    );
     expect(res).toEqual({
       ...fakeUser,
       accessToken: "access-token",
