@@ -6,6 +6,7 @@ vi.mock("../../db/queries/lists.js", () => ({
   getListsByUserId: vi.fn(),
   getListsByPersonId: vi.fn(),
   getListsByName: vi.fn(),
+  getRecentListsByUserId: vi.fn(),
   updateList: vi.fn(),
   deleteList: vi.fn(),
 }));
@@ -49,5 +50,23 @@ describe("lists service", () => {
     await expect(listsService.updateList("other", list)).rejects.toThrow(
       UserForbiddenError,
     );
+  });
+
+  it("getRecentLists delegates to db with userId and limit", async () => {
+    const mockLists = [
+      { id: "l1", userId: "u1", name: "Wishlist", updatedAt: new Date() },
+      { id: "l2", userId: "u1", name: "Holiday", updatedAt: new Date() },
+    ];
+    (listsDb.getRecentListsByUserId as any).mockResolvedValue(mockLists);
+    const res = await listsService.getRecentLists("u1", 2);
+    expect(listsDb.getRecentListsByUserId).toHaveBeenCalledWith("u1", 2);
+    expect(res).toHaveLength(2);
+    expect(res[0]).not.toHaveProperty("items");
+  });
+
+  it("getRecentLists uses default limit of 5", async () => {
+    (listsDb.getRecentListsByUserId as any).mockResolvedValue([]);
+    await listsService.getRecentLists("u1");
+    expect(listsDb.getRecentListsByUserId).toHaveBeenCalledWith("u1", 5);
   });
 });

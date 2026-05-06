@@ -39,6 +39,13 @@ export async function getListById(id: string): Promise<FullList | null> {
   return { ...list, items };
 }
 
+export async function getRecentLists(
+  userId: string,
+  limit = 5,
+): Promise<List[]> {
+  return listsDb.getRecentListsByUserId(userId, limit);
+}
+
 export async function getListsByUserId(userId: string): Promise<FullList[]> {
   const lists = await listsDb.getListsByUserId(userId);
   return Promise.all(
