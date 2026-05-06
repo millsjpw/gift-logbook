@@ -177,7 +177,7 @@ export default function MyPeople() {
   return (
     <Layout>
       {loading && <p>Loading people...</p>}
-      {error && <p className="text-red-600 mb-2">{error}</p>}
+      {error && <p className="text-red-600 mb-2 text-center">{error}</p>}
 
       {/* Add New Person Form */}
       <form
