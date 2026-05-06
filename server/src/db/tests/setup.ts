@@ -46,6 +46,15 @@ export async function setup() {
     throw new Error("DB_URL is not configured for test setup");
   }
 
+  if (!process.env.DB_URL_TEST) {
+    console.warn(
+      "\nWARNING: DB_URL_TEST is not set — tests will run against DB_URL (your dev database).",
+    );
+    console.warn(
+      "Set DB_URL_TEST to a separate test database to avoid affecting dev data.\n",
+    );
+  }
+
   // Quick DB connectivity check to help debug which server is being targeted
   try {
     const checkSql = postgres(process.env.DB_URL as string);
@@ -75,28 +84,9 @@ export async function setup() {
     throw err;
   }
 
-  // Truncate all public tables to ensure clean state
-  async function truncateAll() {
-    const sql = postgres(process.env.DB_URL as string);
-    try {
-      const rows = await sql<
-        { tablename: string }[]
-      >`select tablename from pg_tables where schemaname='public'`;
-      const tables = rows
-        .map((r) => r.tablename)
-        .filter((t) => t !== "drizzle_migrations");
-      if (tables.length > 0) {
-        const q = `TRUNCATE ${tables.map((t) => `"${t}"`).join(", ")} RESTART IDENTITY CASCADE;`;
-        await sql.unsafe(q);
-      }
-    } finally {
-      await sql.end({ timeout: 0 });
-    }
-  }
+  // Individual tests create their own data and clean up via cleanupTestUser (which cascades).
+  // No global truncation — tests must only delete what they create.
 
-  await truncateAll();
-
-  // Return a teardown function (no-op for now)
   return async function teardown() {
     // nothing to clean up globally; individual tests are responsible for isolation
   };

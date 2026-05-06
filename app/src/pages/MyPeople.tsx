@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "../api/client";
 import { formatTimeAgo } from "../utils/time";
+import {
+  calendarDateToFields,
+  fieldsToCalendarDate,
+  formatBirthday,
+} from "../utils/birthdate";
 import Layout from "../components/Layout";
+import BirthdayPicker from "../components/BirthdayPicker";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -9,18 +15,24 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/solid";
 import { type Person } from "../models/Person";
+import type { CalendarDate } from "@internationalized/date";
 
 type SortKey = "name" | "updatedAt";
 type SortOrder = "asc" | "desc";
+type EditDraft = { name: string; birthday: CalendarDate | null };
 
 export default function MyPeople() {
   const [people, setPeople] = useState<Person[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [addName, setAddName] = useState("");
+  const [addBirthday, setAddBirthday] = useState<CalendarDate | null>(null);
   const [addSaving, setAddSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editDraft, setEditDraft] = useState("");
+  const [editDraft, setEditDraft] = useState<EditDraft>({
+    name: "",
+    birthday: null,
+  });
   const [editSaving, setEditSaving] = useState(false);
   const [rowError, setRowError] = useState<string | null>(null);
 
@@ -50,12 +62,20 @@ export default function MyPeople() {
     if (!trimmed) return;
     setAddSaving(true);
     try {
+      const { birthMonth, birthDay, birthYear } =
+        calendarDateToFields(addBirthday);
       const newPerson: Person = await apiFetch("/persons", {
         method: "POST",
-        body: JSON.stringify({ name: trimmed }),
+        body: JSON.stringify({
+          name: trimmed,
+          birthMonth,
+          birthDay,
+          birthYear,
+        }),
       });
       setPeople((prev) => [...prev, newPerson]);
       setAddName("");
+      setAddBirthday(null);
     } catch (err: any) {
       setError(err.message || "Failed to add person");
     } finally {
@@ -65,30 +85,52 @@ export default function MyPeople() {
 
   function startEditing(person: Person) {
     setEditingId(person.id);
-    setEditDraft(person.name);
+    setEditDraft({
+      name: person.name,
+      birthday: fieldsToCalendarDate({
+        birthMonth: person.birthMonth,
+        birthDay: person.birthDay,
+        birthYear: person.birthYear,
+      }),
+    });
     setRowError(null);
   }
 
   function exitEditing() {
     setEditingId(null);
-    setEditDraft("");
+    setEditDraft({ name: "", birthday: null });
     setRowError(null);
   }
 
   async function handleSave(id: string) {
-    const trimmed = editDraft.trim();
+    const trimmed = editDraft.name.trim();
     if (!trimmed) return;
     setEditSaving(true);
     setRowError(null);
     try {
+      const { birthMonth, birthDay, birthYear } = calendarDateToFields(
+        editDraft.birthday,
+      );
       await apiFetch(`/persons/${id}`, {
         method: "PUT",
-        body: JSON.stringify({ name: trimmed }),
+        body: JSON.stringify({
+          name: trimmed,
+          birthMonth,
+          birthDay,
+          birthYear,
+        }),
       });
       setPeople((prev) =>
         prev.map((p) =>
           p.id === id
-            ? { ...p, name: trimmed, updatedAt: new Date().toISOString() }
+            ? {
+                ...p,
+                name: trimmed,
+                birthMonth,
+                birthDay,
+                birthYear,
+                updatedAt: new Date().toISOString(),
+              }
             : p,
         ),
       );
@@ -134,15 +176,13 @@ export default function MyPeople() {
 
   return (
     <Layout>
-      <h1 className="text-2xl font-bold mb-4">My People</h1>
-
       {loading && <p>Loading people...</p>}
       {error && <p className="text-red-600 mb-2">{error}</p>}
 
       {/* Add New Person Form */}
       <form
         onSubmit={handleAdd}
-        className="mb-4 inline-flex items-center space-x-2"
+        className="mb-8 flex flex-wrap items-center justify-center gap-3"
       >
         <input
           type="text"
@@ -151,6 +191,11 @@ export default function MyPeople() {
           disabled={addSaving}
           placeholder="New person name"
           className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+        />
+        <BirthdayPicker
+          value={addBirthday}
+          onChange={setAddBirthday}
+          isDisabled={addSaving}
         />
         <button
           type="submit"
@@ -169,12 +214,12 @@ export default function MyPeople() {
       {people.length === 0 ? (
         <p>You haven't created any people yet.</p>
       ) : (
-        <div className="max-w-4xl mx-auto overflow-x-auto mt-6">
+        <div className="overflow-x-auto mt-6">
           <table className="table-fixed w-full border border-gray-200 divide-y divide-gray-300">
             <thead className="bg-gray-50">
               <tr>
                 <th
-                  className="px-4 py-2 text-left w-3/4 cursor-pointer"
+                  className="px-4 py-2 text-left w-[45%] cursor-pointer"
                   onClick={() => toggleSort("name")}
                 >
                   Name
@@ -185,7 +230,8 @@ export default function MyPeople() {
                       <ArrowDownIcon className="h-4 w-4 inline m-2" />
                     ))}
                 </th>
-                <th className="px-4 py-2 text-center w-1/4">Actions</th>
+                <th className="px-4 py-2 text-left w-[30%]">Birthday</th>
+                <th className="px-4 py-2 text-center w-[25%]">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-300">
@@ -197,8 +243,13 @@ export default function MyPeople() {
                       {isEditing ? (
                         <input
                           type="text"
-                          value={editDraft}
-                          onChange={(e) => setEditDraft(e.target.value)}
+                          value={editDraft.name}
+                          onChange={(e) =>
+                            setEditDraft((d) => ({
+                              ...d,
+                              name: e.target.value,
+                            }))
+                          }
                           disabled={editSaving}
                           className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                         />
@@ -213,13 +264,32 @@ export default function MyPeople() {
                     </td>
                     <td className="px-4 py-2 align-middle">
                       {isEditing ? (
+                        <BirthdayPicker
+                          value={editDraft.birthday}
+                          onChange={(d) =>
+                            setEditDraft((draft) => ({ ...draft, birthday: d }))
+                          }
+                          isDisabled={editSaving}
+                        />
+                      ) : (
+                        <span>
+                          {formatBirthday({
+                            birthMonth: person.birthMonth,
+                            birthDay: person.birthDay,
+                            birthYear: person.birthYear,
+                          })}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-2 align-middle">
+                      {isEditing ? (
                         <div className="flex flex-col items-center gap-1">
                           <div className="flex gap-2 justify-center">
                             <button
                               onClick={() => handleSave(person.id)}
-                              disabled={editSaving || !editDraft.trim()}
+                              disabled={editSaving || !editDraft.name.trim()}
                               className={`px-3 py-1 rounded-md text-white ${
-                                editSaving || !editDraft.trim()
+                                editSaving || !editDraft.name.trim()
                                   ? "bg-gray-400 cursor-not-allowed"
                                   : "bg-blue-500 hover:bg-blue-700"
                               }`}

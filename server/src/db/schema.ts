@@ -84,10 +84,25 @@ export const persons = pgTable(
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
+    birthMonth: integer("birth_month"),
+    birthDay: integer("birth_day"),
+    birthYear: integer("birth_year"),
     meta: jsonb("meta").notNull().default("{}"),
   },
   (table) => [
     uniqueIndex("user_person_name_index").on(table.userId, lower(table.name)),
+    check(
+      "birth_month_valid",
+      sql`${table.birthMonth} IS NULL OR (${table.birthMonth} >= 1 AND ${table.birthMonth} <= 12)`,
+    ),
+    check(
+      "birth_day_valid",
+      sql`${table.birthDay} IS NULL OR (${table.birthDay} >= 1 AND ${table.birthDay} <= 31)`,
+    ),
+    check(
+      "birth_year_valid",
+      sql`${table.birthYear} IS NULL OR (${table.birthYear} >= 1900 AND ${table.birthYear} <= EXTRACT(YEAR FROM CURRENT_DATE))`,
+    ),
   ],
 );
 

@@ -3,11 +3,21 @@ import { db } from "../db.js";
 import { persons } from "../schema.js";
 import { eq, and, like } from "drizzle-orm";
 
-export async function createPerson(userId: string, name: string, meta: any) {
+export async function createPerson(
+  userId: string,
+  name: string,
+  meta: any,
+  birthMonth?: number | null,
+  birthDay?: number | null,
+  birthYear?: number | null,
+) {
   const person = {
     userId,
     name,
     meta,
+    birthMonth: birthMonth ?? null,
+    birthDay: birthDay ?? null,
+    birthYear: birthYear ?? null,
   };
   try {
     const [createdPerson] = await db.insert(persons).values(person).returning();
@@ -49,10 +59,20 @@ export async function getPersonsByName(userId: string, name: string) {
   return personsList;
 }
 
-export async function updatePerson(id: string, name?: string, meta?: any) {
+export async function updatePerson(
+  id: string,
+  name?: string,
+  meta?: any,
+  birthMonth?: number | null,
+  birthDay?: number | null,
+  birthYear?: number | null,
+) {
   const updateData: Partial<typeof persons.$inferInsert> = {};
   if (name) updateData.name = name;
   if (meta) updateData.meta = meta;
+  if (birthMonth !== undefined) updateData.birthMonth = birthMonth;
+  if (birthDay !== undefined) updateData.birthDay = birthDay;
+  if (birthYear !== undefined) updateData.birthYear = birthYear;
 
   try {
     const [updatedPerson] = await db

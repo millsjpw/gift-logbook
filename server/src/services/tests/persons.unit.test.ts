@@ -44,7 +44,46 @@ describe("persons service", () => {
       name: "New",
     });
     const res = await personsService.updatePerson("u1", "p1", "New");
-    expect(personsDb.updatePerson).toHaveBeenCalledWith("p1", "New", undefined);
+    expect(personsDb.updatePerson).toHaveBeenCalledWith(
+      "p1",
+      "New",
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    );
+    expect(res).toBeDefined();
+  });
+
+  it("updatePerson passes birth date fields to db", async () => {
+    (personsDb.getPersonById as any).mockResolvedValue({
+      id: "p1",
+      userId: "u1",
+    });
+    (personsDb.updatePerson as any).mockResolvedValue({
+      id: "p1",
+      name: "Name",
+      birthMonth: 4,
+      birthDay: 10,
+      birthYear: 1992,
+    });
+    const res = await personsService.updatePerson(
+      "u1",
+      "p1",
+      "Name",
+      undefined,
+      4,
+      10,
+      1992,
+    );
+    expect(personsDb.updatePerson).toHaveBeenCalledWith(
+      "p1",
+      "Name",
+      undefined,
+      4,
+      10,
+      1992,
+    );
     expect(res).toBeDefined();
   });
 });
