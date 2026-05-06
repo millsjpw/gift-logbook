@@ -4,13 +4,19 @@ import { apiFetch } from "../api/client";
 export default function UpcomingBirthdaysCard() {
   const [birthdays, setBirthdays] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [slow, setSlow] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const t = setTimeout(() => setSlow(true), 10_000);
     apiFetch("/persons/upcoming-birthdays?limit=5")
       .then((data: string[]) => setBirthdays(data))
       .catch((err: any) => setError(err.message ?? "Failed to load birthdays"))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        clearTimeout(t);
+        setLoading(false);
+      });
+    return () => clearTimeout(t);
   }, []);
 
   return (
@@ -20,10 +26,24 @@ export default function UpcomingBirthdaysCard() {
       </h2>
 
       {loading && (
-        <p className="text-sm text-gray-400 animate-pulse">Loading…</p>
+        <div className="flex flex-col gap-2">
+          <p className="text-sm text-gray-400 animate-pulse">Loading…</p>
+          {slow && (
+            <p className="text-xs text-gray-400">
+              This is taking a while. Try{" "}
+              <button
+                onClick={() => window.location.reload()}
+                className="underline hover:text-gray-600"
+              >
+                refreshing the page
+              </button>
+              .
+            </p>
+          )}
+        </div>
       )}
 
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {!loading && error && <p className="text-sm text-red-500">{error}</p>}
 
       {!loading && !error && birthdays.length === 0 && (
         <p className="text-sm text-gray-400">

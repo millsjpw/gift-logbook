@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { List } from "../models/List";
+import PageLoader from "../components/PageLoader";
 import type { Person } from "../models/Person";
 import { apiFetch } from "../api/client";
 import Layout from "../components/Layout";
@@ -167,197 +168,200 @@ export default function MyLists() {
 
   return (
     <Layout>
-      {loading && <p>Loading lists...</p>}
-      {error && <p className="text-red-500 mb-2">{error}</p>}
-
-      {/* Add New List Form */}
-      <form
-        onSubmit={handleAdd}
-        className="mb-8 flex items-center justify-center gap-3"
-      >
-        <input
-          type="text"
-          value={addName}
-          onChange={(e) => setAddName(e.target.value)}
-          disabled={addSaving}
-          placeholder="New list name"
-          className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-        />
-        <button
-          type="submit"
-          disabled={addSaving || !addName.trim()}
-          className={`px-3 py-1 rounded-md text-white ${
-            addSaving || !addName.trim()
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-blue-500 hover:bg-blue-700"
-          }`}
+      <PageLoader loading={loading} error={error}>
+        {/* Add New List Form */}
+        <form
+          onSubmit={handleAdd}
+          className="mb-8 flex items-center justify-center gap-3"
         >
-          Add
-        </button>
-      </form>
+          <input
+            type="text"
+            value={addName}
+            onChange={(e) => setAddName(e.target.value)}
+            disabled={addSaving}
+            placeholder="New list name"
+            className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+          />
+          <button
+            type="submit"
+            disabled={addSaving || !addName.trim()}
+            className={`px-3 py-1 rounded-md text-white ${
+              addSaving || !addName.trim()
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-500 hover:bg-blue-700"
+            }`}
+          >
+            Add
+          </button>
+        </form>
 
-      {/* Lists Table */}
-      {!loading && lists.length === 0 ? (
-        <p>No lists found.</p>
-      ) : (
-        <div className="overflow-x-auto mt-6">
-          <table className="table-fixed w-full border border-gray-200 divide-y divide-gray-300">
-            <thead className="bg-gray-50">
-              <tr>
-                <th
-                  className="px-4 py-2 text-left w-[32%] cursor-pointer select-none hover:bg-gray-100"
-                  onClick={() => handleSort("name")}
-                >
-                  List Name
-                  {sortKey === "name" &&
-                    (sortOrder === "asc" ? (
-                      <ArrowUpIcon className="h-4 w-4 inline m-2" />
-                    ) : (
-                      <ArrowDownIcon className="h-4 w-4 inline m-2" />
-                    ))}{" "}
-                </th>
-                <th className="px-4 py-2 text-center w-[8%]">Items</th>
-                <th
-                  className="px-4 py-2 text-left w-[32%] cursor-pointer select-none hover:bg-gray-100"
-                  onClick={() => handleSort("person")}
-                >
-                  Person
-                  {sortKey === "person" &&
-                    (sortOrder === "asc" ? (
-                      <ArrowUpIcon className="h-4 w-4 inline m-2" />
-                    ) : (
-                      <ArrowDownIcon className="h-4 w-4 inline m-2" />
-                    ))}{" "}
-                </th>
-                <th className="px-4 py-2 text-center w-[28%]">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-300">
-              {sortedLists.map((list) => {
-                const isEditing = editingId === list.id;
-                return (
-                  <tr
-                    key={list.id}
-                    className={
-                      !isEditing ? "cursor-pointer hover:bg-gray-50" : undefined
-                    }
-                    onClick={() => {
-                      if (!isEditing) {
-                        navigate(`/lists/${list.id}`, { state: { list } });
-                      }
-                    }}
+        {/* Lists Table */}
+        {lists.length === 0 ? (
+          <p>No lists found.</p>
+        ) : (
+          <div className="overflow-x-auto mt-6">
+            <table className="table-fixed w-full border border-gray-200 divide-y divide-gray-300">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th
+                    className="px-4 py-2 text-left w-[32%] cursor-pointer select-none hover:bg-gray-100"
+                    onClick={() => handleSort("name")}
                   >
-                    <td
-                      className="px-4 py-2 align-middle"
-                      onClick={
-                        isEditing ? (e) => e.stopPropagation() : undefined
-                      }
-                    >
-                      {isEditing ? (
-                        <input
-                          type="text"
-                          value={editDraft!.name}
-                          onChange={(e) =>
-                            setEditDraft((d) =>
-                              d ? { ...d, name: e.target.value } : d,
-                            )
-                          }
-                          disabled={saving}
-                          className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-                        />
+                    List Name
+                    {sortKey === "name" &&
+                      (sortOrder === "asc" ? (
+                        <ArrowUpIcon className="h-4 w-4 inline m-2" />
                       ) : (
-                        <div className="flex flex-col justify-center">
-                          <span className="font-medium">{list.name}</span>
-                          <div className="text-gray-400 text-tiny">
-                            updated {formatTimeAgo(list.updatedAt)}
+                        <ArrowDownIcon className="h-4 w-4 inline m-2" />
+                      ))}{" "}
+                  </th>
+                  <th className="px-4 py-2 text-center w-[8%]">Items</th>
+                  <th
+                    className="px-4 py-2 text-left w-[32%] cursor-pointer select-none hover:bg-gray-100"
+                    onClick={() => handleSort("person")}
+                  >
+                    Person
+                    {sortKey === "person" &&
+                      (sortOrder === "asc" ? (
+                        <ArrowUpIcon className="h-4 w-4 inline m-2" />
+                      ) : (
+                        <ArrowDownIcon className="h-4 w-4 inline m-2" />
+                      ))}{" "}
+                  </th>
+                  <th className="px-4 py-2 text-center w-[28%]">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-300">
+                {sortedLists.map((list) => {
+                  const isEditing = editingId === list.id;
+                  return (
+                    <tr
+                      key={list.id}
+                      className={
+                        !isEditing
+                          ? "cursor-pointer hover:bg-gray-50"
+                          : undefined
+                      }
+                      onClick={() => {
+                        if (!isEditing) {
+                          navigate(`/lists/${list.id}`, { state: { list } });
+                        }
+                      }}
+                    >
+                      <td
+                        className="px-4 py-2 align-middle"
+                        onClick={
+                          isEditing ? (e) => e.stopPropagation() : undefined
+                        }
+                      >
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            value={editDraft!.name}
+                            onChange={(e) =>
+                              setEditDraft((d) =>
+                                d ? { ...d, name: e.target.value } : d,
+                              )
+                            }
+                            disabled={saving}
+                            className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                          />
+                        ) : (
+                          <div className="flex flex-col justify-center">
+                            <span className="font-medium">{list.name}</span>
+                            <div className="text-gray-400 text-tiny">
+                              updated {formatTimeAgo(list.updatedAt)}
+                            </div>
                           </div>
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-4 py-2 text-center align-middle">
-                      {list.items.length}
-                    </td>
-                    <td
-                      className="px-4 py-2 align-middle"
-                      onClick={
-                        isEditing ? (e) => e.stopPropagation() : undefined
-                      }
-                    >
-                      {isEditing ? (
-                        <PersonTypeahead
-                          persons={persons}
-                          value={editDraft!.personName}
-                          onChange={(personName) =>
-                            setEditDraft((d) => (d ? { ...d, personName } : d))
-                          }
-                          disabled={saving}
-                        />
-                      ) : (
-                        <span>
-                          {list.personId
-                            ? (personMap[list.personId] ?? "—")
-                            : "—"}
-                        </span>
-                      )}
-                    </td>
-                    <td
-                      className="px-4 py-2 align-middle"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {isEditing ? (
-                        <div className="flex flex-col items-center gap-1">
-                          <div className="flex gap-2">
+                        )}
+                      </td>
+                      <td className="px-4 py-2 text-center align-middle">
+                        {list.items.length}
+                      </td>
+                      <td
+                        className="px-4 py-2 align-middle"
+                        onClick={
+                          isEditing ? (e) => e.stopPropagation() : undefined
+                        }
+                      >
+                        {isEditing ? (
+                          <PersonTypeahead
+                            persons={persons}
+                            value={editDraft!.personName}
+                            onChange={(personName) =>
+                              setEditDraft((d) =>
+                                d ? { ...d, personName } : d,
+                              )
+                            }
+                            disabled={saving}
+                          />
+                        ) : (
+                          <span>
+                            {list.personId
+                              ? (personMap[list.personId] ?? "—")
+                              : "—"}
+                          </span>
+                        )}
+                      </td>
+                      <td
+                        className="px-4 py-2 align-middle"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {isEditing ? (
+                          <div className="flex flex-col items-center gap-1">
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleSave(list.id)}
+                                disabled={saving || !editDraft?.name.trim()}
+                                className={`px-3 py-1 rounded-md text-white ${
+                                  saving || !editDraft?.name.trim()
+                                    ? "bg-gray-400 cursor-not-allowed"
+                                    : "bg-blue-500 hover:bg-blue-700"
+                                }`}
+                              >
+                                Save
+                              </button>
+                              <button
+                                onClick={exitEditing}
+                                disabled={saving}
+                                className={`px-3 py-1 rounded-md text-white ${
+                                  saving
+                                    ? "bg-gray-400 cursor-not-allowed"
+                                    : "bg-gray-400 hover:bg-gray-500"
+                                }`}
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                            {rowError && (
+                              <p className="text-red-600 text-sm">{rowError}</p>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="flex justify-center gap-2">
                             <button
-                              onClick={() => handleSave(list.id)}
-                              disabled={saving || !editDraft?.name.trim()}
-                              className={`px-3 py-1 rounded-md text-white ${
-                                saving || !editDraft?.name.trim()
-                                  ? "bg-gray-400 cursor-not-allowed"
-                                  : "bg-blue-500 hover:bg-blue-700"
-                              }`}
+                              onClick={() => startEditing(list)}
+                              className="p-1 rounded hover:bg-gray-100"
                             >
-                              Save
+                              <PencilSquareIcon className="h-5 w-5 text-blue-500 hover:text-blue-700" />
                             </button>
                             <button
-                              onClick={exitEditing}
-                              disabled={saving}
-                              className={`px-3 py-1 rounded-md text-white ${
-                                saving
-                                  ? "bg-gray-400 cursor-not-allowed"
-                                  : "bg-gray-400 hover:bg-gray-500"
-                              }`}
+                              onClick={() => handleDelete(list.id)}
+                              className="p-1 rounded hover:bg-gray-100"
                             >
-                              Cancel
+                              <TrashIcon className="h-5 w-5 text-red-500 hover:text-red-700" />
                             </button>
                           </div>
-                          {rowError && (
-                            <p className="text-red-600 text-sm">{rowError}</p>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="flex justify-center gap-2">
-                          <button
-                            onClick={() => startEditing(list)}
-                            className="p-1 rounded hover:bg-gray-100"
-                          >
-                            <PencilSquareIcon className="h-5 w-5 text-blue-500 hover:text-blue-700" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(list.id)}
-                            className="p-1 rounded hover:bg-gray-100"
-                          >
-                            <TrashIcon className="h-5 w-5 text-red-500 hover:text-red-700" />
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </PageLoader>
     </Layout>
   );
 }
