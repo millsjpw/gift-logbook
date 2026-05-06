@@ -167,15 +167,13 @@ export default function MyLists() {
 
   return (
     <Layout>
-      <h1 className="text-2xl font-bold mb-4">My Lists</h1>
-
       {loading && <p>Loading lists...</p>}
       {error && <p className="text-red-500 mb-2">{error}</p>}
 
       {/* Add New List Form */}
       <form
         onSubmit={handleAdd}
-        className="mb-4 inline-flex items-center space-x-2"
+        className="mb-8 flex items-center justify-center gap-3"
       >
         <input
           type="text"
@@ -202,7 +200,7 @@ export default function MyLists() {
       {!loading && lists.length === 0 ? (
         <p>No lists found.</p>
       ) : (
-        <div className="max-w-4xl mx-auto overflow-x-auto mt-6">
+        <div className="overflow-x-auto mt-6">
           <table className="table-fixed w-full border border-gray-200 divide-y divide-gray-300">
             <thead className="bg-gray-50">
               <tr>

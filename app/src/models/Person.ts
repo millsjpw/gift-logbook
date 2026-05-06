@@ -3,5 +3,8 @@ export type Person = {
   name: string;
   createdAt: string;
   updatedAt: string;
+  birthMonth: number | null;
+  birthDay: number | null;
+  birthYear: number | null;
   meta?: [];
 };

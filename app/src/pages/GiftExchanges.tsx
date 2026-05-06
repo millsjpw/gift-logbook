@@ -114,15 +114,13 @@ export default function GiftExchanges() {
 
   return (
     <Layout>
-      <h1 className="text-2xl font-bold mb-4">Gift Exchanges</h1>
-
       {loading && <p>Loading exchanges...</p>}
       {error && <p className="text-red-500 mb-2">{error}</p>}
 
       {/* Add New Exchange Form */}
       <form
         onSubmit={handleAdd}
-        className="mb-4 inline-flex items-center space-x-2"
+        className="mb-8 flex items-center justify-center gap-3"
       >
         <input
           type="text"
@@ -149,7 +147,7 @@ export default function GiftExchanges() {
       {!loading && exchanges.length === 0 ? (
         <p>No exchanges found.</p>
       ) : (
-        <div className="max-w-4xl mx-auto overflow-x-auto mt-6">
+        <div className="overflow-x-auto mt-6">
           <table className="table-fixed w-full border border-gray-200 divide-y divide-gray-300">
             <thead className="bg-gray-50">
               <tr>
