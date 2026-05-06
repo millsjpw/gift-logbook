@@ -9,7 +9,7 @@ export default function UpcomingBirthdaysCard() {
 
   useEffect(() => {
     const t = setTimeout(() => setSlow(true), 10_000);
-    apiFetch("/persons/upcoming-birthdays?limit=5")
+    apiFetch("/persons/upcoming-birthdays?limit=5&daysAhead=180")
       .then((data: string[]) => setBirthdays(data))
       .catch((err: any) => setError(err.message ?? "Failed to load birthdays"))
       .finally(() => {

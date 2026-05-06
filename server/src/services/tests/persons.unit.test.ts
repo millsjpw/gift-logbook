@@ -162,7 +162,7 @@ describe("getUpcomingBirthdays", () => {
       },
     ]);
     const res = await personsService.getUpcomingBirthdays("u1");
-    expect(res).toEqual(["05/10 - Alice's birthday"]);
+    expect(res).toEqual(["4 days until 5/10 - Alice's birthday"]);
   });
 
   it("formats birthday without ordinal when birth year is placeholder 1900", async () => {
@@ -177,7 +177,7 @@ describe("getUpcomingBirthdays", () => {
       },
     ]);
     const res = await personsService.getUpcomingBirthdays("u1");
-    expect(res).toEqual(["05/10 - Bob's birthday"]);
+    expect(res).toEqual(["4 days until 5/10 - Bob's birthday"]);
   });
 
   it("formats birthday with ordinal age when birth year is set", async () => {
@@ -193,7 +193,7 @@ describe("getUpcomingBirthdays", () => {
       },
     ]);
     const res = await personsService.getUpcomingBirthdays("u1");
-    expect(res).toEqual(["05/10 - Carol's 36th birthday"]);
+    expect(res).toEqual(["4 days until 5/10 - Carol's 36th birthday"]);
   });
 
   it("uses 11th/12th/13th (not 11st/12nd/13rd) for teen ordinals", async () => {
@@ -209,7 +209,7 @@ describe("getUpcomingBirthdays", () => {
       },
     ]);
     const res = await personsService.getUpcomingBirthdays("u1");
-    expect(res).toEqual(["05/10 - Dave's 11th birthday"]);
+    expect(res).toEqual(["4 days until 5/10 - Dave's 11th birthday"]);
   });
 
   it("includes today's birthday with daysUntil of 0", async () => {
@@ -224,7 +224,7 @@ describe("getUpcomingBirthdays", () => {
       },
     ]);
     const res = await personsService.getUpcomingBirthdays("u1");
-    expect(res).toEqual(["05/06 - Eve's birthday"]);
+    expect(res).toEqual(["0 days until 5/6 - Eve's birthday"]);
   });
 
   it("rolls to next year for birthdays already passed", async () => {
@@ -247,7 +247,8 @@ describe("getUpcomingBirthdays", () => {
         birthYear: null,
       },
     ]);
-    const res = await personsService.getUpcomingBirthdays("u1");
+    // Pass daysAhead=400 so Frank (Apr 30 next year, ~359 days) is included
+    const res = await personsService.getUpcomingBirthdays("u1", 5, 400);
     // Grace (May 10, 4 days away) should come before Frank (Apr 30 next year)
     expect(res[0]).toContain("Grace");
     expect(res[1]).toContain("Frank");
@@ -320,5 +321,58 @@ describe("getUpcomingBirthdays", () => {
     (personsDb.getPersonsByUserId as any).mockResolvedValue(people);
     const res = await personsService.getUpcomingBirthdays("u1");
     expect(res).toHaveLength(5);
+  });
+
+  it("excludes birthdays beyond daysAhead", async () => {
+    (personsDb.getPersonsByUserId as any).mockResolvedValue([
+      // 4 days away — within 10 day window
+      {
+        id: "p1",
+        name: "Near",
+        userId: "u1",
+        birthMonth: 5,
+        birthDay: 10,
+        birthYear: null,
+      },
+      // 30 days away — outside 10 day window
+      {
+        id: "p2",
+        name: "Far",
+        userId: "u1",
+        birthMonth: 6,
+        birthDay: 5,
+        birthYear: null,
+      },
+    ]);
+    const res = await personsService.getUpcomingBirthdays("u1", 5, 10);
+    expect(res).toHaveLength(1);
+    expect(res[0]).toContain("Near");
+  });
+
+  it("defaults to daysAhead of 180", async () => {
+    // 181 days from May 6, 2026 is Nov 3, 2026
+    (personsDb.getPersonsByUserId as any).mockResolvedValue([
+      // Nov 2 = 180 days ahead — included
+      {
+        id: "p1",
+        name: "InWindow",
+        userId: "u1",
+        birthMonth: 11,
+        birthDay: 2,
+        birthYear: null,
+      },
+      // Nov 4 = 182 days ahead — excluded
+      {
+        id: "p2",
+        name: "OutOfWindow",
+        userId: "u1",
+        birthMonth: 11,
+        birthDay: 4,
+        birthYear: null,
+      },
+    ]);
+    const res = await personsService.getUpcomingBirthdays("u1");
+    expect(res.some((r) => r.includes("InWindow"))).toBe(true);
+    expect(res.some((r) => r.includes("OutOfWindow"))).toBe(false);
   });
 });

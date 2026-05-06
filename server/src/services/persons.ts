@@ -79,6 +79,7 @@ function ordinalSuffix(n: number): string {
 export async function getUpcomingBirthdays(
   userId: string,
   limit = 5,
+  daysAhead = 180,
 ): Promise<string[]> {
   const people = await personsDb.getPersonsByUserId(userId);
 
@@ -109,20 +110,23 @@ export async function getUpcomingBirthdays(
       (nextBirthday.getTime() - todayMidnight.getTime()) / 86_400_000,
     );
 
-    const mm = String(birthMonth).padStart(2, "0");
-    const dd = String(birthDay).padStart(2, "0");
-    const dateStr = `${mm}/${dd}`;
+    if (daysUntil > daysAhead) continue;
 
-    let label: string;
+    const dateStr = `${birthMonth}/${birthDay}`;
+
+    let birthdayStr: string;
     const PLACEHOLDER_YEAR = 1900;
     if (birthYear && birthYear !== PLACEHOLDER_YEAR) {
       const age = candidateYear - birthYear;
-      label = `${dateStr} - ${name}'s ${ordinalSuffix(age)} birthday`;
+      birthdayStr = `${dateStr} - ${name}'s ${ordinalSuffix(age)} birthday`;
     } else {
-      label = `${dateStr} - ${name}'s birthday`;
+      birthdayStr = `${dateStr} - ${name}'s birthday`;
     }
 
-    entries.push({ daysUntil, label });
+    entries.push({
+      daysUntil,
+      label: `${daysUntil} days until ${birthdayStr}`,
+    });
   }
 
   entries.sort((a, b) => a.daysUntil - b.daysUntil);
