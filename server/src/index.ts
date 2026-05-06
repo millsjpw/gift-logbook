@@ -82,6 +82,11 @@ app.get(
   middlewareRequireAuth,
   personsApi.handleSearchPeopleByName,
 );
+app.get(
+  "/persons/upcoming-birthdays",
+  middlewareRequireAuth,
+  personsApi.handleGetUpcomingBirthdays,
+);
 app.get("/persons/:id", middlewareRequireAuth, personsApi.handleGetPerson);
 app.put("/persons/:id", middlewareRequireAuth, personsApi.handleUpdatePerson);
 app.get(
