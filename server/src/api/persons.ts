@@ -120,3 +120,19 @@ export async function handleDeletePeopleCreatedByUser(
   await personService.deletePeopleCreatedByUser(userId);
   res.status(204).send();
 }
+
+export async function handleGetUpcomingBirthdays(req: Request, res: Response) {
+  const userId = req.auth?.userId;
+  if (!userId) {
+    throw new BadRequestError("Authentication required");
+  }
+
+  const rawLimit = req.query.limit;
+  const limit = rawLimit !== undefined ? parseInt(rawLimit as string, 10) : 5;
+  if (isNaN(limit) || limit < 1) {
+    throw new BadRequestError("limit must be a positive integer");
+  }
+
+  const birthdays = await personService.getUpcomingBirthdays(userId, limit);
+  respondWithJSON(res, 200, birthdays);
+}

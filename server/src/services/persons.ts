@@ -65,6 +65,71 @@ export async function updatePerson(
   );
 }
 
+function ordinalSuffix(n: number): string {
+  const abs = Math.abs(n);
+  const mod100 = abs % 100;
+  const mod10 = abs % 10;
+  if (mod100 >= 11 && mod100 <= 13) return `${n}th`;
+  if (mod10 === 1) return `${n}st`;
+  if (mod10 === 2) return `${n}nd`;
+  if (mod10 === 3) return `${n}rd`;
+  return `${n}th`;
+}
+
+export async function getUpcomingBirthdays(
+  userId: string,
+  limit = 5,
+): Promise<string[]> {
+  const people = await personsDb.getPersonsByUserId(userId);
+
+  const today = new Date();
+  const todayMonth = today.getMonth() + 1; // 1-indexed
+  const todayDay = today.getDate();
+  const currentYear = today.getFullYear();
+
+  type Entry = { daysUntil: number; label: string };
+  const entries: Entry[] = [];
+
+  for (const person of people) {
+    const { birthMonth, birthDay, birthYear, name } = person;
+    if (!birthMonth || !birthDay) continue;
+
+    // Days until next occurrence of this month/day
+    let candidateYear = currentYear;
+    if (
+      birthMonth < todayMonth ||
+      (birthMonth === todayMonth && birthDay < todayDay)
+    ) {
+      candidateYear = currentYear + 1;
+    }
+
+    const nextBirthday = new Date(candidateYear, birthMonth - 1, birthDay);
+    const todayMidnight = new Date(currentYear, todayMonth - 1, todayDay);
+    const daysUntil = Math.round(
+      (nextBirthday.getTime() - todayMidnight.getTime()) / 86_400_000,
+    );
+
+    const mm = String(birthMonth).padStart(2, "0");
+    const dd = String(birthDay).padStart(2, "0");
+    const dateStr = `${mm}/${dd}`;
+
+    let label: string;
+    const PLACEHOLDER_YEAR = 1900;
+    if (birthYear && birthYear !== PLACEHOLDER_YEAR) {
+      const age = candidateYear - birthYear;
+      label = `${dateStr} - ${name}'s ${ordinalSuffix(age)} birthday`;
+    } else {
+      label = `${dateStr} - ${name}'s birthday`;
+    }
+
+    entries.push({ daysUntil, label });
+  }
+
+  entries.sort((a, b) => a.daysUntil - b.daysUntil);
+
+  return entries.slice(0, limit).map((e) => e.label);
+}
+
 export async function deletePerson(userId: string, id: string): Promise<void> {
   const person = await personsDb.getPersonById(id);
   if (!person) {
