@@ -105,6 +105,23 @@
           "meta": {
             "type": ["object", "array", "null"]
           },
+          "birthMonth": {
+            "type": ["integer", "null"],
+            "minimum": 1,
+            "maximum": 12,
+            "description": "Month of birth (1–12), or null if not set"
+          },
+          "birthDay": {
+            "type": ["integer", "null"],
+            "minimum": 1,
+            "maximum": 31,
+            "description": "Day of birth (1–31), or null if not set"
+          },
+          "birthYear": {
+            "type": ["integer", "null"],
+            "minimum": 1900,
+            "description": "Year of birth (≥ 1900), or null if not set"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -405,6 +422,20 @@
                   },
                   "meta": {
                     "type": ["object", "array"]
+                  },
+                  "birthMonth": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 12
+                  },
+                  "birthDay": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 31
+                  },
+                  "birthYear": {
+                    "type": "integer",
+                    "minimum": 1900
                   }
                 },
                 "required": ["name"]

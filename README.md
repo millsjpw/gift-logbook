@@ -47,28 +47,44 @@ Nothing out there would be able to meet our specific needs, so I built it myself
 ```bash
 git clone https://github.com/millsjpw/gift-logbook.git
 cd gift-logbook
-docker compose up -d --build
+
+# Install dependencies for both server and app
+npm --prefix server install
+npm --prefix app install
+
+# Configure environment (see Environment Variables below)
+cp server/.env.example server/.env  # or create server/.env manually
+
+# Run database migrations
+npm --prefix server run migrate:dev
+
+# Start the API server and frontend in separate terminals
+npm run dev:server
+npm run dev:app
 ```
 
 ## Environment Variables
 
-Create a .env file or export these in your shell:
-| Variable | Description | Default |
-| -------------------- | -------------------------------- | ------------ |
-| PORT | Server port | 3000 |
-| PLATFORM | Runtime environment | local |
-| DB_URL | PostgreSQL connection string | — |
-| JWT_SECRET | Secret for signing tokens | — |
-| JWT_DEFAULT_DURATION | Access token lifetime (seconds) | 3600 |
-| JWT_REFRESH_DURATION | Refresh token lifetime (seconds) | 86400 |
-| JWT_ISSUER | Token issuer | gift-logbook |
+Create a `.env` file in the `server/` directory (or export these in your shell):
 
-### Example
+| Variable             | Description                               | Default      |
+| -------------------- | ----------------------------------------- | ------------ |
+| PORT                 | Server port                               | 3000         |
+| PLATFORM             | Runtime environment                       | local        |
+| DB_URL               | PostgreSQL connection string              | —            |
+| DB_URL_TEST          | Separate test DB (prevents dev data loss) | —            |
+| JWT_SECRET           | Secret for signing tokens                 | —            |
+| JWT_DEFAULT_DURATION | Access token lifetime (seconds)           | 3600         |
+| JWT_REFRESH_DURATION | Refresh token lifetime (seconds)          | 86400        |
+| JWT_ISSUER           | Token issuer                              | gift-logbook |
+
+### Example `server/.env`
 
 ```
 PORT=3000
 PLATFORM=local
 DB_URL=postgres://user:pass@localhost:5432/gift_logbook
+DB_URL_TEST=postgres://user:pass@localhost:5432/gift_logbook_test
 JWT_DEFAULT_DURATION=3600
 JWT_REFRESH_DURATION=86400
 JWT_SECRET=change-me-to-a-secure-secret
@@ -79,15 +95,19 @@ JWT_ISSUER=gift-logbook
 
 ### Development
 
-```
-npm run dev
+Run the API server and frontend in separate terminals:
+
+```bash
+npm run dev:server   # starts the Express API (compiles TS then runs)
+npm run dev:app      # starts the Vite frontend
 ```
 
 ### Production
 
-```
-npm run build
-npm start
+```bash
+npm run build:server
+npm run build:app
+npm --prefix server run start
 ```
 
 ## API Docs
@@ -97,8 +117,14 @@ npm start
 
 ## Testing
 
-```
+Integration tests require a real PostgreSQL database. Set `DB_URL_TEST` to a separate database to avoid affecting dev data.
+
+```bash
+# Integration tests (requires DB_URL or DB_URL_TEST)
 npm test
+
+# Unit tests (no database required — all DB calls are mocked)
+npm run test:unit
 ```
 
 ## Endpoints (Summary)
@@ -195,13 +221,15 @@ cd gift-logbook
 ### Build the project
 
 ```bash
-npm run dev
+npm run build:server
+npm run build:app
 ```
 
 ### Run the tests
 
 ```bash
-npm run dev
+npm run test:unit   # unit tests, no DB required
+npm test            # integration tests, requires DB_URL or DB_URL_TEST
 ```
 
 ### Submit a pull request
