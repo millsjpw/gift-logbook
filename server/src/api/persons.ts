@@ -133,6 +133,17 @@ export async function handleGetUpcomingBirthdays(req: Request, res: Response) {
     throw new BadRequestError("limit must be a positive integer");
   }
 
-  const birthdays = await personService.getUpcomingBirthdays(userId, limit);
+  const rawDaysAhead = req.query.daysAhead;
+  const daysAhead =
+    rawDaysAhead !== undefined ? parseInt(rawDaysAhead as string, 10) : 180;
+  if (isNaN(daysAhead) || daysAhead < 0) {
+    throw new BadRequestError("daysAhead must be a non-negative integer");
+  }
+
+  const birthdays = await personService.getUpcomingBirthdays(
+    userId,
+    limit,
+    daysAhead,
+  );
   respondWithJSON(res, 200, birthdays);
 }
