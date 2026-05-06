@@ -6,8 +6,18 @@ export async function addPerson(
   userId: string,
   name: string,
   meta?: Record<string, unknown>,
+  birthMonth?: number | null,
+  birthDay?: number | null,
+  birthYear?: number | null,
 ): Promise<Person> {
-  return await personsDb.createPerson(userId, name, meta);
+  return await personsDb.createPerson(
+    userId,
+    name,
+    meta,
+    birthMonth,
+    birthDay,
+    birthYear,
+  );
 }
 
 export async function getPersonById(id: string): Promise<Person | null> {
@@ -32,6 +42,9 @@ export async function updatePerson(
   id: string,
   name?: string,
   meta?: Record<string, unknown>,
+  birthMonth?: number | null,
+  birthDay?: number | null,
+  birthYear?: number | null,
 ): Promise<Person> {
   const person = await personsDb.getPersonById(id);
   if (!person) {
@@ -42,7 +55,14 @@ export async function updatePerson(
       "You do not have permission to update this person",
     );
   }
-  return await personsDb.updatePerson(id, name, meta);
+  return await personsDb.updatePerson(
+    id,
+    name,
+    meta,
+    birthMonth,
+    birthDay,
+    birthYear,
+  );
 }
 
 export async function deletePerson(userId: string, id: string): Promise<void> {
