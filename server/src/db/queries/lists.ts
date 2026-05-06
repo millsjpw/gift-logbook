@@ -1,6 +1,6 @@
 import { db } from "../db.js";
 import { lists, NewList } from "../schema.js";
-import { and, eq, like } from "drizzle-orm";
+import { and, desc, eq, like } from "drizzle-orm";
 import { BadRequestError, NotFoundError } from "../../api/errors.js";
 
 export async function createList(
@@ -33,6 +33,15 @@ export async function getListsByUserId(userId: string) {
     .from(lists)
     .where(eq(lists.userId, userId));
   return userLists;
+}
+
+export async function getRecentListsByUserId(userId: string, limit: number) {
+  return db
+    .select()
+    .from(lists)
+    .where(eq(lists.userId, userId))
+    .orderBy(desc(lists.updatedAt))
+    .limit(limit);
 }
 
 export async function getListsByPersonId(userId: string, personId: string) {

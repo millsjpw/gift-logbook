@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import Layout from "../components/Layout";
+import PageLoader from "../components/PageLoader";
 import { apiFetch } from "../api/client";
 import type { FullExchange } from "../models/Exchanges";
 
@@ -34,14 +35,16 @@ export default function GiftExchangeView() {
 
   return (
     <Layout>
-      {loading && <p>Loading...</p>}
-      {error && <p className="text-red-500">{error}</p>}
-      {exchange && (
-        <div className="p-4">
-          <h1 className="text-2xl font-bold mb-4">{exchange.exchange.name}</h1>
-          <p className="text-gray-500">Exchange view coming soon.</p>
-        </div>
-      )}
+      <PageLoader loading={loading} error={error}>
+        {exchange && (
+          <div className="p-4">
+            <h1 className="text-2xl font-bold mb-4">
+              {exchange.exchange.name}
+            </h1>
+            <p className="text-gray-500">Exchange view coming soon.</p>
+          </div>
+        )}
+      </PageLoader>
     </Layout>
   );
 }

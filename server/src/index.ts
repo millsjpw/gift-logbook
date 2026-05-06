@@ -108,6 +108,7 @@ app.delete(
 // Lists API
 app.post("/lists", middlewareRequireAuth, listsApi.handleCreateList);
 app.get("/lists/search", middlewareRequireAuth, listsApi.handleGetListsByName);
+app.get("/lists/recent", middlewareRequireAuth, listsApi.handleGetRecentLists);
 app.get(
   "/lists/person/:personId",
   middlewareRequireAuth,
