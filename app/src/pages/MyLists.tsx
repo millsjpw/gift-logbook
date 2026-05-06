@@ -5,7 +5,12 @@ import type { Person } from "../models/Person";
 import { apiFetch } from "../api/client";
 import Layout from "../components/Layout";
 import PersonTypeahead from "../components/PersonTypeahead";
-import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/solid";
+import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  PencilSquareIcon,
+  TrashIcon,
+} from "@heroicons/react/24/solid";
 import { formatTimeAgo } from "../utils/time";
 
 type EditDraft = { name: string; personName: string };
@@ -21,6 +26,8 @@ export default function MyLists() {
   const [rowError, setRowError] = useState<string | null>(null);
   const [addName, setAddName] = useState("");
   const [addSaving, setAddSaving] = useState(false);
+  const [sortKey, setSortKey] = useState<"name" | "person" | null>(null);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -135,6 +142,29 @@ export default function MyLists() {
 
   const personMap = Object.fromEntries(persons.map((p) => [p.id, p.name]));
 
+  function handleSort(col: "name" | "person") {
+    if (sortKey === col) {
+      setSortOrder((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(col);
+      setSortOrder("asc");
+    }
+  }
+
+  const sortedLists = [...lists].sort((a, b) => {
+    if (!sortKey) return 0;
+    const aVal =
+      sortKey === "name"
+        ? a.name.toLowerCase()
+        : (personMap[a.personId ?? ""] ?? "").toLowerCase();
+    const bVal =
+      sortKey === "name"
+        ? b.name.toLowerCase()
+        : (personMap[b.personId ?? ""] ?? "").toLowerCase();
+    const cmp = aVal.localeCompare(bVal);
+    return sortOrder === "asc" ? cmp : -cmp;
+  });
+
   return (
     <Layout>
       <h1 className="text-2xl font-bold mb-4">My Lists</h1>
@@ -176,14 +206,36 @@ export default function MyLists() {
           <table className="table-fixed w-full border border-gray-200 divide-y divide-gray-300">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-4 py-2 text-left w-[32%]">List Name</th>
+                <th
+                  className="px-4 py-2 text-left w-[32%] cursor-pointer select-none hover:bg-gray-100"
+                  onClick={() => handleSort("name")}
+                >
+                  List Name
+                  {sortKey === "name" &&
+                    (sortOrder === "asc" ? (
+                      <ArrowUpIcon className="h-4 w-4 inline m-2" />
+                    ) : (
+                      <ArrowDownIcon className="h-4 w-4 inline m-2" />
+                    ))}{" "}
+                </th>
                 <th className="px-4 py-2 text-center w-[8%]">Items</th>
-                <th className="px-4 py-2 text-left w-[32%]">Person</th>
+                <th
+                  className="px-4 py-2 text-left w-[32%] cursor-pointer select-none hover:bg-gray-100"
+                  onClick={() => handleSort("person")}
+                >
+                  Person
+                  {sortKey === "person" &&
+                    (sortOrder === "asc" ? (
+                      <ArrowUpIcon className="h-4 w-4 inline m-2" />
+                    ) : (
+                      <ArrowDownIcon className="h-4 w-4 inline m-2" />
+                    ))}{" "}
+                </th>
                 <th className="px-4 py-2 text-center w-[28%]">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-300">
-              {lists.map((list) => {
+              {sortedLists.map((list) => {
                 const isEditing = editingId === list.id;
                 return (
                   <tr
