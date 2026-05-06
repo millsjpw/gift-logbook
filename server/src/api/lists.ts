@@ -28,6 +28,21 @@ export async function handleGetListById(req: Request, res: Response) {
   respondWithJSON(res, 200, list);
 }
 
+export async function handleGetRecentLists(req: Request, res: Response) {
+  const userId = req.auth!.userId;
+  const rawLimit = req.query.limit;
+  let limit = 5;
+  if (rawLimit !== undefined) {
+    const parsed = parseInt(rawLimit as string, 10);
+    if (isNaN(parsed) || parsed < 1) {
+      throw new BadRequestError("limit must be a positive integer");
+    }
+    limit = parsed;
+  }
+  const lists = await listService.getRecentLists(userId, limit);
+  respondWithJSON(res, 200, lists);
+}
+
 export async function handleGetListsByUserId(req: Request, res: Response) {
   const userId = req.auth!.userId;
   const lists = await listService.getListsByUserId(userId);

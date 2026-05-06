@@ -1,7 +1,14 @@
 import { db } from "../db.js";
-import { listItems, NewListItem } from "../schema.js";
+import { listItems, lists, NewListItem } from "../schema.js";
 import { eq, and, like } from "drizzle-orm";
 import { BadRequestError } from "../../api/errors.js";
+
+async function touchList(listId: string) {
+  await db
+    .update(lists)
+    .set({ updatedAt: new Date() })
+    .where(eq(lists.id, listId));
+}
 
 export async function createListItem(
   userId: string,
@@ -19,6 +26,7 @@ export async function createListItem(
       .insert(listItems)
       .values(listItem)
       .returning();
+    await touchList(listId);
     return createdListItem;
   } catch (err: any) {
     if (err.cause?.code === "23505") {
@@ -46,6 +54,7 @@ export async function bulkInsertListItems(
       .insert(listItems)
       .values(newItems)
       .returning();
+    await touchList(listId);
     return createdItems;
   } catch (err: any) {
     if (err.cause?.code === "23505") {
@@ -94,13 +103,23 @@ export async function updateListItem(id: string, title?: string, url?: string) {
     .set(updateData)
     .where(eq(listItems.id, id))
     .returning();
+  if (updatedListItem) {
+    await touchList(updatedListItem.listId);
+  }
   return updatedListItem;
 }
 
 export async function deleteListItem(id: string) {
-  await db.delete(listItems).where(eq(listItems.id, id));
+  const [deleted] = await db
+    .delete(listItems)
+    .where(eq(listItems.id, id))
+    .returning();
+  if (deleted) {
+    await touchList(deleted.listId);
+  }
 }
 
 export async function deleteListItemsByListId(listId: string) {
   await db.delete(listItems).where(eq(listItems.listId, listId));
+  await touchList(listId);
 }
