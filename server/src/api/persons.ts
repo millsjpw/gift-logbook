@@ -5,7 +5,7 @@ import * as personService from "../services/persons.js";
 import { Person } from "../db/schema.js";
 
 export async function handleCreatePerson(req: Request, res: Response) {
-  const { name, meta } = req.body;
+  const { name, meta, birthMonth, birthDay, birthYear } = req.body;
   if (!name) {
     throw new BadRequestError("Missing required field: name");
   }
@@ -15,7 +15,14 @@ export async function handleCreatePerson(req: Request, res: Response) {
     throw new BadRequestError("Authentication required to create a person");
   }
 
-  const person: Person = await personService.addPerson(userId, name, meta);
+  const person: Person = await personService.addPerson(
+    userId,
+    name,
+    meta,
+    birthMonth ?? null,
+    birthDay ?? null,
+    birthYear ?? null,
+  );
   respondWithJSON(res, 201, person);
 }
 
@@ -58,11 +65,17 @@ export async function handleSearchPeopleByName(req: Request, res: Response) {
 
 export async function handleUpdatePerson(req: Request, res: Response) {
   const personId = req.params.id as string;
-  const { name, meta } = req.body;
+  const { name, meta, birthMonth, birthDay, birthYear } = req.body;
 
-  if (!name && !meta) {
+  if (
+    !name &&
+    !meta &&
+    birthMonth === undefined &&
+    birthDay === undefined &&
+    birthYear === undefined
+  ) {
     throw new BadRequestError(
-      "At least one field (name, meta) must be provided for update",
+      "At least one field (name, meta, birthMonth, birthDay, birthYear) must be provided for update",
     );
   }
 
@@ -76,6 +89,9 @@ export async function handleUpdatePerson(req: Request, res: Response) {
     personId,
     name,
     meta,
+    birthMonth,
+    birthDay,
+    birthYear,
   );
   respondWithJSON(res, 200, updatedPerson);
 }
