@@ -1,29 +1,36 @@
-# ---------- Build stage ----------
-FROM node:22-alpine AS builder
+# ---------- Base ----------
+FROM node:22-alpine AS base
 
 WORKDIR /app
 
-COPY package*.json ./
+# ---------- Install dependencies from ROOT (workspace-aware) ----------
+FROM base AS deps
+
+COPY package.json package-lock.json ./
+
+COPY app ./app
+COPY server ./server
+
 RUN npm ci
 
-COPY . .
+
+# ---------- Build server ----------
+FROM deps AS builder
+
+WORKDIR /app/server
 
 RUN npm run build
 
 
-# ---------- Runtime stage ----------
-FROM node:22-alpine
+# ---------- Runtime ----------
+FROM node:22-alpine AS runtime
 
 WORKDIR /app
 
 ENV NODE_ENV=production
 
-COPY package*.json ./
-RUN npm ci --omit=dev
-
-COPY --from=builder /app/src/db/migrations ./src/db/migrations
-
-COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/server/dist ./dist
+COPY --from=builder /app/server/src/db/migrations ./src/db/migrations
 
 EXPOSE 3000
 
