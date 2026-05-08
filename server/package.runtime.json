@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "type": "commonjs",
+  "dependencies": {
+    "argon2": "^0.44.0"
+  }
+}

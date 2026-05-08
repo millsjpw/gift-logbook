@@ -6,6 +6,7 @@ export default defineConfig({
   format: ["cjs"],
   platform: "node",
   target: "node22",
+
   bundle: true,
   splitting: false,
   clean: true,
