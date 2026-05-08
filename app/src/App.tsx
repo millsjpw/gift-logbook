@@ -10,6 +10,7 @@ import MyLists from "./pages/MyLists";
 import ListView from "./pages/ListView";
 import GiftExchanges from "./pages/GiftExchanges";
 import GiftExchangeView from "./pages/GiftExchangeView";
+import Logbook from "./pages/Logbook";
 
 function ProtectedRoute({ children }: { children: JSX.Element }) {
   return isAuthenticated() ? children : <Navigate to="/login" />;
@@ -57,6 +58,14 @@ function App() {
           element={
             <ProtectedRoute>
               <GiftExchangeView />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/logbook"
+          element={
+            <ProtectedRoute>
+              <Logbook />
             </ProtectedRoute>
           }
         />
