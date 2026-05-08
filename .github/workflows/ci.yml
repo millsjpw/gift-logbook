@@ -1,47 +1,45 @@
-name: Tests
+name: CI
 
 on:
   pull_request:
-    branches: [master]
+    branches:
+      - main
 
 jobs:
-  unit-tests:
-    name: Unit Tests
+  server-tests:
+    name: Server Tests
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Node
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: server/package-lock.json
 
       - name: Install dependencies
         run: npm ci
-        working-directory: server
 
-      - name: Run unit tests
+      - name: Run server unit tests
+        working-directory: ./server
         run: npm run test:unit -- --coverage
-        working-directory: server
 
-  style:
-    name: Style & Security
+  quality-checks:
+    name: Quality Checks
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Node
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: app/package-lock.json
 
       - name: Install dependencies
         run: npm ci

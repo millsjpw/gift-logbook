@@ -234,4 +234,4 @@ npm test            # integration tests, requires DB_URL or DB_URL_TEST
 
 ### Submit a pull request
 
-If you'd like to contribute, please fork the repository and open a pull request to the `master` branch.
+If you'd like to contribute, please fork the repository and open a pull request to the `main` branch.
