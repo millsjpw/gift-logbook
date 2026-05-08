@@ -1,5 +1,11 @@
 # gift-logbook
 
+## 1.1.2
+
+### Patch Changes
+
+- [#91](https://github.com/millsjpw/gift-logbook/pull/91) [`a3807d1`](https://github.com/millsjpw/gift-logbook/commit/a3807d1204594dd70e7e2f432025e0615984cc35) Thanks [@millsjpw](https://github.com/millsjpw)! - Adding analytics and speed insights
+
 ## 1.1.1
 
 ### Patch Changes
