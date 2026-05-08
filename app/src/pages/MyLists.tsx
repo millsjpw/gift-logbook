@@ -2,10 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { List } from "../models/List";
 import PageLoader from "../components/PageLoader";
-import type { Person } from "../models/Person";
 import { apiFetch } from "../api/client";
 import Layout from "../components/Layout";
-import PersonTypeahead from "../components/PersonTypeahead";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -14,11 +12,10 @@ import {
 } from "@heroicons/react/24/solid";
 import { formatTimeAgo } from "../utils/time";
 
-type EditDraft = { name: string; personName: string };
+type EditDraft = { name: string };
 
 export default function MyLists() {
   const [lists, setLists] = useState<List[]>([]);
-  const [persons, setPersons] = useState<Person[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -27,7 +24,7 @@ export default function MyLists() {
   const [rowError, setRowError] = useState<string | null>(null);
   const [addName, setAddName] = useState("");
   const [addSaving, setAddSaving] = useState(false);
-  const [sortKey, setSortKey] = useState<"name" | "person" | null>(null);
+  const [sortKey, setSortKey] = useState<"name" | null>(null);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const navigate = useNavigate();
 
@@ -39,12 +36,8 @@ export default function MyLists() {
     setLoading(true);
     setError(null);
     try {
-      const [listsData, personsData]: [List[], Person[]] = await Promise.all([
-        apiFetch("/lists"),
-        apiFetch("/persons"),
-      ]);
+      const listsData: List[] = await apiFetch("/lists");
       setLists(listsData);
-      setPersons(personsData);
     } catch (err: any) {
       setError(err.message || "Failed to load data");
     } finally {
@@ -72,11 +65,8 @@ export default function MyLists() {
   }
 
   function startEditing(list: List) {
-    const personName = list.personId
-      ? (persons.find((p) => p.id === list.personId)?.name ?? "")
-      : "";
     setEditingId(list.id);
-    setEditDraft({ name: list.name, personName });
+    setEditDraft({ name: list.name });
     setRowError(null);
   }
 
@@ -88,40 +78,23 @@ export default function MyLists() {
 
   async function handleSave(listId: string) {
     const draft = editDraft!;
-    if (!draft.name.trim()) return;
+    const name = draft.name.trim();
+    if (!name) return;
     const list = lists.find((l) => l.id === listId)!;
 
     setSaving(true);
     setRowError(null);
     try {
-      // Resolve person
-      let personId: string | null = null;
-      const trimmedPerson = draft.personName.trim();
-      if (trimmedPerson) {
-        const match = persons.find(
-          (p) => p.name.toLowerCase() === trimmedPerson.toLowerCase(),
-        );
-        if (match) {
-          personId = match.id;
-        } else {
-          const newPerson: Person = await apiFetch("/persons", {
-            method: "POST",
-            body: JSON.stringify({ name: trimmedPerson }),
-          });
-          personId = newPerson.id;
-          setPersons((prev) => [...prev, newPerson]);
-        }
-      }
-
-      const name = draft.name.trim();
       await apiFetch(`/lists/${listId}`, {
         method: "PUT",
-        body: JSON.stringify({ name, personId, items: list.items }),
+        body: JSON.stringify({
+          name,
+          personId: list.personId ?? null,
+          items: list.items,
+        }),
       });
       setLists((prev) =>
-        prev.map((l) =>
-          l.id === listId ? { ...l, name, personId: personId ?? undefined } : l,
-        ),
+        prev.map((l) => (l.id === listId ? { ...l, name } : l)),
       );
       exitEditing();
     } catch (err: any) {
@@ -141,28 +114,18 @@ export default function MyLists() {
     }
   }
 
-  const personMap = Object.fromEntries(persons.map((p) => [p.id, p.name]));
-
-  function handleSort(col: "name" | "person") {
-    if (sortKey === col) {
+  function handleSort() {
+    if (sortKey === "name") {
       setSortOrder((d) => (d === "asc" ? "desc" : "asc"));
     } else {
-      setSortKey(col);
+      setSortKey("name");
       setSortOrder("asc");
     }
   }
 
   const sortedLists = [...lists].sort((a, b) => {
     if (!sortKey) return 0;
-    const aVal =
-      sortKey === "name"
-        ? a.name.toLowerCase()
-        : (personMap[a.personId ?? ""] ?? "").toLowerCase();
-    const bVal =
-      sortKey === "name"
-        ? b.name.toLowerCase()
-        : (personMap[b.personId ?? ""] ?? "").toLowerCase();
-    const cmp = aVal.localeCompare(bVal);
+    const cmp = a.name.toLowerCase().localeCompare(b.name.toLowerCase());
     return sortOrder === "asc" ? cmp : -cmp;
   });
 
@@ -204,24 +167,11 @@ export default function MyLists() {
               <thead className="bg-gray-50">
                 <tr>
                   <th
-                    className="px-4 py-2 text-left w-[32%] cursor-pointer select-none hover:bg-gray-100"
-                    onClick={() => handleSort("name")}
+                    className="px-4 py-2 text-left w-[72%] cursor-pointer select-none hover:bg-gray-100"
+                    onClick={handleSort}
                   >
                     List Name
                     {sortKey === "name" &&
-                      (sortOrder === "asc" ? (
-                        <ArrowUpIcon className="h-4 w-4 inline m-2" />
-                      ) : (
-                        <ArrowDownIcon className="h-4 w-4 inline m-2" />
-                      ))}{" "}
-                  </th>
-                  <th className="px-4 py-2 text-center w-[8%]">Items</th>
-                  <th
-                    className="px-4 py-2 text-left w-[32%] cursor-pointer select-none hover:bg-gray-100"
-                    onClick={() => handleSort("person")}
-                  >
-                    Person
-                    {sortKey === "person" &&
                       (sortOrder === "asc" ? (
                         <ArrowUpIcon className="h-4 w-4 inline m-2" />
                       ) : (
@@ -263,7 +213,12 @@ export default function MyLists() {
                                 d ? { ...d, name: e.target.value } : d,
                               )
                             }
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") handleSave(list.id);
+                              if (e.key === "Escape") exitEditing();
+                            }}
                             disabled={saving}
+                            autoFocus
                             className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                           />
                         ) : (
@@ -273,34 +228,6 @@ export default function MyLists() {
                               updated {formatTimeAgo(list.updatedAt)}
                             </div>
                           </div>
-                        )}
-                      </td>
-                      <td className="px-4 py-2 text-center align-middle">
-                        {list.items.length}
-                      </td>
-                      <td
-                        className="px-4 py-2 align-middle"
-                        onClick={
-                          isEditing ? (e) => e.stopPropagation() : undefined
-                        }
-                      >
-                        {isEditing ? (
-                          <PersonTypeahead
-                            persons={persons}
-                            value={editDraft!.personName}
-                            onChange={(personName) =>
-                              setEditDraft((d) =>
-                                d ? { ...d, personName } : d,
-                              )
-                            }
-                            disabled={saving}
-                          />
-                        ) : (
-                          <span>
-                            {list.personId
-                              ? (personMap[list.personId] ?? "—")
-                              : "—"}
-                          </span>
                         )}
                       </td>
                       <td
