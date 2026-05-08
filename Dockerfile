@@ -11,7 +11,6 @@ RUN npm ci
 
 RUN npm run build:server
 
-
 # ---------- Runtime ----------
 FROM node:22-alpine
 
