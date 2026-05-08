@@ -11,7 +11,8 @@
     "test:unit": "vitest --config vitest.unit.config.ts --run",
     "generate": "drizzle-kit generate",
     "migrate": "node dist/scripts/migrate.js",
-    "migrate:dev": "drizzle-kit migrate"
+    "migrate:dev": "drizzle-kit migrate",
+    "verify-build": "test -f dist/index.js"
   },
   "keywords": [],
   "author": "",

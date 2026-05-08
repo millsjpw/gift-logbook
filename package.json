@@ -1,6 +1,11 @@
 {
   "name": "gift-logbook-root",
   "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "app",
+    "server"
+  ],
   "scripts": {
     "test": "npm --prefix server run test",
     "test:unit": "npm --prefix server run test:unit",
@@ -10,9 +15,12 @@
     "build:app": "npm --prefix app run build",
     "lint": "eslint .",
     "format:write": "prettier --write \"**/*.{js,ts,json,css,md}\"",
-    "format:check": "prettier --check \"**/*.{js,ts,json,css,md}\""
+    "format:check": "prettier --check \"**/*.{js,ts,json,css,md}\"",
+    "changeset": "changeset",
+    "version-packages": "changeset version"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.31.0",
     "@eslint/js": "^10.0.1",
     "eslint": "^10.2.1",
     "globals": "^17.5.0",
