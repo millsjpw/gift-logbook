@@ -1,5 +1,5 @@
 {
-  "name": "gift-logbook-root",
+  "name": "gift-logbook",
   "private": true,
   "version": "1.0.0",
   "workspaces": [
