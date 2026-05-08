@@ -1,5 +1,5 @@
 # ---------- Builder ----------
-FROM node:22-slim AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /build
 
@@ -18,6 +18,12 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
+# Install ONLY runtime native deps
+COPY server/package.runtime.json ./package.json
+
+RUN npm install --omit=dev
+
+# Copy bundled app
 COPY --from=builder /build/server/dist ./dist
 COPY --from=builder /build/server/src/db/migrations ./migrations
 
