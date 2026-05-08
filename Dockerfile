@@ -17,10 +17,17 @@ FROM node:22-alpine
 WORKDIR /srv
 ENV NODE_ENV=production
 
-# Copy ONLY what we need from builder
+COPY server/package.json ./server/package.json
+
+# bring node_modules from workspace install
 COPY --from=builder /srv/node_modules ./node_modules
-COPY --from=builder /srv/server/dist ./dist
-COPY --from=builder /srv/server/src/db/migrations ./migrations
+
+# bring compiled output
+COPY --from=builder /srv/server/dist ./server/dist
+COPY --from=builder /srv/server/src/db/migrations ./server/migrations
+
+# run from correct package context
+WORKDIR /srv/server
 
 EXPOSE 3000
 
