@@ -1,5 +1,11 @@
 # gift-logbook
 
+## 1.1.1
+
+### Patch Changes
+
+- [#89](https://github.com/millsjpw/gift-logbook/pull/89) [`e49aa07`](https://github.com/millsjpw/gift-logbook/commit/e49aa07296a7c16ccdfcf968094463e0a16bc1c9) Thanks [@millsjpw](https://github.com/millsjpw)! - Navbar icon changes and other minor UI tweaks
+
 ## 1.1.0
 
 ### Minor Changes
