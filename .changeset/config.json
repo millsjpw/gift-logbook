@@ -4,7 +4,6 @@
   "commit": false,
   "baseBranch": "main",
   "access": "public",
-  "fixed": [],
-  "linked": [],
-  "updateInternalDependencies": "ignore"
+  "fixed": [["gift-logbook"]],
+  "linked": []
 }

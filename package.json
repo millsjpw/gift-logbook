@@ -4,7 +4,8 @@
   "version": "1.0.0",
   "workspaces": [
     "app",
-    "server"
+    "server",
+    "."
   ],
   "scripts": {
     "test": "npm --prefix server run test",
