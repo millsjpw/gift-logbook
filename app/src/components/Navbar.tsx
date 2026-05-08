@@ -1,6 +1,14 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { clearTokens } from "../api/tokens";
 import { isAuthenticated } from "../api/auth";
+import {
+  ArrowRightEndOnRectangleIcon,
+  ArrowRightStartOnRectangleIcon,
+  ClipboardDocumentListIcon,
+  GiftIcon,
+  Squares2X2Icon,
+  UsersIcon,
+} from "@heroicons/react/24/solid";
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -12,35 +20,49 @@ export default function Navbar() {
     navigate("/login");
   }
 
+  function isActive(path: string) {
+    if (path === "/") return location.pathname === "/";
+    return location.pathname.includes(path);
+  }
+
   function navClass(path: string) {
-    if (path === "/") {
-      // Special case for root path - only active if we're exactly on it
-      return location.pathname === "/"
-        ? "bg-blue-600 text-white px-3 py-2 rounded-md text-sm font-medium"
-        : "hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium";
-    }
-    const active = location.pathname.includes(path);
-    return `px-3 py-2 rounded-md text-sm font-medium ${
-      active ? "bg-blue-600 text-white" : "hover:bg-gray-700"
+    return `flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium ${
+      isActive(path) ? "bg-blue-600 text-white" : "hover:bg-gray-700"
     }`;
   }
 
   return (
     <nav className="bg-gray-800 text-white px-6 py-4 flex items-center justify-between">
-      <div className="flex space-x-4">
+      <div className="flex space-x-1">
         {loggedIn && (
           <>
             <Link to="/" className={navClass("/")}>
-              Dashboard
+              <Squares2X2Icon className="w-5 h-5 shrink-0" />
+              <span className={isActive("/") ? "" : "hidden sm:inline"}>
+                Dashboard
+              </span>
             </Link>
             <Link to="/people" className={navClass("/people")}>
-              My People
+              <UsersIcon className="w-5 h-5 shrink-0" />
+              <span className={isActive("/people") ? "" : "hidden sm:inline"}>
+                My People
+              </span>
             </Link>
             <Link to="/lists" className={navClass("/lists")}>
-              My Lists
+              <ClipboardDocumentListIcon className="w-5 h-5 shrink-0" />
+              <span className={isActive("/lists") ? "" : "hidden sm:inline"}>
+                My Lists
+              </span>
             </Link>
             <Link to="/gift-exchanges" className={navClass("/gift-exchanges")}>
-              Gift Exchanges
+              <GiftIcon className="w-5 h-5 shrink-0" />
+              <span
+                className={
+                  isActive("/gift-exchanges") ? "" : "hidden sm:inline"
+                }
+              >
+                Gift Exchanges
+              </span>
             </Link>
           </>
         )}
@@ -49,16 +71,18 @@ export default function Navbar() {
       {loggedIn ? (
         <button
           onClick={handleLogout}
-          className="bg-red-600 hover:bg-red-700 px-3 py-2 rounded-md text-sm font-medium"
+          className="flex items-center gap-1.5 bg-red-600 hover:bg-red-700 px-3 py-2 rounded-md text-sm font-medium"
         >
-          Logout
+          <ArrowRightStartOnRectangleIcon className="w-5 h-5 shrink-0" />
+          <span className="hidden sm:inline">Logout</span>
         </button>
       ) : (
         <Link
           to="/login"
-          className="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium"
+          className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium"
         >
-          Login
+          <ArrowRightEndOnRectangleIcon className="w-5 h-5 shrink-0" />
+          <span className="hidden sm:inline">Login</span>
         </Link>
       )}
     </nav>
