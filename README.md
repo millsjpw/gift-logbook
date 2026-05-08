@@ -1,6 +1,4 @@
-![test badge](https://github.com/millsjpw/gift-logbook/actions/workflows/Tests.yml/badge.svg)
-
-[![Deploy API](https://github.com/millsjpw/gift-logbook/actions/workflows/Deploy.yml/badge.svg)](https://github.com/millsjpw/gift-logbook/actions/workflows/Deploy.yml)
+![CI](https://github.com/millsjpw/gift-logbook/actions/workflows/ci.yml/badge.svg) [![Release](https://github.com/millsjpw/gift-logbook/actions/workflows/release.yml/badge.svg)](https://github.com/millsjpw/gift-logbook/actions/workflows/release.yml) [![Deploy API](https://github.com/millsjpw/gift-logbook/actions/workflows/deploy-api.yml/badge.svg)](https://github.com/millsjpw/gift-logbook/actions/workflows/deploy-api.yml)
 
 # Gift Logbook API
 
