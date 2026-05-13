@@ -1,52 +1,82 @@
 import * as personsDb from "../db/queries/persons.js";
 import * as personTagsDb from "../db/queries/person_tags.js";
-import { Person } from "../db/schema.js";
+import * as tagsDb from "../db/queries/tags.js";
+import { Person, Tag } from "../db/schema.js";
 import { NotFoundError, UserForbiddenError } from "../api/errors.js";
+
+export type PersonWithTags = Person & { tags: Tag[] };
+
+async function hydratePerson(person: Person): Promise<PersonWithTags> {
+  const personTags = await personTagsDb.getTagsByPersonId(person.id);
+  return { ...person, tags: personTags };
+}
+
+async function resolveAndSyncPersonTags(
+  personId: string,
+  userId: string,
+  tagNames: string[],
+): Promise<Tag[]> {
+  const resolvedTags = await Promise.all(
+    tagNames.map((name) => tagsDb.findOrCreateTag(userId, name)),
+  );
+  await personTagsDb.syncTagsForPerson(
+    personId,
+    resolvedTags.map((t) => t.id),
+  );
+  return resolvedTags;
+}
 
 export async function addPerson(
   userId: string,
   name: string,
-  meta?: Record<string, unknown>,
   birthMonth?: number | null,
   birthDay?: number | null,
   birthYear?: number | null,
-): Promise<Person> {
-  return await personsDb.createPerson(
+  tags?: string[],
+): Promise<PersonWithTags> {
+  const person = await personsDb.createPerson(
     userId,
     name,
-    meta,
     birthMonth,
     birthDay,
     birthYear,
   );
+  const resolvedTags = tags?.length
+    ? await resolveAndSyncPersonTags(person.id, userId, tags)
+    : [];
+  return { ...person, tags: resolvedTags };
 }
 
-export async function getPersonById(id: string): Promise<Person | null> {
-  return await personsDb.getPersonById(id);
+export async function getPersonById(id: string): Promise<PersonWithTags | null> {
+  const person = await personsDb.getPersonById(id);
+  if (!person) return null;
+  return hydratePerson(person);
 }
 
 export async function getAllPeopleCreatedByUser(
   userId: string,
-): Promise<Person[]> {
-  return await personsDb.getPersonsByUserId(userId);
+): Promise<PersonWithTags[]> {
+  const people = await personsDb.getPersonsByUserId(userId);
+  return Promise.all(people.map(hydratePerson));
 }
 
 export async function searchPeopleByName(
   userId: string,
   name: string,
-): Promise<Person[]> {
-  return await personsDb.getPersonsByName(userId, name);
+): Promise<PersonWithTags[]> {
+  const people = await personsDb.getPersonsByName(userId, name);
+  return Promise.all(people.map(hydratePerson));
 }
 
 export async function updatePerson(
   userId: string,
   id: string,
   name?: string,
-  meta?: Record<string, unknown>,
   birthMonth?: number | null,
   birthDay?: number | null,
   birthYear?: number | null,
-): Promise<Person> {
+  tags?: string[],
+): Promise<PersonWithTags> {
   const person = await personsDb.getPersonById(id);
   if (!person) {
     throw new NotFoundError("Person not found");
@@ -56,14 +86,18 @@ export async function updatePerson(
       "You do not have permission to update this person",
     );
   }
-  return await personsDb.updatePerson(
+  const updated = await personsDb.updatePerson(
     id,
     name,
-    meta,
     birthMonth,
     birthDay,
     birthYear,
   );
+  const resolvedTags =
+    tags !== undefined
+      ? await resolveAndSyncPersonTags(updated.id, userId, tags)
+      : await personTagsDb.getTagsByPersonId(updated.id);
+  return { ...updated, tags: resolvedTags };
 }
 
 function ordinalSuffix(n: number): string {
@@ -189,7 +223,7 @@ export async function removeTagFromPerson(
 export async function getTagsForPerson(
   userId: string,
   personId: string,
-): Promise<string[]> {
+): Promise<Tag[]> {
   const person = await personsDb.getPersonById(personId);
   if (!person) {
     throw new NotFoundError("Person not found");
@@ -199,6 +233,5 @@ export async function getTagsForPerson(
       "You do not have permission to view this person's tags",
     );
   }
-  const personTags = await personTagsDb.getTagsByPersonId(personId);
-  return personTags.map((pt) => pt.tagId);
+  return await personTagsDb.getTagsByPersonId(personId);
 }

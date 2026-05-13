@@ -6,7 +6,6 @@ import { eq, and, like } from "drizzle-orm";
 export async function createPerson(
   userId: string,
   name: string,
-  meta: any,
   birthMonth?: number | null,
   birthDay?: number | null,
   birthYear?: number | null,
@@ -14,7 +13,6 @@ export async function createPerson(
   const person = {
     userId,
     name,
-    meta,
     birthMonth: birthMonth ?? null,
     birthDay: birthDay ?? null,
     birthYear: birthYear ?? null,
@@ -62,14 +60,12 @@ export async function getPersonsByName(userId: string, name: string) {
 export async function updatePerson(
   id: string,
   name?: string,
-  meta?: any,
   birthMonth?: number | null,
   birthDay?: number | null,
   birthYear?: number | null,
 ) {
   const updateData: Partial<typeof persons.$inferInsert> = {};
   if (name) updateData.name = name;
-  if (meta) updateData.meta = meta;
   if (birthMonth !== undefined) updateData.birthMonth = birthMonth;
   if (birthDay !== undefined) updateData.birthDay = birthDay;
   if (birthYear !== undefined) updateData.birthYear = birthYear;

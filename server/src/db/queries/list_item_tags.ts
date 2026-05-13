@@ -38,3 +38,18 @@ export async function removeAllTagsFromListItem(
 ): Promise<void> {
   await db.delete(listItemTags).where(eq(listItemTags.listItemId, listItemId));
 }
+
+export async function syncTagsForListItem(
+  listItemId: string,
+  tagIds: string[],
+): Promise<void> {
+  await db
+    .delete(listItemTags)
+    .where(eq(listItemTags.listItemId, listItemId));
+  if (tagIds.length > 0) {
+    await db
+      .insert(listItemTags)
+      .values(tagIds.map((tagId) => ({ listItemId, tagId })))
+      .onConflictDoNothing();
+  }
+}

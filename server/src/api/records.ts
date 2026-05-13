@@ -6,23 +6,22 @@ import {
 } from "./errors.js";
 import { respondWithJSON } from "./json.js";
 import * as recordsService from "../services/records.js";
-import { GiftRecord } from "../db/schema.js";
 
 export async function handleAddRecord(req: Request, res: Response) {
   const userId = req.auth!.userId;
-  const { personId, itemText, amount, date, meta } = req.body;
+  const { personId, itemText, amount, date, tags } = req.body;
 
   if (!personId || !itemText) {
     throw new BadRequestError("Missing required fields: personId, itemText");
   }
 
-  const record: GiftRecord = await recordsService.addRecord(
+  const record = await recordsService.addRecord(
     userId,
     personId,
     itemText,
     amount,
     date ? new Date(date) : undefined,
-    meta,
+    tags,
   );
   respondWithJSON(res, 201, record);
 }
@@ -74,11 +73,11 @@ export async function handleGetRecordsByItemText(req: Request, res: Response) {
 export async function handleUpdateRecord(req: Request, res: Response) {
   const userId = req.auth!.userId;
   const recordId = req.params.id as string;
-  const { itemText, amount, date, meta } = req.body;
+  const { itemText, amount, date, tags } = req.body;
 
-  if (!itemText && !amount && !date && !meta) {
+  if (!itemText && amount === undefined && !date && tags === undefined) {
     throw new BadRequestError(
-      "At least one field (itemText, amount, date, meta) must be provided for update",
+      "At least one field (itemText, amount, date, tags) must be provided for update",
     );
   }
 
@@ -88,7 +87,7 @@ export async function handleUpdateRecord(req: Request, res: Response) {
     itemText,
     amount,
     date ? new Date(date) : undefined,
-    meta,
+    tags,
   );
   respondWithJSON(res, 200, updatedRecord);
 }

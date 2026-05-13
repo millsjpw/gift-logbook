@@ -87,7 +87,6 @@ export const persons = pgTable(
     birthMonth: integer("birth_month"),
     birthDay: integer("birth_day"),
     birthYear: integer("birth_year"),
-    meta: jsonb("meta").notNull().default("{}"),
   },
   (table) => [
     uniqueIndex("user_person_name_index").on(table.userId, lower(table.name)),
@@ -189,7 +188,6 @@ export const records = pgTable(
     itemText: varchar("item_text", { length: 256 }).notNull(),
     amount: numeric("amount", { precision: 10, scale: 2 }),
     date: timestamp("date").notNull(),
-    meta: jsonb("meta").notNull().default("{}"),
   },
   (table) => [
     index("user_record_date_index").on(table.userId, table.date),

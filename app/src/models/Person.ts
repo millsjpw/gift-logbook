@@ -1,3 +1,5 @@
+import type { Tag } from "./Tag";
+
 export type Person = {
   id: string;
   name: string;
@@ -6,5 +8,5 @@ export type Person = {
   birthMonth: number | null;
   birthDay: number | null;
   birthYear: number | null;
-  meta?: [];
+  tags: Tag[];
 };

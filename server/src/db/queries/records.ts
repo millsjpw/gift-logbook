@@ -8,7 +8,6 @@ export async function addRecord(
   itemText: string,
   amount?: number,
   date?: Date,
-  meta?: any,
 ) {
   const record: NewGiftRecord = {
     userId,
@@ -16,7 +15,6 @@ export async function addRecord(
     itemText,
     amount: amount !== undefined ? String(amount) : null,
     date: date ?? new Date(),
-    meta: meta ?? {},
   };
   const [createdRecord] = await db.insert(records).values(record).returning();
   return createdRecord;
@@ -60,15 +58,13 @@ export async function getRecordsByItemText(userId: string, itemText: string) {
 export async function updateRecord(
   id: string,
   itemText?: string,
-  amount?: number,
+  amount?: number | null,
   date?: Date,
-  meta?: any,
 ) {
   const updateData: Partial<NewGiftRecord> = {};
   if (itemText) updateData.itemText = itemText;
-  if (amount !== undefined) updateData.amount = String(amount);
+  if (amount !== undefined) updateData.amount = amount !== null ? String(amount) : null;
   if (date) updateData.date = date;
-  if (meta) updateData.meta = meta;
 
   const [updatedRecord] = await db
     .update(records)
