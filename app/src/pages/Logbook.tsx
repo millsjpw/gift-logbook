@@ -180,10 +180,11 @@ export default function Logbook() {
     setEditSaving(true);
     setRowError(null);
     try {
-      const body: Record<string, unknown> = { itemText: trimmed, meta: {} };
-      if (editDraft.amount !== "") {
-        body.amount = parseFloat(editDraft.amount);
-      }
+      const body: Record<string, unknown> = {
+        itemText: trimmed,
+        amount: editDraft.amount !== "" ? parseFloat(editDraft.amount) : null,
+        meta: {},
+      };
       if (editDraft.date) {
         body.date = calendarDateToISO(editDraft.date);
       }
