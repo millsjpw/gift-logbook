@@ -4,6 +4,7 @@ import { isAuthenticated } from "../api/auth";
 import {
   ArrowRightEndOnRectangleIcon,
   ArrowRightStartOnRectangleIcon,
+  BookOpenIcon,
   ClipboardDocumentListIcon,
   GiftIcon,
   Squares2X2Icon,
@@ -61,7 +62,13 @@ export default function Navbar() {
                   isActive("/gift-exchanges") ? "" : "hidden sm:inline"
                 }
               >
-                Gift Exchanges
+                Exchanges
+              </span>
+            </Link>
+            <Link to="/logbook" className={navClass("/logbook")}>
+              <BookOpenIcon className="w-5 h-5 shrink-0" />
+              <span className={isActive("/logbook") ? "" : "hidden sm:inline"}>
+                Logbook
               </span>
             </Link>
           </>

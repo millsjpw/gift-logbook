@@ -81,7 +81,7 @@ export async function updateRecord(
   userId: string,
   id: string,
   itemText?: string,
-  amount?: number,
+  amount?: number | null,
   date?: Date,
   meta?: any,
 ): Promise<GiftRecord> {
