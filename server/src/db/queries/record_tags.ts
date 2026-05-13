@@ -1,33 +1,49 @@
 import { db } from "../db.js";
-import { recordTags, NewRecordTag } from "../schema.js";
+import { recordTags, tags, NewRecordTag, Tag } from "../schema.js";
 import { eq, and } from "drizzle-orm";
 
-export async function addTagToRecord(recordId: string, tagId: string) {
-  const recordTag: NewRecordTag = {
-    recordId,
-    tagId,
-  };
-  const [createdRecordTag] = await db
+export async function addTagToRecord(
+  recordId: string,
+  tagId: string,
+): Promise<NewRecordTag> {
+  const [row] = await db
     .insert(recordTags)
-    .values(recordTag)
+    .values({ recordId, tagId })
     .returning();
-  return createdRecordTag;
+  return row;
 }
 
-export async function getTagsByRecordId(recordId: string) {
-  const recordTagsList = await db
-    .select()
+export async function getTagsByRecordId(recordId: string): Promise<Tag[]> {
+  const rows = await db
+    .select({ tag: tags })
     .from(recordTags)
+    .innerJoin(tags, eq(recordTags.tagId, tags.id))
     .where(eq(recordTags.recordId, recordId));
-  return recordTagsList;
+  return rows.map((r) => r.tag);
 }
 
-export async function removeTagFromRecord(recordId: string, tagId: string) {
+export async function syncTagsForRecord(
+  recordId: string,
+  tagIds: string[],
+): Promise<void> {
+  await db.delete(recordTags).where(eq(recordTags.recordId, recordId));
+  if (tagIds.length > 0) {
+    await db
+      .insert(recordTags)
+      .values(tagIds.map((tagId) => ({ recordId, tagId })))
+      .onConflictDoNothing();
+  }
+}
+
+export async function removeTagFromRecord(
+  recordId: string,
+  tagId: string,
+): Promise<void> {
   await db
     .delete(recordTags)
     .where(and(eq(recordTags.recordId, recordId), eq(recordTags.tagId, tagId)));
 }
 
-export async function removeAllTagsFromRecord(recordId: string) {
+export async function removeAllTagsFromRecord(recordId: string): Promise<void> {
   await db.delete(recordTags).where(eq(recordTags.recordId, recordId));
 }

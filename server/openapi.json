@@ -28,281 +28,199 @@
       "User": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "name": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string",
-            "format": "email"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
         },
         "required": ["id", "name", "email", "createdAt", "updatedAt"]
       },
       "LoginRequest": {
         "type": "object",
         "properties": {
-          "email": {
-            "type": "string"
-          },
-          "password": {
-            "type": "string"
-          }
+          "email": { "type": "string", "format": "email" },
+          "password": { "type": "string" }
         },
         "required": ["email", "password"]
       },
       "LoginResponse": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
-          },
-          "createdAt": {
-            "type": "string"
-          },
-          "updatedAt": {
-            "type": "string"
-          },
-          "token": {
-            "type": "string"
-          },
-          "refreshToken": {
-            "type": "string"
-          }
-        }
-      },
-      "Person": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "name": {
-            "type": "string"
-          },
-          "userId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "meta": {
-            "type": ["object", "array", "null"]
-          },
-          "birthMonth": {
-            "type": ["integer", "null"],
-            "minimum": 1,
-            "maximum": 12,
-            "description": "Month of birth (1–12), or null if not set"
-          },
-          "birthDay": {
-            "type": ["integer", "null"],
-            "minimum": 1,
-            "maximum": 31,
-            "description": "Day of birth (1–31), or null if not set"
-          },
-          "birthYear": {
-            "type": ["integer", "null"],
-            "minimum": 1900,
-            "description": "Year of birth (≥ 1900), or null if not set"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "ListItem": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          },
-          "url": {
-            "type": "string"
-          },
-          "listId": {
-            "type": "string"
-          }
-        }
-      },
-      "List": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "userId": {
-            "type": "string"
-          },
-          "personId": {
-            "type": ["string", "null"]
-          },
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ListItem"
-            }
-          }
-        }
-      },
-      "GiftRecord": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "userId": {
-            "type": "string"
-          },
-          "personId": {
-            "type": ["string", "null"]
-          },
-          "itemText": {
-            "type": "string"
-          },
-          "amount": {
-            "type": ["number", "null"]
-          },
-          "date": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "meta": {
-            "type": ["object", "array", "null"]
-          },
-          "tags": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" },
+          "token": { "type": "string" },
+          "refreshToken": { "type": "string" }
         },
-        "required": ["id", "userId", "itemText", "date"]
+        "required": [
+          "id",
+          "name",
+          "email",
+          "createdAt",
+          "updatedAt",
+          "token",
+          "refreshToken"
+        ]
       },
       "Tag": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string"
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "userId": { "type": "string", "format": "uuid" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        },
+        "required": ["id", "name", "userId", "createdAt", "updatedAt"]
+      },
+      "Person": {
+        "type": "object",
+        "description": "A person with their associated tags.",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "userId": { "type": "string", "format": "uuid" },
+          "birthMonth": {
+            "type": ["integer", "null"],
+            "minimum": 1,
+            "maximum": 12
           },
-          "name": {
-            "type": "string"
+          "birthDay": {
+            "type": ["integer", "null"],
+            "minimum": 1,
+            "maximum": 31
           },
-          "userId": {
-            "type": "string"
+          "birthYear": { "type": ["integer", "null"], "minimum": 1900 },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" },
+          "tags": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Tag" }
           }
-        }
+        },
+        "required": ["id", "name", "userId", "createdAt", "updatedAt", "tags"]
+      },
+      "ListItem": {
+        "type": "object",
+        "description": "An item on a wish list, with its associated tags.",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "title": { "type": "string" },
+          "url": { "type": ["string", "null"], "format": "uri" },
+          "listId": { "type": "string", "format": "uuid" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" },
+          "tags": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Tag" }
+          }
+        },
+        "required": ["id", "title", "listId", "createdAt", "updatedAt", "tags"]
+      },
+      "List": {
+        "type": "object",
+        "description": "A wish list with its items.",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "userId": { "type": "string", "format": "uuid" },
+          "personId": { "type": ["string", "null"], "format": "uuid" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" },
+          "items": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ListItem" }
+          }
+        },
+        "required": ["id", "name", "userId", "createdAt", "updatedAt", "items"]
+      },
+      "GiftRecord": {
+        "type": "object",
+        "description": "A logged gift record with its associated tags.",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "userId": { "type": "string", "format": "uuid" },
+          "personId": { "type": ["string", "null"], "format": "uuid" },
+          "itemText": { "type": "string" },
+          "amount": {
+            "type": ["string", "null"],
+            "description": "Decimal amount as string (e.g. \"25.00\"), or null."
+          },
+          "date": { "type": "string", "format": "date-time" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" },
+          "tags": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Tag" }
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "itemText",
+          "date",
+          "createdAt",
+          "updatedAt",
+          "tags"
+        ]
       },
       "Assignment": {
         "type": "object",
         "properties": {
-          "giverId": {
-            "type": "string"
-          },
-          "receiverId": {
-            "type": "string"
-          }
+          "giverId": { "type": "string", "format": "uuid" },
+          "receiverId": { "type": "string", "format": "uuid" }
         },
         "required": ["giverId", "receiverId"]
       },
       "FullExchange": {
         "type": "object",
         "properties": {
-          "exchange": {
-            "type": "object"
-          },
-          "participants": {
-            "type": "array",
-            "items": {
-              "type": "object"
-            }
-          },
+          "exchange": { "type": "object" },
+          "participants": { "type": "array", "items": { "type": "object" } },
           "assignments": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Assignment"
-            }
+            "items": { "$ref": "#/components/schemas/Assignment" }
           },
-          "exclusions": {
-            "type": "array",
-            "items": {
-              "type": "object"
-            }
-          }
+          "exclusions": { "type": "array", "items": { "type": "object" } }
         }
       }
     }
   },
-  "security": [
-    {
-      "bearerAuth": []
-    }
-  ],
+  "security": [{ "bearerAuth": [] }],
   "paths": {
     "/health": {
       "get": {
         "summary": "Health check",
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": []
+        "security": [],
+        "responses": { "200": { "description": "OK" } }
       }
     },
     "/auth/login": {
       "post": {
         "summary": "Login",
+        "security": [],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LoginRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/LoginRequest" }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Login response",
+            "description": "Successful login",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginResponse"
-                }
+                "schema": { "$ref": "#/components/schemas/LoginResponse" }
               }
             }
-          }
-        },
-        "security": []
+          },
+          "401": { "description": "Invalid credentials" }
+        }
       }
     },
     "/auth/refresh": {
@@ -310,24 +228,27 @@
         "summary": "Refresh access token",
         "responses": {
           "200": {
-            "description": "New tokens"
-          }
+            "description": "New token pair",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/LoginResponse" }
+              }
+            }
+          },
+          "401": { "description": "Invalid or expired refresh token" }
         }
       }
     },
     "/auth/logout": {
       "post": {
         "summary": "Logout",
-        "responses": {
-          "204": {
-            "description": "No content"
-          }
-        }
+        "responses": { "204": { "description": "Session revoked" } }
       }
     },
     "/users": {
       "post": {
         "summary": "Create user",
+        "security": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -335,15 +256,9 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "email": {
-                    "type": "string"
-                  },
-                  "password": {
-                    "type": "string"
-                  }
+                  "name": { "type": "string" },
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string" }
                 },
                 "required": ["name", "email", "password"]
               }
@@ -352,59 +267,69 @@
         },
         "responses": {
           "201": {
-            "description": "Created",
+            "description": "User created",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
-                }
+                "schema": { "$ref": "#/components/schemas/User" }
               }
             }
-          },
-          "security": []
+          }
         }
       }
     },
     "/users/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
+      ],
       "get": {
-        "summary": "Get user",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "summary": "Get user by ID",
         "responses": {
           "200": {
+            "description": "User",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
-                }
+                "schema": { "$ref": "#/components/schemas/User" }
               }
             }
-          }
+          },
+          "404": { "description": "Not found" }
         }
       },
       "put": {
         "summary": "Update user",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "Updated"
+            "description": "Updated user",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/User" }
+              }
+            }
           }
         }
       },
       "delete": {
         "summary": "Delete user",
-        "responses": {
-          "204": {
-            "description": "No content"
-          }
-        }
+        "responses": { "204": { "description": "Deleted" } }
       }
     },
     "/persons": {
@@ -417,12 +342,7 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "meta": {
-                    "type": ["object", "array"]
-                  },
+                  "name": { "type": "string" },
                   "birthMonth": {
                     "type": "integer",
                     "minimum": 1,
@@ -433,10 +353,8 @@
                     "minimum": 1,
                     "maximum": 31
                   },
-                  "birthYear": {
-                    "type": "integer",
-                    "minimum": 1900
-                  }
+                  "birthYear": { "type": "integer", "minimum": 1900 },
+                  "tags": { "type": "array", "items": { "type": "string" } }
                 },
                 "required": ["name"]
               }
@@ -445,11 +363,55 @@
         },
         "responses": {
           "201": {
-            "description": "Created",
+            "description": "Person created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Person" }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Get all persons for the authenticated user",
+        "responses": {
+          "200": {
+            "description": "Persons",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Person"
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Person" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete all persons created by the authenticated user",
+        "responses": { "204": { "description": "All persons deleted" } }
+      }
+    },
+    "/persons/search": {
+      "get": {
+        "summary": "Search persons by name",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matching persons",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Person" }
                 }
               }
             }
@@ -457,66 +419,129 @@
         }
       }
     },
-    "/persons/search": {
+    "/persons/upcoming-birthdays": {
       "get": {
-        "summary": "Search persons",
+        "summary": "Get persons with upcoming birthdays",
         "parameters": [
           {
-            "name": "name",
+            "name": "limit",
             "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
+            "required": false,
+            "schema": { "type": "integer", "minimum": 1, "default": 5 }
+          },
+          {
+            "name": "daysAhead",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "minimum": 0, "default": 180 },
+            "description": "How many days ahead to look."
           }
         ],
         "responses": {
           "200": {
-            "description": "List"
+            "description": "Persons with upcoming birthdays",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Person" }
+                }
+              }
+            }
           }
         }
       }
     },
     "/persons/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
+      ],
       "get": {
-        "summary": "Get person",
+        "summary": "Get person by ID",
         "responses": {
           "200": {
-            "description": "Person"
-          }
+            "description": "Person",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Person" }
+              }
+            }
+          },
+          "404": { "description": "Not found" }
         }
       },
       "put": {
-        "summary": "Update person"
-      },
-      "delete": {
-        "summary": "Delete person",
-        "responses": {
-          "204": {
-            "description": "No content"
-          }
-        }
-      }
-    },
-    "/lists": {
-      "post": {
-        "summary": "Create list",
+        "summary": "Update person",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
-                  "name": {
-                    "type": "string"
+                  "name": { "type": "string" },
+                  "birthMonth": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 12
                   },
-                  "personId": {
-                    "type": "string"
+                  "birthDay": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 31
                   },
+                  "birthYear": { "type": "integer", "minimum": 1900 },
+                  "tags": { "type": "array", "items": { "type": "string" } }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated person",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Person" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete person",
+        "responses": { "204": { "description": "Deleted" } }
+      }
+    },
+    "/lists": {
+      "post": {
+        "summary": "Create list",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "personId": { "type": "string", "format": "uuid" },
                   "items": {
                     "type": "array",
                     "items": {
-                      "type": "object"
+                      "type": "object",
+                      "properties": {
+                        "title": { "type": "string" },
+                        "url": { "type": "string", "format": "uri" },
+                        "tags": {
+                          "type": "array",
+                          "items": { "type": "string" }
+                        }
+                      },
+                      "required": ["title"]
                     }
                   }
                 },
@@ -527,11 +552,25 @@
         },
         "responses": {
           "201": {
-            "description": "Created",
+            "description": "List created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/List" }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Get all lists for the authenticated user",
+        "responses": {
+          "200": {
+            "description": "Lists",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/List"
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/List" }
                 }
               }
             }
@@ -541,70 +580,249 @@
     },
     "/lists/search": {
       "get": {
+        "summary": "Search lists by name",
         "parameters": [
           {
             "name": "name",
             "in": "query",
             "required": true,
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string" }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Matching lists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/List" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lists/recent": {
+      "get": {
+        "summary": "Get recently updated lists",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "minimum": 1, "default": 5 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recent lists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/List" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lists/person/{personId}": {
+      "get": {
+        "summary": "Get lists by person",
+        "parameters": [
+          {
+            "name": "personId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lists for the given person",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/List" }
+                }
+              }
+            }
           }
         }
       }
     },
     "/lists/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
+      ],
       "get": {
+        "summary": "Get list by ID",
         "responses": {
           "200": {
-            "description": "List"
-          }
+            "description": "List",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/List" }
+              }
+            }
+          },
+          "404": { "description": "Not found" }
         }
       },
       "put": {
-        "responses": {
-          "200": {
-            "description": "Updated"
-          }
-        }
-      },
-      "delete": {
-        "responses": {
-          "204": {
-            "description": "No content"
-          }
-        }
-      }
-    },
-    "/records": {
-      "post": {
-        "summary": "Add record",
+        "summary": "Update list",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
-                  "personId": {
-                    "type": "string"
-                  },
-                  "itemText": {
-                    "type": "string"
-                  },
-                  "amount": {
-                    "type": "number"
-                  },
-                  "date": {
-                    "type": "string"
-                  },
-                  "meta": {
-                    "type": ["object", "array"]
+                  "name": { "type": "string" },
+                  "personId": { "type": "string", "format": "uuid" },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "Omit for new items."
+                        },
+                        "title": { "type": "string" },
+                        "url": { "type": "string", "format": "uri" },
+                        "tags": {
+                          "type": "array",
+                          "items": { "type": "string" }
+                        }
+                      },
+                      "required": ["title"]
+                    }
                   }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated list",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/List" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete list",
+        "responses": { "204": { "description": "Deleted" } }
+      }
+    },
+    "/lists/{listId}/items/{itemId}": {
+      "parameters": [
+        {
+          "name": "listId",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        },
+        {
+          "name": "itemId",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
+      ],
+      "delete": {
+        "summary": "Remove an item from a list",
+        "responses": { "204": { "description": "Item removed" } }
+      }
+    },
+    "/lists/{listId}/items/{itemId}/tags": {
+      "parameters": [
+        {
+          "name": "listId",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        },
+        {
+          "name": "itemId",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
+      ],
+      "post": {
+        "summary": "Add a tag to a list item",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { "tag": { "type": "string" } },
+                "required": ["tag"]
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Tag added" } }
+      }
+    },
+    "/lists/{listId}/items/{itemId}/tags/{tagId}": {
+      "parameters": [
+        {
+          "name": "listId",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        },
+        {
+          "name": "itemId",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        },
+        {
+          "name": "tagId",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
+      ],
+      "delete": {
+        "summary": "Remove a tag from a list item",
+        "responses": { "204": { "description": "Tag removed" } }
+      }
+    },
+    "/records": {
+      "post": {
+        "summary": "Add a gift record",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "personId": { "type": "string", "format": "uuid" },
+                  "itemText": { "type": "string" },
+                  "amount": { "type": "number", "minimum": 0 },
+                  "date": { "type": "string", "format": "date-time" },
+                  "tags": { "type": "array", "items": { "type": "string" } }
                 },
                 "required": ["personId", "itemText"]
               }
@@ -613,311 +831,491 @@
         },
         "responses": {
           "201": {
-            "description": "Created",
+            "description": "Record created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GiftRecord" }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Get all gift records for the authenticated user",
+        "responses": {
+          "200": {
+            "description": "Records",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GiftRecord"
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/GiftRecord" }
                 }
               }
             }
           }
         }
       },
-      "/records/search": {
-        "get": {
-          "parameters": [
-            {
-              "name": "itemText",
-              "in": "query",
-              "required": true,
+      "delete": {
+        "summary": "Delete all gift records for the authenticated user",
+        "responses": { "204": { "description": "All records deleted" } }
+      }
+    },
+    "/records/search": {
+      "get": {
+        "summary": "Search gift records by item text",
+        "parameters": [
+          {
+            "name": "itemText",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matching records",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/GiftRecord" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/records/person/{personId}": {
+      "parameters": [
+        {
+          "name": "personId",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
+      ],
+      "get": {
+        "summary": "Get all gift records for a specific person",
+        "responses": {
+          "200": {
+            "description": "Records for the person",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/GiftRecord" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete all gift records for a specific person",
+        "responses": { "204": { "description": "Records deleted" } }
+      }
+    },
+    "/records/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
+      ],
+      "get": {
+        "summary": "Get gift record by ID",
+        "responses": {
+          "200": {
+            "description": "Record",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GiftRecord" }
+              }
+            }
+          },
+          "404": { "description": "Not found" }
+        }
+      },
+      "put": {
+        "summary": "Update gift record",
+        "requestBody": {
+          "content": {
+            "application/json": {
               "schema": {
-                "type": "string"
+                "type": "object",
+                "properties": {
+                  "itemText": { "type": "string" },
+                  "amount": { "type": "number", "minimum": 0 },
+                  "date": { "type": "string", "format": "date-time" },
+                  "personId": { "type": "string", "format": "uuid" },
+                  "tags": { "type": "array", "items": { "type": "string" } }
+                }
               }
             }
-          ],
-          "responses": {
-            "200": {
-              "description": "OK"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated record",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GiftRecord" }
+              }
             }
           }
         }
       },
-      "/records/{id}": {
-        "get": {
-          "responses": {
-            "200": {
-              "description": "Record"
-            }
-          }
-        },
-        "put": {
-          "responses": {
-            "200": {
-              "description": "Updated"
-            }
-          }
-        },
-        "delete": {
-          "responses": {
-            "204": {
-              "description": "No content"
-            }
-          }
+      "delete": {
+        "summary": "Delete gift record",
+        "responses": { "204": { "description": "Deleted" } }
+      }
+    },
+    "/records/{id}/tags": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
         }
-      },
-      "/records/{id}/tags": {
-        "post": {
-          "requestBody": {
+      ],
+      "get": {
+        "summary": "Get all tags for a gift record",
+        "responses": {
+          "200": {
+            "description": "Tags",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "tag": {
-                      "type": "string"
-                    }
-                  },
-                  "required": ["tag"]
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Tag" }
                 }
               }
-            }
-          },
-          "responses": {
-            "200": {
-              "description": "Updated"
-            }
-          }
-        },
-        "get": {
-          "responses": {
-            "200": {
-              "description": "List of tags"
             }
           }
         }
       },
-      "/tags": {
-        "post": {
-          "requestBody": {
+      "post": {
+        "summary": "Add a tag to a gift record",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { "tag": { "type": "string" } },
+                "required": ["tag"]
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Tag added" } }
+      }
+    },
+    "/records/{id}/tags/{tag}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        },
+        {
+          "name": "tag",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string" },
+          "description": "Tag name to remove."
+        }
+      ],
+      "delete": {
+        "summary": "Remove a tag from a gift record by name",
+        "responses": { "204": { "description": "Tag removed" } }
+      }
+    },
+    "/tags": {
+      "post": {
+        "summary": "Create a tag",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { "name": { "type": "string" } },
+                "required": ["name"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Tag created",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "name": {
-                      "type": "string"
-                    }
-                  },
-                  "required": ["name"]
-                }
-              }
-            }
-          },
-          "responses": {
-            "201": {
-              "description": "Created",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/Tag"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "/tags/{id}": {
-          "get": {
-            "responses": {
-              "200": {
-                "description": "Tag"
-              }
-            }
-          },
-          "put": {
-            "requestBody": {
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "name": {
-                        "type": "string"
-                      }
-                    },
-                    "required": ["name"]
-                  }
-                }
-              }
-            },
-            "responses": {
-              "200": {
-                "description": "Updated"
-              }
-            }
-          },
-          "delete": {
-            "responses": {
-              "204": {
-                "description": "No content"
-              }
-            }
-          }
-        },
-        "/exchanges": {
-          "post": {
-            "requestBody": {
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "name": {
-                        "type": "string"
-                      }
-                    },
-                    "required": ["name"]
-                  }
-                }
-              }
-            },
-            "responses": {
-              "201": {
-                "description": "Created"
-              }
-            }
-          },
-          "get": {
-            "responses": {
-              "200": {
-                "description": "List"
-              }
-            }
-          }
-        },
-        "/exchanges/{id}": {
-          "get": {
-            "responses": {
-              "200": {
-                "description": "FullExchange"
-              }
-            }
-          },
-          "put": {
-            "responses": {
-              "200": {
-                "description": "Updated"
-              }
-            }
-          },
-          "delete": {
-            "responses": {
-              "204": {
-                "description": "No content"
-              }
-            }
-          }
-        },
-        "/exchanges/{id}/participants": {
-          "post": {
-            "requestBody": {
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "personId": {
-                        "type": "string"
-                      }
-                    },
-                    "required": ["personId"]
-                  }
-                }
-              }
-            },
-            "responses": {
-              "201": {
-                "description": "Created"
-              }
-            }
-          }
-        },
-        "/exchanges/{id}/exclusions": {
-          "post": {
-            "requestBody": {
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "personId": {
-                        "type": "string"
-                      },
-                      "excludedPersonIds": {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        }
-                      }
-                    },
-                    "required": ["personId", "excludedPersonIds"]
-                  }
-                }
-              }
-            },
-            "responses": {
-              "204": {
-                "description": "No content"
-              }
-            }
-          }
-        },
-        "/exchanges/{id}/generate": {
-          "get": {
-            "responses": {
-              "200": {
-                "description": "Assignments"
-              }
-            }
-          }
-        },
-        "/exchanges/{id}/clone": {
-          "post": {
-            "responses": {
-              "201": {
-                "description": "Cloned"
-              }
-            }
-          }
-        },
-        "/exchanges/{id}/assignments": {
-          "post": {
-            "requestBody": {
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "assignments": {
-                        "type": "array",
-                        "items": {
-                          "$ref": "#/components/schemas/Assignment"
-                        }
-                      }
-                    },
-                    "required": ["assignments"]
-                  }
-                }
-              }
-            },
-            "responses": {
-              "204": {
-                "description": "Saved"
+                "schema": { "$ref": "#/components/schemas/Tag" }
               }
             }
           }
         }
+      },
+      "get": {
+        "summary": "Get all tags for the authenticated user",
+        "responses": {
+          "200": {
+            "description": "Tags",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Tag" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tags/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
+      ],
+      "get": {
+        "summary": "Get tag by ID",
+        "responses": {
+          "200": {
+            "description": "Tag",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Tag" }
+              }
+            }
+          },
+          "404": { "description": "Not found" }
+        }
+      },
+      "put": {
+        "summary": "Update tag",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { "name": { "type": "string" } },
+                "required": ["name"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated tag",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Tag" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete tag",
+        "responses": { "204": { "description": "Deleted" } }
+      }
+    },
+    "/exchanges": {
+      "post": {
+        "summary": "Create a gift exchange",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { "name": { "type": "string" } },
+                "required": ["name"]
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Exchange created" } }
+      },
+      "get": {
+        "summary": "Get all exchanges for the authenticated user",
+        "responses": { "200": { "description": "Exchanges" } }
+      }
+    },
+    "/exchanges/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
+      ],
+      "get": {
+        "summary": "Get full exchange (with participants, assignments, exclusions)",
+        "responses": {
+          "200": {
+            "description": "Full exchange",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/FullExchange" }
+              }
+            }
+          },
+          "404": { "description": "Not found" }
+        }
+      },
+      "put": {
+        "summary": "Update exchange",
+        "responses": { "200": { "description": "Updated" } }
+      },
+      "delete": {
+        "summary": "Delete exchange",
+        "responses": { "204": { "description": "Deleted" } }
+      }
+    },
+    "/exchanges/{id}/participants": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
+      ],
+      "post": {
+        "summary": "Add a participant to an exchange",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "personId": { "type": "string", "format": "uuid" }
+                },
+                "required": ["personId"]
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Participant added" } }
+      }
+    },
+    "/exchanges/{id}/exclusions": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
+      ],
+      "post": {
+        "summary": "Set exclusions for a participant in an exchange",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "personId": { "type": "string", "format": "uuid" },
+                  "excludedPersonIds": {
+                    "type": "array",
+                    "items": { "type": "string", "format": "uuid" }
+                  }
+                },
+                "required": ["personId", "excludedPersonIds"]
+              }
+            }
+          }
+        },
+        "responses": { "204": { "description": "Exclusions set" } }
+      }
+    },
+    "/exchanges/{id}/generate": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
+      ],
+      "get": {
+        "summary": "Generate assignments for an exchange",
+        "responses": {
+          "200": {
+            "description": "Generated assignments",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Assignment" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/exchanges/{id}/clone": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
+      ],
+      "post": {
+        "summary": "Clone an exchange",
+        "responses": { "201": { "description": "Cloned exchange created" } }
+      }
+    },
+    "/exchanges/{id}/assignments": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
+      ],
+      "post": {
+        "summary": "Save assignments for an exchange",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "assignments": {
+                    "type": "array",
+                    "items": { "$ref": "#/components/schemas/Assignment" }
+                  }
+                },
+                "required": ["assignments"]
+              }
+            }
+          }
+        },
+        "responses": { "204": { "description": "Assignments saved" } }
       }
     }
   }

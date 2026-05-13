@@ -21,6 +21,16 @@ vi.mock("../../db/queries/list_item_tags.js", () => ({
   getTagsByListItemId: vi.fn(),
 }));
 
+vi.mock("../../db/queries/tags.js", () => ({
+  findOrCreateTag: vi.fn(),
+  getTagsByUserId: vi.fn(),
+  getTagById: vi.fn(),
+  updateTag: vi.fn(),
+  deleteTag: vi.fn(),
+  deleteTagsByUserId: vi.fn(),
+  createTag: vi.fn(),
+}));
+
 import * as listsService from "../lists.js";
 import * as listsDb from "../../db/queries/lists.js";
 import * as itemsDb from "../../db/queries/list_items.js";

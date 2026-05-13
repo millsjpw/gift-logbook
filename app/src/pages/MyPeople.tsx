@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { apiFetch } from "../api/client";
 import { formatTimeAgo } from "../utils/time";
 import PageLoader from "../components/PageLoader";
@@ -9,6 +9,7 @@ import {
 } from "../utils/birthdate";
 import Layout from "../components/Layout";
 import BirthdayPicker from "../components/BirthdayPicker";
+import TagInput from "../components/TagInput";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -20,7 +21,11 @@ import type { CalendarDate } from "@internationalized/date";
 
 type SortKey = "name" | "updatedAt";
 type SortOrder = "asc" | "desc";
-type EditDraft = { name: string; birthday: CalendarDate | null };
+type EditDraft = {
+  name: string;
+  birthday: CalendarDate | null;
+  tags: string[];
+};
 
 export default function MyPeople() {
   const [people, setPeople] = useState<Person[]>([]);
@@ -29,10 +34,12 @@ export default function MyPeople() {
   const [addName, setAddName] = useState("");
   const [addBirthday, setAddBirthday] = useState<CalendarDate | null>(null);
   const [addSaving, setAddSaving] = useState(false);
+  const [addTags, setAddTags] = useState<string[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState<EditDraft>({
     name: "",
     birthday: null,
+    tags: [],
   });
   const [editSaving, setEditSaving] = useState(false);
   const [rowError, setRowError] = useState<string | null>(null);
@@ -72,11 +79,13 @@ export default function MyPeople() {
           birthMonth,
           birthDay,
           birthYear,
+          tags: addTags,
         }),
       });
       setPeople((prev) => [...prev, newPerson]);
       setAddName("");
       setAddBirthday(null);
+      setAddTags([]);
     } catch (err: any) {
       setError(err.message || "Failed to add person");
     } finally {
@@ -93,13 +102,14 @@ export default function MyPeople() {
         birthDay: person.birthDay,
         birthYear: person.birthYear,
       }),
+      tags: person.tags.map((t) => t.name),
     });
     setRowError(null);
   }
 
   function exitEditing() {
     setEditingId(null);
-    setEditDraft({ name: "", birthday: null });
+    setEditDraft({ name: "", birthday: null, tags: [] });
     setRowError(null);
   }
 
@@ -112,29 +122,17 @@ export default function MyPeople() {
       const { birthMonth, birthDay, birthYear } = calendarDateToFields(
         editDraft.birthday,
       );
-      await apiFetch(`/persons/${id}`, {
+      const updated: Person = await apiFetch(`/persons/${id}`, {
         method: "PUT",
         body: JSON.stringify({
           name: trimmed,
           birthMonth,
           birthDay,
           birthYear,
+          tags: editDraft.tags,
         }),
       });
-      setPeople((prev) =>
-        prev.map((p) =>
-          p.id === id
-            ? {
-                ...p,
-                name: trimmed,
-                birthMonth,
-                birthDay,
-                birthYear,
-                updatedAt: new Date().toISOString(),
-              }
-            : p,
-        ),
-      );
+      setPeople((prev) => prev.map((p) => (p.id === id ? updated : p)));
       exitEditing();
     } catch (err: any) {
       setRowError(err.message || "Failed to update person");
@@ -179,34 +177,42 @@ export default function MyPeople() {
     <Layout>
       <PageLoader loading={loading} error={error}>
         {/* Add New Person Form */}
-        <form
-          onSubmit={handleAdd}
-          className="mb-8 flex flex-wrap items-center justify-center gap-3"
-        >
-          <input
-            type="text"
-            value={addName}
-            onChange={(e) => setAddName(e.target.value)}
-            disabled={addSaving}
-            placeholder="New person name"
-            className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-          />
-          <BirthdayPicker
-            value={addBirthday}
-            onChange={setAddBirthday}
-            isDisabled={addSaving}
-          />
-          <button
-            type="submit"
-            disabled={addSaving || !addName.trim()}
-            className={`px-3 py-1 rounded-md text-white ${
-              addSaving || !addName.trim()
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-500 hover:bg-blue-700"
-            }`}
-          >
-            Add
-          </button>
+        <form onSubmit={handleAdd} className="mb-8">
+          <div className="flex justify-center">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-3">
+                <input
+                  type="text"
+                  value={addName}
+                  onChange={(e) => setAddName(e.target.value)}
+                  disabled={addSaving}
+                  placeholder="New person name"
+                  className="w-48 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                />
+                <BirthdayPicker
+                  value={addBirthday}
+                  onChange={setAddBirthday}
+                  isDisabled={addSaving}
+                />
+                <button
+                  type="submit"
+                  disabled={addSaving || !addName.trim()}
+                  className={`px-3 py-1 rounded-md text-white ${
+                    addSaving || !addName.trim()
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-blue-500 hover:bg-blue-700"
+                  }`}
+                >
+                  Add
+                </button>
+              </div>
+              <TagInput
+                tags={addTags}
+                onChange={setAddTags}
+                disabled={addSaving}
+              />
+            </div>
+          </div>
         </form>
 
         {/* People List */}
@@ -237,101 +243,120 @@ export default function MyPeople() {
                 {sortedPeople.map((person) => {
                   const isEditing = editingId === person.id;
                   return (
-                    <tr key={person.id}>
-                      <td className="px-4 py-2 align-middle">
-                        {isEditing ? (
-                          <input
-                            type="text"
-                            value={editDraft.name}
-                            onChange={(e) =>
-                              setEditDraft((d) => ({
-                                ...d,
-                                name: e.target.value,
-                              }))
-                            }
-                            disabled={editSaving}
-                            className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-                          />
-                        ) : (
-                          <div className="flex flex-col justify-center">
-                            <span className="font-medium">{person.name}</span>
-                            <div className="text-gray-400 text-tiny">
-                              updated {formatTimeAgo(person.updatedAt)}
+                    <Fragment key={person.id}>
+                      <tr className={isEditing ? "bg-blue-50" : ""}>
+                        <td className="px-4 py-2 align-middle">
+                          {isEditing ? (
+                            <input
+                              type="text"
+                              value={editDraft.name}
+                              onChange={(e) =>
+                                setEditDraft((d) => ({
+                                  ...d,
+                                  name: e.target.value,
+                                }))
+                              }
+                              disabled={editSaving}
+                              className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                            />
+                          ) : (
+                            <div className="flex flex-col justify-center">
+                              <span className="font-medium">{person.name}</span>
+                              <div className="text-gray-400 text-tiny">
+                                updated {formatTimeAgo(person.updatedAt)}
+                              </div>
                             </div>
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-4 py-2 align-middle">
-                        {isEditing ? (
-                          <BirthdayPicker
-                            value={editDraft.birthday}
-                            onChange={(d) =>
-                              setEditDraft((draft) => ({
-                                ...draft,
-                                birthday: d,
-                              }))
-                            }
-                            isDisabled={editSaving}
-                          />
-                        ) : (
-                          <span>
-                            {formatBirthday({
-                              birthMonth: person.birthMonth,
-                              birthDay: person.birthDay,
-                              birthYear: person.birthYear,
-                            })}
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-4 py-2 align-middle">
-                        {isEditing ? (
-                          <div className="flex flex-col items-center gap-1">
-                            <div className="flex gap-2 justify-center">
+                          )}
+                        </td>
+                        <td className="px-4 py-2 align-middle">
+                          {isEditing ? (
+                            <BirthdayPicker
+                              value={editDraft.birthday}
+                              onChange={(d) =>
+                                setEditDraft((draft) => ({
+                                  ...draft,
+                                  birthday: d,
+                                }))
+                              }
+                              isDisabled={editSaving}
+                            />
+                          ) : (
+                            <span>
+                              {formatBirthday({
+                                birthMonth: person.birthMonth,
+                                birthDay: person.birthDay,
+                                birthYear: person.birthYear,
+                              })}
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-4 py-2 align-middle">
+                          {isEditing ? (
+                            <div className="flex flex-col items-center gap-1">
+                              <div className="flex gap-2 justify-center">
+                                <button
+                                  onClick={() => handleSave(person.id)}
+                                  disabled={
+                                    editSaving || !editDraft.name.trim()
+                                  }
+                                  className={`px-3 py-1 rounded-md text-white ${
+                                    editSaving || !editDraft.name.trim()
+                                      ? "bg-gray-400 cursor-not-allowed"
+                                      : "bg-blue-500 hover:bg-blue-700"
+                                  }`}
+                                >
+                                  Save
+                                </button>
+                                <button
+                                  onClick={exitEditing}
+                                  disabled={editSaving}
+                                  className={`px-3 py-1 rounded-md text-white ${
+                                    editSaving
+                                      ? "bg-gray-400 cursor-not-allowed"
+                                      : "bg-gray-400 hover:bg-gray-500"
+                                  }`}
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                              {rowError && (
+                                <p className="text-red-600 text-sm">
+                                  {rowError}
+                                </p>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="justify-center gap-2 flex">
                               <button
-                                onClick={() => handleSave(person.id)}
-                                disabled={editSaving || !editDraft.name.trim()}
-                                className={`px-3 py-1 rounded-md text-white ${
-                                  editSaving || !editDraft.name.trim()
-                                    ? "bg-gray-400 cursor-not-allowed"
-                                    : "bg-blue-500 hover:bg-blue-700"
-                                }`}
+                                onClick={() => startEditing(person)}
+                                className="p-1 rounded hover:bg-gray-100"
                               >
-                                Save
+                                <PencilSquareIcon className="h-5 w-5 text-blue-500 hover:text-blue-700" />
                               </button>
                               <button
-                                onClick={exitEditing}
-                                disabled={editSaving}
-                                className={`px-3 py-1 rounded-md text-white ${
-                                  editSaving
-                                    ? "bg-gray-400 cursor-not-allowed"
-                                    : "bg-gray-400 hover:bg-gray-500"
-                                }`}
+                                onClick={() => handleDelete(person.id)}
+                                className="p-1 rounded hover:bg-gray-100"
                               >
-                                Cancel
+                                <TrashIcon className="h-5 w-5 text-red-500 hover:text-red-700" />
                               </button>
                             </div>
-                            {rowError && (
-                              <p className="text-red-600 text-sm">{rowError}</p>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="justify-center gap-2 flex">
-                            <button
-                              onClick={() => startEditing(person)}
-                              className="p-1 rounded hover:bg-gray-100"
-                            >
-                              <PencilSquareIcon className="h-5 w-5 text-blue-500 hover:text-blue-700" />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(person.id)}
-                              className="p-1 rounded hover:bg-gray-100"
-                            >
-                              <TrashIcon className="h-5 w-5 text-red-500 hover:text-red-700" />
-                            </button>
-                          </div>
-                        )}
-                      </td>
-                    </tr>
+                          )}
+                        </td>
+                      </tr>
+                      {isEditing && (
+                        <tr className="bg-blue-50">
+                          <td colSpan={3} className="px-4 pb-3">
+                            <TagInput
+                              tags={editDraft.tags}
+                              onChange={(t) =>
+                                setEditDraft((d) => ({ ...d, tags: t }))
+                              }
+                              disabled={editSaving}
+                            />
+                          </td>
+                        </tr>
+                      )}
+                    </Fragment>
                   );
                 })}
               </tbody>

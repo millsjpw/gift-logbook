@@ -9,9 +9,7 @@ describe("persons queries", () => {
     let created: Person | undefined;
     try {
       user = (await createTestUser("person")).user;
-      created = await persons.createPerson(user.id, "Friend", {
-        notes: "none",
-      });
+      created = await persons.createPerson(user.id, "Friend");
       expect(created).toHaveProperty("id");
       expect(created.birthMonth).toBeNull();
       expect(created.birthDay).toBeNull();
@@ -27,9 +25,7 @@ describe("persons queries", () => {
       const found = await persons.getPersonsByName(user.id, "Friend");
       expect(found.length).toBeGreaterThan(0);
 
-      const updated = await persons.updatePerson(created.id, "Buddy", {
-        notes: "updated",
-      });
+      const updated = await persons.updatePerson(created.id, "Buddy");
       expect(updated.name).toBe("Buddy");
     } finally {
       if (created?.id) await persons.deletePerson(created.id);
@@ -45,7 +41,6 @@ describe("persons queries", () => {
       created = await persons.createPerson(
         user.id,
         "Birthday Person",
-        {},
         6,
         15,
         1990,
@@ -64,12 +59,11 @@ describe("persons queries", () => {
     let created: Person | undefined;
     try {
       user = (await createTestUser("person-birth-update")).user;
-      created = await persons.createPerson(user.id, "No Birthday", {});
+      created = await persons.createPerson(user.id, "No Birthday");
       expect(created.birthMonth).toBeNull();
 
       const updated = await persons.updatePerson(
         created.id,
-        undefined,
         undefined,
         3,
         22,
@@ -81,7 +75,6 @@ describe("persons queries", () => {
 
       const cleared = await persons.updatePerson(
         updated.id,
-        undefined,
         undefined,
         null,
         null,

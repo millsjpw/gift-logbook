@@ -1,3 +1,5 @@
+import type { Tag } from "./Tag";
+
 export type GiftRecord = {
   id: string;
   createdAt: string;
@@ -5,8 +7,7 @@ export type GiftRecord = {
   userId: string;
   personId: string | null;
   itemText: string;
-  amount: string | null; // Postgres numeric comes back as a string
+  amount: string | null; // Postgres numeric → string
   date: string;
-  meta: Record<string, unknown>;
-  tags: string[];
+  tags: Tag[];
 };

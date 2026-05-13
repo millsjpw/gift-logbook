@@ -12,4 +12,7 @@ export default defineConfig({
   define: {
     APP_VERSION: JSON.stringify(rootPkg.version),
   },
+  resolve: {
+    dedupe: ["react", "react-dom"],
+  },
 });

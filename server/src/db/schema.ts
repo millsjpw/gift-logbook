@@ -4,7 +4,6 @@ import {
   timestamp,
   varchar,
   uuid,
-  jsonb,
   numeric,
   index,
   uniqueIndex,
@@ -87,7 +86,6 @@ export const persons = pgTable(
     birthMonth: integer("birth_month"),
     birthDay: integer("birth_day"),
     birthYear: integer("birth_year"),
-    meta: jsonb("meta").notNull().default("{}"),
   },
   (table) => [
     uniqueIndex("user_person_name_index").on(table.userId, lower(table.name)),
@@ -189,7 +187,6 @@ export const records = pgTable(
     itemText: varchar("item_text", { length: 256 }).notNull(),
     amount: numeric("amount", { precision: 10, scale: 2 }),
     date: timestamp("date").notNull(),
-    meta: jsonb("meta").notNull().default("{}"),
   },
   (table) => [
     index("user_record_date_index").on(table.userId, table.date),
@@ -289,6 +286,35 @@ export const listItemTags = pgTable(
 
 export type NewListItemTag = typeof listItemTags.$inferInsert;
 export type ListItemTag = typeof listItemTags.$inferSelect;
+
+// =====================
+// Person Tags
+// =====================
+
+export const personTags = pgTable(
+  "person_tags",
+  {
+    personId: uuid("person_id")
+      .notNull()
+      .references(() => persons.id, { onDelete: "cascade" }),
+    tagId: uuid("tag_id")
+      .notNull()
+      .references(() => tags.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at")
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    primaryKey({ columns: [table.personId, table.tagId] }),
+    index("person_tag_person_index").on(table.personId),
+    index("person_tag_tag_index").on(table.tagId),
+  ],
+);
+
+export type NewPersonTag = typeof personTags.$inferInsert;
+export type PersonTag = typeof personTags.$inferSelect;
 
 // =====================
 // Exchanges

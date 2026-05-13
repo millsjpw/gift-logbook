@@ -41,7 +41,7 @@ export async function createListItem(
 export async function bulkInsertListItems(
   userId: string,
   listId: string,
-  items: { title: string; url: string }[],
+  items: { title: string; url?: string }[],
 ) {
   const newItems: NewListItem[] = items.map((item) => ({
     listId,

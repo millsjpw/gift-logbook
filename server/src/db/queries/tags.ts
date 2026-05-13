@@ -1,6 +1,6 @@
 import { db } from "../db.js";
-import { tags, NewTag } from "../schema.js";
-import { eq } from "drizzle-orm";
+import { tags, NewTag, Tag } from "../schema.js";
+import { eq, and, sql } from "drizzle-orm";
 
 export async function createTag(userId: string, name: string) {
   const tag: NewTag = {
@@ -39,4 +39,23 @@ export async function deleteTag(id: string) {
 
 export async function deleteTagsByUserId(userId: string) {
   await db.delete(tags).where(eq(tags.userId, userId));
+}
+
+export async function findOrCreateTag(
+  userId: string,
+  name: string,
+): Promise<Tag> {
+  const trimmed = name.trim();
+  await db.insert(tags).values({ userId, name: trimmed }).onConflictDoNothing();
+  const [tag] = await db
+    .select()
+    .from(tags)
+    .where(
+      and(
+        eq(tags.userId, userId),
+        sql`lower(${tags.name}) = lower(${trimmed})`,
+      ),
+    )
+    .limit(1);
+  return tag;
 }

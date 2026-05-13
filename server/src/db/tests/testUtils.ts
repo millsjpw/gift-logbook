@@ -9,7 +9,7 @@ export async function createTestUser(prefix = "test") {
 }
 
 export async function createTestPerson(userId: string, name = "Person") {
-  return await persons.createPerson(userId, name, {});
+  return await persons.createPerson(userId, name);
 }
 
 export async function cleanupTestUser(userId: string) {

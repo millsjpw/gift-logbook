@@ -2,10 +2,9 @@ import type { Request, Response } from "express";
 import { BadRequestError, NotFoundError } from "./errors.js";
 import { respondWithJSON } from "./json.js";
 import * as personService from "../services/persons.js";
-import { Person } from "../db/schema.js";
 
 export async function handleCreatePerson(req: Request, res: Response) {
-  const { name, meta, birthMonth, birthDay, birthYear } = req.body;
+  const { name, tags, birthMonth, birthDay, birthYear } = req.body;
   if (!name) {
     throw new BadRequestError("Missing required field: name");
   }
@@ -15,13 +14,13 @@ export async function handleCreatePerson(req: Request, res: Response) {
     throw new BadRequestError("Authentication required to create a person");
   }
 
-  const person: Person = await personService.addPerson(
+  const person = await personService.addPerson(
     userId,
     name,
-    meta,
     birthMonth ?? null,
     birthDay ?? null,
     birthYear ?? null,
+    tags,
   );
   respondWithJSON(res, 201, person);
 }
@@ -65,17 +64,17 @@ export async function handleSearchPeopleByName(req: Request, res: Response) {
 
 export async function handleUpdatePerson(req: Request, res: Response) {
   const personId = req.params.id as string;
-  const { name, meta, birthMonth, birthDay, birthYear } = req.body;
+  const { name, tags, birthMonth, birthDay, birthYear } = req.body;
 
   if (
     !name &&
-    !meta &&
     birthMonth === undefined &&
     birthDay === undefined &&
-    birthYear === undefined
+    birthYear === undefined &&
+    tags === undefined
   ) {
     throw new BadRequestError(
-      "At least one field (name, meta, birthMonth, birthDay, birthYear) must be provided for update",
+      "At least one field (name, tags, birthMonth, birthDay, birthYear) must be provided for update",
     );
   }
 
@@ -88,10 +87,10 @@ export async function handleUpdatePerson(req: Request, res: Response) {
     userId,
     personId,
     name,
-    meta,
     birthMonth,
     birthDay,
     birthYear,
+    tags,
   );
   respondWithJSON(res, 200, updatedPerson);
 }

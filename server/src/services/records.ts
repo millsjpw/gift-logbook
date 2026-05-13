@@ -1,7 +1,30 @@
 import * as recordsDb from "../db/queries/records.js";
 import * as recordTagsDb from "../db/queries/record_tags.js";
-import { GiftRecord, RecordTag } from "../db/schema.js";
+import * as tagsDb from "../db/queries/tags.js";
+import { GiftRecord, Tag } from "../db/schema.js";
 import { NotFoundError, UserForbiddenError } from "../api/errors.js";
+
+export type RecordWithTags = GiftRecord & { tags: Tag[] };
+
+async function hydrateRecord(record: GiftRecord): Promise<RecordWithTags> {
+  const tags = await recordTagsDb.getTagsByRecordId(record.id);
+  return { ...record, tags };
+}
+
+async function resolveAndSyncRecordTags(
+  recordId: string,
+  userId: string,
+  tagNames: string[],
+): Promise<Tag[]> {
+  const resolvedTags = await Promise.all(
+    tagNames.map((name) => tagsDb.findOrCreateTag(userId, name)),
+  );
+  await recordTagsDb.syncTagsForRecord(
+    recordId,
+    resolvedTags.map((t) => t.id),
+  );
+  return resolvedTags;
+}
 
 export async function addRecord(
   userId: string,
@@ -9,72 +32,50 @@ export async function addRecord(
   itemText: string,
   amount?: number,
   date?: Date,
-  meta?: any,
-): Promise<GiftRecord> {
-  return await recordsDb.addRecord(
+  tags?: string[],
+): Promise<RecordWithTags> {
+  const record = await recordsDb.addRecord(
     userId,
     personId,
     itemText,
     amount,
     date,
-    meta,
   );
+  const resolvedTags = tags?.length
+    ? await resolveAndSyncRecordTags(record.id, userId, tags)
+    : [];
+  return { ...record, tags: resolvedTags };
 }
 
-export async function getRecordById(id: string) {
+export async function getRecordById(
+  id: string,
+): Promise<RecordWithTags | null> {
   const record = await recordsDb.getRecordById(id);
-  if (!record) {
-    return null;
-  }
-  const tags = await recordTagsDb.getTagsByRecordId(id);
-  return { ...record, tags: tags.map((t) => t.tagId) };
+  if (!record) return null;
+  return hydrateRecord(record);
 }
 
 export async function getRecordsByUserId(
   userId: string,
-): Promise<GiftRecord[]> {
+): Promise<RecordWithTags[]> {
   const records = await recordsDb.getRecordsByUserId(userId);
-  if (!records) {
-    return [];
-  }
-  const recordsWithTags = [];
-  for (const record of records) {
-    const tags = await recordTagsDb.getTagsByRecordId(record.id);
-    recordsWithTags.push({ ...record, tags: tags.map((t) => t.tagId) });
-  }
-  return recordsWithTags;
+  return Promise.all(records.map(hydrateRecord));
 }
 
 export async function getRecordsByPersonId(
   userId: string,
   personId: string,
-): Promise<GiftRecord[]> {
+): Promise<RecordWithTags[]> {
   const records = await recordsDb.getRecordsByPersonId(userId, personId);
-  if (!records) {
-    return [];
-  }
-  const recordsWithTags = [];
-  for (const record of records) {
-    const tags = await recordTagsDb.getTagsByRecordId(record.id);
-    recordsWithTags.push({ ...record, tags: tags.map((t) => t.tagId) });
-  }
-  return recordsWithTags;
+  return Promise.all(records.map(hydrateRecord));
 }
 
 export async function getRecordsByItemText(
   userId: string,
   itemText: string,
-): Promise<GiftRecord[]> {
+): Promise<RecordWithTags[]> {
   const records = await recordsDb.getRecordsByItemText(userId, itemText);
-  if (!records) {
-    return [];
-  }
-  const recordsWithTags = [];
-  for (const record of records) {
-    const tags = await recordTagsDb.getTagsByRecordId(record.id);
-    recordsWithTags.push({ ...record, tags: tags.map((t) => t.tagId) });
-  }
-  return recordsWithTags;
+  return Promise.all(records.map(hydrateRecord));
 }
 
 export async function updateRecord(
@@ -83,8 +84,8 @@ export async function updateRecord(
   itemText?: string,
   amount?: number | null,
   date?: Date,
-  meta?: any,
-): Promise<GiftRecord> {
+  tags?: string[],
+): Promise<RecordWithTags> {
   const record = await recordsDb.getRecordById(id);
   if (!record) {
     throw new NotFoundError("Record not found");
@@ -94,7 +95,12 @@ export async function updateRecord(
       "You do not have permission to update this record",
     );
   }
-  return await recordsDb.updateRecord(id, itemText, amount, date, meta);
+  const updated = await recordsDb.updateRecord(id, itemText, amount, date);
+  const resolvedTags =
+    tags !== undefined
+      ? await resolveAndSyncRecordTags(updated.id, userId, tags)
+      : await recordTagsDb.getTagsByRecordId(updated.id);
+  return { ...updated, tags: resolvedTags };
 }
 
 export async function deleteRecord(userId: string, id: string): Promise<void> {
@@ -133,7 +139,7 @@ export async function addTagToRecord(
   userId: string,
   recordId: string,
   tag: string,
-): Promise<RecordTag> {
+) {
   const record = await recordsDb.getRecordById(recordId);
   if (!record) {
     throw new NotFoundError("Record not found");
@@ -166,7 +172,7 @@ export async function removeTagFromRecord(
 export async function getTagsForRecord(
   userId: string,
   recordId: string,
-): Promise<RecordTag[]> {
+): Promise<Tag[]> {
   const record = await recordsDb.getRecordById(recordId);
   if (!record) {
     throw new NotFoundError("Record not found");
