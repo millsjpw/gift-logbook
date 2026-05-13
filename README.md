@@ -149,20 +149,25 @@ npm run test:unit
 - `POST /persons — create`
 - `GET /persons — list`
 - `GET /persons/search?name=... — search`
+- `GET /persons/upcoming-birthdays?limit=&daysAhead= — upcoming birthdays`
 - `GET /persons/:id — retrieve`
 - `PUT /persons/:id — update`
 - `DELETE /persons/:id — delete`
+- `DELETE /persons — delete all`
 
 #### Lists (auth required)
 
 - `POST /lists — create`
 - `GET /lists — list all`
-- `GET /lists/:id — retrieve`
-- `GET /lists/person/:personId — by person`
 - `GET /lists/search?name=... — search`
+- `GET /lists/recent?limit= — recently updated`
+- `GET /lists/person/:personId — by person`
+- `GET /lists/:id — retrieve`
 - `PUT /lists/:id — update`
 - `DELETE /lists/:id — delete list`
 - `DELETE /lists/:listId/items/:itemId — delete item`
+- `POST /lists/:listId/items/:itemId/tags — add tag to item`
+- `DELETE /lists/:listId/items/:itemId/tags/:tagId — remove tag from item`
 
 #### Records (auth required)
 

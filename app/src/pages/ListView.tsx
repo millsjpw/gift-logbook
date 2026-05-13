@@ -7,6 +7,7 @@ import Layout from "../components/Layout";
 import PageLoader from "../components/PageLoader";
 import PersonTypeahead from "../components/PersonTypeahead";
 import ListItemCard from "../components/ListItemCard";
+import TagInput from "../components/TagInput";
 import {
   PencilSquareIcon,
   CheckIcon,
@@ -33,6 +34,7 @@ export default function ListView() {
   // Add item state
   const [addTitle, setAddTitle] = useState("");
   const [addUrl, setAddUrl] = useState("");
+  const [addTags, setAddTags] = useState<string[]>([]);
   const [addSaving, setAddSaving] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
 
@@ -80,6 +82,15 @@ export default function ListView() {
     setHeaderError(null);
   }
 
+  function serializeItem(i: List["items"][number]) {
+    return {
+      id: i.id,
+      title: i.title,
+      url: i.url,
+      tags: i.tags.map((t) => t.name),
+    };
+  }
+
   async function saveName() {
     const trimmed = nameDraft.trim();
     if (!trimmed || !list) return;
@@ -91,7 +102,7 @@ export default function ListView() {
         body: JSON.stringify({
           name: trimmed,
           personId: list.personId ?? null,
-          items: list.items,
+          items: list.items.map(serializeItem),
         }),
       });
       setList((l) => (l ? { ...l, name: trimmed } : l));
@@ -127,7 +138,11 @@ export default function ListView() {
       }
       await apiFetch(`/lists/${list.id}`, {
         method: "PUT",
-        body: JSON.stringify({ name: list.name, personId, items: list.items }),
+        body: JSON.stringify({
+          name: list.name,
+          personId,
+          items: list.items.map(serializeItem),
+        }),
       });
       setList((l) => (l ? { ...l, personId: personId ?? undefined } : l));
       setEditField(null);
@@ -151,14 +166,19 @@ export default function ListView() {
           name: list.name,
           personId: list.personId ?? null,
           items: [
-            ...list.items,
-            { title: trimmedTitle, url: addUrl.trim() || undefined },
+            ...list.items.map(serializeItem),
+            {
+              title: trimmedTitle,
+              url: addUrl.trim() || undefined,
+              tags: addTags,
+            },
           ],
         }),
       });
       setList(updatedList);
       setAddTitle("");
       setAddUrl("");
+      setAddTags([]);
     } catch (err: any) {
       setAddError(err.message || "Failed to add item");
     } finally {
@@ -178,17 +198,24 @@ export default function ListView() {
     }
   }
 
-  async function handleEditItem(itemId: string, title: string, url: string) {
+  async function handleEditItem(
+    itemId: string,
+    title: string,
+    url: string,
+    tags: string[],
+  ) {
     if (!list) return;
-    const updatedItems = list.items.map((i) =>
-      i.id === itemId ? { ...i, title, url: url || undefined } : i,
+    const items = list.items.map((i) =>
+      i.id === itemId
+        ? { id: i.id, title, url: url || undefined, tags }
+        : serializeItem(i),
     );
     const updatedList: List = await apiFetch(`/lists/${list.id}`, {
       method: "PUT",
       body: JSON.stringify({
         name: list.name,
         personId: list.personId ?? null,
-        items: updatedItems,
+        items,
       }),
     });
     setList(updatedList);
@@ -309,6 +336,11 @@ export default function ListView() {
                   onChange={(e) => setAddUrl(e.target.value)}
                   disabled={addSaving}
                   className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                />
+                <TagInput
+                  tags={addTags}
+                  onChange={setAddTags}
+                  disabled={addSaving}
                 />
                 {addError && <p className="text-red-600 text-sm">{addError}</p>}
               </div>

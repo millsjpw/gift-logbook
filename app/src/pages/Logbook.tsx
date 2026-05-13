@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { apiFetch } from "../api/client";
 import Layout from "../components/Layout";
 import PageLoader from "../components/PageLoader";
 import PersonTypeahead from "../components/PersonTypeahead";
 import DatePickerInput from "../components/DatePickerInput";
+import TagInput from "../components/TagInput";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -14,7 +15,6 @@ import type { GiftRecord } from "../models/GiftRecord";
 import type { Person } from "../models/Person";
 import type { CalendarDate } from "@internationalized/date";
 import { getLocalTimeZone, parseDate, today } from "@internationalized/date";
-import { formatTimeAgo } from "../utils/time";
 
 type SortKey = "date" | "itemText" | "amount" | "updatedAt";
 type SortOrder = "asc" | "desc";
@@ -22,6 +22,7 @@ type EditDraft = {
   itemText: string;
   amount: string;
   date: CalendarDate | null;
+  tags: string[];
 };
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
@@ -69,6 +70,7 @@ export default function Logbook() {
   );
   const [addSaving, setAddSaving] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
+  const [addTags, setAddTags] = useState<string[]>([]);
 
   // Edit state
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -76,6 +78,7 @@ export default function Logbook() {
     itemText: "",
     amount: "",
     date: null,
+    tags: [],
   });
   const [editSaving, setEditSaving] = useState(false);
   const [rowError, setRowError] = useState<string | null>(null);
@@ -143,7 +146,7 @@ export default function Logbook() {
           itemText: trimmedText,
           amount: addAmount ? parseFloat(addAmount) : undefined,
           date: addDate ? calendarDateToISO(addDate) : new Date().toISOString(),
-          meta: {},
+          tags: addTags,
         }),
       });
       setRecords((prev) => [newRecord, ...prev]);
@@ -151,6 +154,7 @@ export default function Logbook() {
       setAddPersonName("");
       setAddAmount("");
       setAddDate(today(getLocalTimeZone()));
+      setAddTags([]);
     } catch (err: any) {
       setAddError(err.message || "Failed to add record");
     } finally {
@@ -164,13 +168,14 @@ export default function Logbook() {
       itemText: record.itemText,
       amount: record.amount ?? "",
       date: isoToCalendarDate(record.date),
+      tags: record.tags.map((t) => t.name),
     });
     setRowError(null);
   }
 
   function exitEditing() {
     setEditingId(null);
-    setEditDraft({ itemText: "", amount: "", date: null });
+    setEditDraft({ itemText: "", amount: "", date: null, tags: [] });
     setRowError(null);
   }
 
@@ -183,7 +188,7 @@ export default function Logbook() {
       const body: Record<string, unknown> = {
         itemText: trimmed,
         amount: editDraft.amount !== "" ? parseFloat(editDraft.amount) : null,
-        meta: {},
+        tags: editDraft.tags,
       };
       if (editDraft.date) {
         body.date = calendarDateToISO(editDraft.date);
@@ -265,65 +270,71 @@ export default function Logbook() {
     <Layout>
       <PageLoader loading={loading} error={error}>
         {/* Add Record Form */}
-        <form
-          onSubmit={handleAdd}
-          className="mb-8 flex flex-wrap items-end gap-3"
-        >
-          <div className="flex flex-col gap-1">
-            <label className="text-sm text-gray-600">Item *</label>
-            <input
-              type="text"
-              value={addItemText}
-              onChange={(e) => setAddItemText(e.target.value)}
+        <form onSubmit={handleAdd} className="mb-8">
+          <div className="flex flex-col gap-2 w-fit">
+            <div className="flex items-end gap-3">
+              <div className="flex flex-col gap-1">
+                <label className="text-sm text-gray-600">Item *</label>
+                <input
+                  type="text"
+                  value={addItemText}
+                  onChange={(e) => setAddItemText(e.target.value)}
+                  disabled={addSaving}
+                  placeholder="What did you give?"
+                  className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 w-48"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-sm text-gray-600">For *</label>
+                <PersonTypeahead
+                  persons={persons}
+                  value={addPersonName}
+                  onChange={setAddPersonName}
+                  disabled={addSaving}
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-sm text-gray-600">Amount</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={addAmount}
+                  onChange={(e) => setAddAmount(e.target.value)}
+                  disabled={addSaving}
+                  placeholder="0.00"
+                  className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 w-28"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-sm text-gray-600">Date</label>
+                <DatePickerInput
+                  value={addDate}
+                  onChange={setAddDate}
+                  isDisabled={addSaving}
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={
+                  addSaving || !addItemText.trim() || !addPersonName.trim()
+                }
+                className={`px-3 py-1.5 rounded-md text-white self-end ${
+                  addSaving || !addItemText.trim() || !addPersonName.trim()
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-blue-500 hover:bg-blue-700"
+                }`}
+              >
+                Add Record
+              </button>
+            </div>
+            <TagInput
+              tags={addTags}
+              onChange={setAddTags}
               disabled={addSaving}
-              placeholder="What did you give?"
-              className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 w-48"
             />
           </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-sm text-gray-600">For *</label>
-            <PersonTypeahead
-              persons={persons}
-              value={addPersonName}
-              onChange={setAddPersonName}
-              disabled={addSaving}
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-sm text-gray-600">Amount</label>
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              value={addAmount}
-              onChange={(e) => setAddAmount(e.target.value)}
-              disabled={addSaving}
-              placeholder="0.00"
-              className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 w-28"
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-sm text-gray-600">Date</label>
-            <DatePickerInput
-              value={addDate}
-              onChange={setAddDate}
-              isDisabled={addSaving}
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={addSaving || !addItemText.trim() || !addPersonName.trim()}
-            className={`px-3 py-1.5 rounded-md text-white self-end ${
-              addSaving || !addItemText.trim() || !addPersonName.trim()
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-500 hover:bg-blue-700"
-            }`}
-          >
-            Add Record
-          </button>
-          {addError && (
-            <p className="w-full text-red-600 text-sm">{addError}</p>
-          )}
+          {addError && <p className="text-red-600 text-sm mt-1">{addError}</p>}
         </form>
 
         {/* Table */}
@@ -367,121 +378,160 @@ export default function Logbook() {
                     const personName =
                       personMap.get(record.personId ?? "") ?? "—";
                     return (
-                      <tr key={record.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-2 align-middle">
-                          {isEditing ? (
-                            <DatePickerInput
-                              value={editDraft.date}
-                              onChange={(d) =>
-                                setEditDraft((prev) => ({ ...prev, date: d }))
-                              }
-                              isDisabled={editSaving}
-                            />
-                          ) : (
-                            <span className="whitespace-nowrap">
-                              {formatDate(record.date)}
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-4 py-2 align-middle">
-                          {isEditing ? (
-                            <input
-                              type="text"
-                              value={editDraft.itemText}
-                              onChange={(e) =>
-                                setEditDraft((prev) => ({
-                                  ...prev,
-                                  itemText: e.target.value,
-                                }))
-                              }
-                              disabled={editSaving}
-                              className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 w-full min-w-36"
-                            />
-                          ) : (
-                            <div>
-                              <span className="font-medium">
-                                {record.itemText}
+                      <Fragment key={record.id}>
+                        <tr
+                          className={
+                            isEditing ? "bg-blue-50" : "hover:bg-gray-50"
+                          }
+                        >
+                          <td className="px-4 py-2 align-middle">
+                            {isEditing ? (
+                              <DatePickerInput
+                                value={editDraft.date}
+                                onChange={(d) =>
+                                  setEditDraft((prev) => ({ ...prev, date: d }))
+                                }
+                                isDisabled={editSaving}
+                              />
+                            ) : (
+                              <span className="whitespace-nowrap">
+                                {formatDate(record.date)}
                               </span>
-                              <div className="text-gray-400 text-xs">
-                                updated {formatTimeAgo(record.updatedAt)}
+                            )}
+                          </td>
+                          <td className="px-4 py-2 align-middle">
+                            {isEditing ? (
+                              <input
+                                type="text"
+                                value={editDraft.itemText}
+                                onChange={(e) =>
+                                  setEditDraft((prev) => ({
+                                    ...prev,
+                                    itemText: e.target.value,
+                                  }))
+                                }
+                                disabled={editSaving}
+                                className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 w-full min-w-36"
+                              />
+                            ) : (
+                              <div>
+                                <span className="font-medium">
+                                  {record.itemText}
+                                </span>
+                                {record.tags.length > 0 && (
+                                  <div className="flex items-center gap-1 mt-0.5 overflow-hidden">
+                                    {record.tags.slice(0, 3).map((t) => (
+                                      <span
+                                        key={t.id}
+                                        className="shrink-0 max-w-[6rem] truncate px-1.5 py-0.5 rounded-full text-xs font-medium"
+                                        style={{
+                                          backgroundColor: "#dbeafe",
+                                          color: "#1e40af",
+                                        }}
+                                      >
+                                        {t.name}
+                                      </span>
+                                    ))}
+                                    {record.tags.length > 3 && (
+                                      <span className="shrink-0 text-gray-400 text-xs">
+                                        +{record.tags.length - 3}
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
                               </div>
-                            </div>
-                          )}
-                        </td>
-                        <td className="px-4 py-2 align-middle">{personName}</td>
-                        <td className="px-4 py-2 align-middle">
-                          {isEditing ? (
-                            <input
-                              type="number"
-                              min="0"
-                              step="0.01"
-                              value={editDraft.amount}
-                              onChange={(e) =>
-                                setEditDraft((prev) => ({
-                                  ...prev,
-                                  amount: e.target.value,
-                                }))
-                              }
-                              disabled={editSaving}
-                              className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 w-28"
-                            />
-                          ) : (
-                            <span>{formatAmount(record.amount)}</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-2 align-middle">
-                          {isEditing ? (
-                            <div className="flex flex-col items-center gap-1">
-                              <div className="flex gap-2 justify-center">
+                            )}
+                          </td>
+                          <td className="px-4 py-2 align-middle">
+                            {personName}
+                          </td>
+                          <td className="px-4 py-2 align-middle">
+                            {isEditing ? (
+                              <input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value={editDraft.amount}
+                                onChange={(e) =>
+                                  setEditDraft((prev) => ({
+                                    ...prev,
+                                    amount: e.target.value,
+                                  }))
+                                }
+                                disabled={editSaving}
+                                className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 w-28"
+                              />
+                            ) : (
+                              <span>{formatAmount(record.amount)}</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-2 align-middle">
+                            {isEditing ? (
+                              <div className="flex flex-col items-center gap-1">
+                                <div className="flex gap-2 justify-center">
+                                  <button
+                                    onClick={() => handleSave(record.id)}
+                                    disabled={
+                                      editSaving || !editDraft.itemText.trim()
+                                    }
+                                    className={`px-3 py-1 rounded-md text-white ${
+                                      editSaving || !editDraft.itemText.trim()
+                                        ? "bg-gray-400 cursor-not-allowed"
+                                        : "bg-blue-500 hover:bg-blue-700"
+                                    }`}
+                                  >
+                                    Save
+                                  </button>
+                                  <button
+                                    onClick={exitEditing}
+                                    disabled={editSaving}
+                                    className={`px-3 py-1 rounded-md text-white ${
+                                      editSaving
+                                        ? "bg-gray-400 cursor-not-allowed"
+                                        : "bg-gray-400 hover:bg-gray-500"
+                                    }`}
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                                {rowError && (
+                                  <p className="text-red-600 text-sm">
+                                    {rowError}
+                                  </p>
+                                )}
+                              </div>
+                            ) : (
+                              <div className="flex justify-center gap-2">
                                 <button
-                                  onClick={() => handleSave(record.id)}
-                                  disabled={
-                                    editSaving || !editDraft.itemText.trim()
-                                  }
-                                  className={`px-3 py-1 rounded-md text-white ${
-                                    editSaving || !editDraft.itemText.trim()
-                                      ? "bg-gray-400 cursor-not-allowed"
-                                      : "bg-blue-500 hover:bg-blue-700"
-                                  }`}
+                                  onClick={() => startEditing(record)}
+                                  className="p-1 rounded hover:bg-gray-100"
                                 >
-                                  Save
+                                  <PencilSquareIcon className="h-5 w-5 text-blue-500 hover:text-blue-700" />
                                 </button>
                                 <button
-                                  onClick={exitEditing}
-                                  disabled={editSaving}
-                                  className={`px-3 py-1 rounded-md text-white ${
-                                    editSaving
-                                      ? "bg-gray-400 cursor-not-allowed"
-                                      : "bg-gray-400 hover:bg-gray-500"
-                                  }`}
+                                  onClick={() => handleDelete(record.id)}
+                                  className="p-1 rounded hover:bg-gray-100"
                                 >
-                                  Cancel
+                                  <TrashIcon className="h-5 w-5 text-red-500 hover:text-red-700" />
                                 </button>
                               </div>
-                              {rowError && (
-                                <p className="text-red-600 text-sm">
-                                  {rowError}
-                                </p>
-                              )}
-                            </div>
-                          ) : (
-                            <div className="flex justify-center gap-2">
-                              <button
-                                onClick={() => startEditing(record)}
-                                className="p-1 rounded hover:bg-gray-100"
-                              >
-                                <PencilSquareIcon className="h-5 w-5 text-blue-500 hover:text-blue-700" />
-                              </button>
-                              <button
-                                onClick={() => handleDelete(record.id)}
-                                className="p-1 rounded hover:bg-gray-100"
-                              >
-                                <TrashIcon className="h-5 w-5 text-red-500 hover:text-red-700" />
-                              </button>
-                            </div>
-                          )}
-                        </td>
-                      </tr>
+                            )}
+                          </td>
+                        </tr>
+                        {isEditing && (
+                          <tr className="bg-blue-50">
+                            <td colSpan={5} className="px-4 pb-3">
+                              <TagInput
+                                tags={editDraft.tags}
+                                onChange={(t) =>
+                                  setEditDraft((prev) => ({ ...prev, tags: t }))
+                                }
+                                disabled={editSaving}
+                              />
+                            </td>
+                          </tr>
+                        )}
+                      </Fragment>
                     );
                   })}
                 </tbody>

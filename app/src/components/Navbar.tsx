@@ -43,6 +43,12 @@ export default function Navbar() {
                 Dashboard
               </span>
             </Link>
+            <Link to="/logbook" className={navClass("/logbook")}>
+              <BookOpenIcon className="w-5 h-5 shrink-0" />
+              <span className={isActive("/logbook") ? "" : "hidden sm:inline"}>
+                Logbook
+              </span>
+            </Link>
             <Link to="/people" className={navClass("/people")}>
               <UsersIcon className="w-5 h-5 shrink-0" />
               <span className={isActive("/people") ? "" : "hidden sm:inline"}>
@@ -63,12 +69,6 @@ export default function Navbar() {
                 }
               >
                 Exchanges
-              </span>
-            </Link>
-            <Link to="/logbook" className={navClass("/logbook")}>
-              <BookOpenIcon className="w-5 h-5 shrink-0" />
-              <span className={isActive("/logbook") ? "" : "hidden sm:inline"}>
-                Logbook
               </span>
             </Link>
           </>
