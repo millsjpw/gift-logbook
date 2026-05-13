@@ -63,7 +63,8 @@ export async function updateRecord(
 ) {
   const updateData: Partial<NewGiftRecord> = {};
   if (itemText) updateData.itemText = itemText;
-  if (amount !== undefined) updateData.amount = amount !== null ? String(amount) : null;
+  if (amount !== undefined)
+    updateData.amount = amount !== null ? String(amount) : null;
   if (date) updateData.date = date;
 
   const [updatedRecord] = await db
