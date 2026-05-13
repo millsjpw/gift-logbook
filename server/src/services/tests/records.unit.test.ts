@@ -18,6 +18,16 @@ vi.mock("../../db/queries/record_tags.js", () => ({
   getTagsByRecordId: vi.fn(),
 }));
 
+vi.mock("../../db/queries/tags.js", () => ({
+  findOrCreateTag: vi.fn(),
+  getTagsByUserId: vi.fn(),
+  getTagById: vi.fn(),
+  updateTag: vi.fn(),
+  deleteTag: vi.fn(),
+  deleteTagsByUserId: vi.fn(),
+  createTag: vi.fn(),
+}));
+
 import * as recordsService from "../records.js";
 import * as recordsDb from "../../db/queries/records.js";
 import { NotFoundError, UserForbiddenError } from "../../api/errors.js";
