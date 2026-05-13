@@ -291,6 +291,35 @@ export type NewListItemTag = typeof listItemTags.$inferInsert;
 export type ListItemTag = typeof listItemTags.$inferSelect;
 
 // =====================
+// Person Tags
+// =====================
+
+export const personTags = pgTable(
+  "person_tags",
+  {
+    personId: uuid("person_id")
+      .notNull()
+      .references(() => persons.id, { onDelete: "cascade" }),
+    tagId: uuid("tag_id")
+      .notNull()
+      .references(() => tags.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at")
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    primaryKey({ columns: [table.personId, table.tagId] }),
+    index("person_tag_person_index").on(table.personId),
+    index("person_tag_tag_index").on(table.tagId),
+  ],
+);
+
+export type NewPersonTag = typeof personTags.$inferInsert;
+export type PersonTag = typeof personTags.$inferSelect;
+
+// =====================
 // Exchanges
 // =====================
 

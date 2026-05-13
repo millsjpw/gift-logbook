@@ -1,4 +1,5 @@
 import * as personsDb from "../db/queries/persons.js";
+import * as personTagsDb from "../db/queries/person_tags.js";
 import { Person } from "../db/schema.js";
 import { NotFoundError, UserForbiddenError } from "../api/errors.js";
 
@@ -149,4 +150,55 @@ export async function deletePerson(userId: string, id: string): Promise<void> {
 
 export async function deletePeopleCreatedByUser(userId: string): Promise<void> {
   await personsDb.deletePersonsByUserId(userId);
+}
+
+export async function addTagToPerson(
+  userId: string,
+  personId: string,
+  tagId: string,
+): Promise<void> {
+  const person = await personsDb.getPersonById(personId);
+  if (!person) {
+    throw new NotFoundError("Person not found");
+  }
+  if (person.userId !== userId) {
+    throw new UserForbiddenError(
+      "You do not have permission to modify this person",
+    );
+  }
+  await personTagsDb.addTagToPerson(personId, tagId);
+}
+
+export async function removeTagFromPerson(
+  userId: string,
+  personId: string,
+  tagId: string,
+): Promise<void> {
+  const person = await personsDb.getPersonById(personId);
+  if (!person) {
+    throw new NotFoundError("Person not found");
+  }
+  if (person.userId !== userId) {
+    throw new UserForbiddenError(
+      "You do not have permission to modify this person",
+    );
+  }
+  await personTagsDb.removeTagFromPerson(personId, tagId);
+}
+
+export async function getTagsForPerson(
+  userId: string,
+  personId: string,
+): Promise<string[]> {
+  const person = await personsDb.getPersonById(personId);
+  if (!person) {
+    throw new NotFoundError("Person not found");
+  }
+  if (person.userId !== userId) {
+    throw new UserForbiddenError(
+      "You do not have permission to view this person's tags",
+    );
+  }
+  const personTags = await personTagsDb.getTagsByPersonId(personId);
+  return personTags.map((pt) => pt.tagId);
 }
