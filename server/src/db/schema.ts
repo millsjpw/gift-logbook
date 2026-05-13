@@ -4,7 +4,6 @@ import {
   timestamp,
   varchar,
   uuid,
-  jsonb,
   numeric,
   index,
   uniqueIndex,

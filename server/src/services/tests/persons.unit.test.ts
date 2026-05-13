@@ -13,6 +13,15 @@ vi.mock("../../db/queries/person_tags.js", () => ({
   getTagsByPersonId: vi.fn().mockResolvedValue([]),
   syncTagsForPerson: vi.fn().mockResolvedValue(undefined),
 }));
+vi.mock("../../db/queries/tags.js", () => ({
+  findOrCreateTag: vi.fn(),
+  getTagsByUserId: vi.fn(),
+  getTagById: vi.fn(),
+  updateTag: vi.fn(),
+  deleteTag: vi.fn(),
+  deleteTagsByUserId: vi.fn(),
+  createTag: vi.fn(),
+}));
 import * as personsService from "../persons.js";
 import * as personsDb from "../../db/queries/persons.js";
 import { NotFoundError, UserForbiddenError } from "../../api/errors.js";
