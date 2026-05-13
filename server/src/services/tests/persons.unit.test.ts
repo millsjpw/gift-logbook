@@ -9,6 +9,10 @@ vi.mock("../../db/queries/persons.js", () => ({
   deletePerson: vi.fn(),
   deletePersonsByUserId: vi.fn(),
 }));
+vi.mock("../../db/queries/person_tags.js", () => ({
+  getTagsByPersonId: vi.fn().mockResolvedValue([]),
+  syncTagsForPerson: vi.fn().mockResolvedValue(undefined),
+}));
 import * as personsService from "../persons.js";
 import * as personsDb from "../../db/queries/persons.js";
 import { NotFoundError, UserForbiddenError } from "../../api/errors.js";
@@ -49,7 +53,6 @@ describe("persons service", () => {
       undefined,
       undefined,
       undefined,
-      undefined,
     );
     expect(res).toBeDefined();
   });
@@ -70,7 +73,6 @@ describe("persons service", () => {
       "u1",
       "p1",
       "Name",
-      undefined,
       4,
       10,
       1992,
@@ -78,7 +80,6 @@ describe("persons service", () => {
     expect(personsDb.updatePerson).toHaveBeenCalledWith(
       "p1",
       "Name",
-      undefined,
       4,
       10,
       1992,
@@ -96,11 +97,10 @@ describe("addPerson", () => {
       birthDay: 15,
       birthYear: 1995,
     });
-    await personsService.addPerson("u1", "Alice", undefined, 6, 15, 1995);
+    await personsService.addPerson("u1", "Alice", 6, 15, 1995);
     expect(personsDb.createPerson).toHaveBeenCalledWith(
       "u1",
       "Alice",
-      undefined,
       6,
       15,
       1995,
@@ -116,7 +116,6 @@ describe("addPerson", () => {
     expect(personsDb.createPerson).toHaveBeenCalledWith(
       "u1",
       "Bob",
-      undefined,
       undefined,
       undefined,
       undefined,
