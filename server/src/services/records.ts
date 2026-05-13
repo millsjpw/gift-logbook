@@ -47,7 +47,9 @@ export async function addRecord(
   return { ...record, tags: resolvedTags };
 }
 
-export async function getRecordById(id: string): Promise<RecordWithTags | null> {
+export async function getRecordById(
+  id: string,
+): Promise<RecordWithTags | null> {
   const record = await recordsDb.getRecordById(id);
   if (!record) return null;
   return hydrateRecord(record);

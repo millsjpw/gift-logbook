@@ -47,7 +47,9 @@ export async function addPerson(
   return { ...person, tags: resolvedTags };
 }
 
-export async function getPersonById(id: string): Promise<PersonWithTags | null> {
+export async function getPersonById(
+  id: string,
+): Promise<PersonWithTags | null> {
   const person = await personsDb.getPersonById(id);
   if (!person) return null;
   return hydratePerson(person);

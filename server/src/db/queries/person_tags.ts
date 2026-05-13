@@ -41,9 +41,7 @@ export async function removeTagFromPerson(
 ): Promise<void> {
   await db
     .delete(personTags)
-    .where(
-      and(eq(personTags.personId, personId), eq(personTags.tagId, tagId)),
-    );
+    .where(and(eq(personTags.personId, personId), eq(personTags.tagId, tagId)));
 }
 
 export async function removeAllTagsFromPerson(personId: string) {

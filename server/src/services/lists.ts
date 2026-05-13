@@ -5,7 +5,12 @@ import * as tagsDb from "../db/queries/tags.js";
 import { List, ListItem, Tag } from "../db/schema.js";
 import { UserForbiddenError, NotFoundError } from "../api/errors.js";
 
-type ListItemInput = { id?: string; title: string; url?: string; tags?: string[] };
+type ListItemInput = {
+  id?: string;
+  title: string;
+  url?: string;
+  tags?: string[];
+};
 type FullListItem = ListItem & { tags: Tag[] };
 type FullList = List & { items: FullListItem[] };
 
@@ -27,7 +32,11 @@ export async function createList(
 ): Promise<FullList> {
   const list = await listsDb.createList(userId, name, personId);
   if (items && items.length > 0) {
-    const created = await listItemsDb.bulkInsertListItems(userId, list.id, items);
+    const created = await listItemsDb.bulkInsertListItems(
+      userId,
+      list.id,
+      items,
+    );
     for (let i = 0; i < created.length; i++) {
       const tagNames = items[i]?.tags;
       if (tagNames?.length) {
@@ -110,7 +119,11 @@ export async function updateList(
   for (const item of list.items) {
     let savedItem: ListItem | undefined;
     if (item.id) {
-      savedItem = await listItemsDb.updateListItem(item.id, item.title, item.url ?? "");
+      savedItem = await listItemsDb.updateListItem(
+        item.id,
+        item.title,
+        item.url ?? "",
+      );
     } else {
       savedItem = await listItemsDb.createListItem(
         userId,

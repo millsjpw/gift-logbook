@@ -46,14 +46,16 @@ export async function findOrCreateTag(
   name: string,
 ): Promise<Tag> {
   const trimmed = name.trim();
-  await db
-    .insert(tags)
-    .values({ userId, name: trimmed })
-    .onConflictDoNothing();
+  await db.insert(tags).values({ userId, name: trimmed }).onConflictDoNothing();
   const [tag] = await db
     .select()
     .from(tags)
-    .where(and(eq(tags.userId, userId), sql`lower(${tags.name}) = lower(${trimmed})`))
+    .where(
+      and(
+        eq(tags.userId, userId),
+        sql`lower(${tags.name}) = lower(${trimmed})`,
+      ),
+    )
     .limit(1);
   return tag;
 }

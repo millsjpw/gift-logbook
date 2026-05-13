@@ -55,7 +55,15 @@
           "token": { "type": "string" },
           "refreshToken": { "type": "string" }
         },
-        "required": ["id", "name", "email", "createdAt", "updatedAt", "token", "refreshToken"]
+        "required": [
+          "id",
+          "name",
+          "email",
+          "createdAt",
+          "updatedAt",
+          "token",
+          "refreshToken"
+        ]
       },
       "Tag": {
         "type": "object",
@@ -75,12 +83,23 @@
           "id": { "type": "string", "format": "uuid" },
           "name": { "type": "string" },
           "userId": { "type": "string", "format": "uuid" },
-          "birthMonth": { "type": ["integer", "null"], "minimum": 1, "maximum": 12 },
-          "birthDay": { "type": ["integer", "null"], "minimum": 1, "maximum": 31 },
+          "birthMonth": {
+            "type": ["integer", "null"],
+            "minimum": 1,
+            "maximum": 12
+          },
+          "birthDay": {
+            "type": ["integer", "null"],
+            "minimum": 1,
+            "maximum": 31
+          },
           "birthYear": { "type": ["integer", "null"], "minimum": 1900 },
           "createdAt": { "type": "string", "format": "date-time" },
           "updatedAt": { "type": "string", "format": "date-time" },
-          "tags": { "type": "array", "items": { "$ref": "#/components/schemas/Tag" } }
+          "tags": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Tag" }
+          }
         },
         "required": ["id", "name", "userId", "createdAt", "updatedAt", "tags"]
       },
@@ -94,7 +113,10 @@
           "listId": { "type": "string", "format": "uuid" },
           "createdAt": { "type": "string", "format": "date-time" },
           "updatedAt": { "type": "string", "format": "date-time" },
-          "tags": { "type": "array", "items": { "$ref": "#/components/schemas/Tag" } }
+          "tags": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Tag" }
+          }
         },
         "required": ["id", "title", "listId", "createdAt", "updatedAt", "tags"]
       },
@@ -108,7 +130,10 @@
           "personId": { "type": ["string", "null"], "format": "uuid" },
           "createdAt": { "type": "string", "format": "date-time" },
           "updatedAt": { "type": "string", "format": "date-time" },
-          "items": { "type": "array", "items": { "$ref": "#/components/schemas/ListItem" } }
+          "items": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ListItem" }
+          }
         },
         "required": ["id", "name", "userId", "createdAt", "updatedAt", "items"]
       },
@@ -120,13 +145,27 @@
           "userId": { "type": "string", "format": "uuid" },
           "personId": { "type": ["string", "null"], "format": "uuid" },
           "itemText": { "type": "string" },
-          "amount": { "type": ["string", "null"], "description": "Decimal amount as string (e.g. \"25.00\"), or null." },
+          "amount": {
+            "type": ["string", "null"],
+            "description": "Decimal amount as string (e.g. \"25.00\"), or null."
+          },
           "date": { "type": "string", "format": "date-time" },
           "createdAt": { "type": "string", "format": "date-time" },
           "updatedAt": { "type": "string", "format": "date-time" },
-          "tags": { "type": "array", "items": { "$ref": "#/components/schemas/Tag" } }
+          "tags": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Tag" }
+          }
         },
-        "required": ["id", "userId", "itemText", "date", "createdAt", "updatedAt", "tags"]
+        "required": [
+          "id",
+          "userId",
+          "itemText",
+          "date",
+          "createdAt",
+          "updatedAt",
+          "tags"
+        ]
       },
       "Assignment": {
         "type": "object",
@@ -141,7 +180,10 @@
         "properties": {
           "exchange": { "type": "object" },
           "participants": { "type": "array", "items": { "type": "object" } },
-          "assignments": { "type": "array", "items": { "$ref": "#/components/schemas/Assignment" } },
+          "assignments": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Assignment" }
+          },
           "exclusions": { "type": "array", "items": { "type": "object" } }
         }
       }
@@ -162,12 +204,20 @@
         "security": [],
         "requestBody": {
           "required": true,
-          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/LoginRequest" } } }
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LoginRequest" }
+            }
+          }
         },
         "responses": {
           "200": {
             "description": "Successful login",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/LoginResponse" } } }
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/LoginResponse" }
+              }
+            }
           },
           "401": { "description": "Invalid credentials" }
         }
@@ -179,7 +229,11 @@
         "responses": {
           "200": {
             "description": "New token pair",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/LoginResponse" } } }
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/LoginResponse" }
+              }
+            }
           },
           "401": { "description": "Invalid or expired refresh token" }
         }
@@ -214,19 +268,35 @@
         "responses": {
           "201": {
             "description": "User created",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/User" } } }
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/User" }
+              }
+            }
           }
         }
       }
     },
     "/users/{id}": {
       "parameters": [
-        { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
       ],
       "get": {
         "summary": "Get user by ID",
         "responses": {
-          "200": { "description": "User", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/User" } } } },
+          "200": {
+            "description": "User",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/User" }
+              }
+            }
+          },
           "404": { "description": "Not found" }
         }
       },
@@ -247,7 +317,14 @@
           }
         },
         "responses": {
-          "200": { "description": "Updated user", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/User" } } } }
+          "200": {
+            "description": "Updated user",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/User" }
+              }
+            }
+          }
         }
       },
       "delete": {
@@ -266,8 +343,16 @@
                 "type": "object",
                 "properties": {
                   "name": { "type": "string" },
-                  "birthMonth": { "type": "integer", "minimum": 1, "maximum": 12 },
-                  "birthDay": { "type": "integer", "minimum": 1, "maximum": 31 },
+                  "birthMonth": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 12
+                  },
+                  "birthDay": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 31
+                  },
                   "birthYear": { "type": "integer", "minimum": 1900 },
                   "tags": { "type": "array", "items": { "type": "string" } }
                 },
@@ -277,7 +362,14 @@
           }
         },
         "responses": {
-          "201": { "description": "Person created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Person" } } } }
+          "201": {
+            "description": "Person created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Person" }
+              }
+            }
+          }
         }
       },
       "get": {
@@ -285,7 +377,14 @@
         "responses": {
           "200": {
             "description": "Persons",
-            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Person" } } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Person" }
+                }
+              }
+            }
           }
         }
       },
@@ -298,12 +397,24 @@
       "get": {
         "summary": "Search persons by name",
         "parameters": [
-          { "name": "name", "in": "query", "required": true, "schema": { "type": "string" } }
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          }
         ],
         "responses": {
           "200": {
             "description": "Matching persons",
-            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Person" } } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Person" }
+                }
+              }
+            }
           }
         }
       }
@@ -312,25 +423,55 @@
       "get": {
         "summary": "Get persons with upcoming birthdays",
         "parameters": [
-          { "name": "limit", "in": "query", "required": false, "schema": { "type": "integer", "minimum": 1, "default": 5 } },
-          { "name": "daysAhead", "in": "query", "required": false, "schema": { "type": "integer", "minimum": 0, "default": 180 }, "description": "How many days ahead to look." }
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "minimum": 1, "default": 5 }
+          },
+          {
+            "name": "daysAhead",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "minimum": 0, "default": 180 },
+            "description": "How many days ahead to look."
+          }
         ],
         "responses": {
           "200": {
             "description": "Persons with upcoming birthdays",
-            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Person" } } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Person" }
+                }
+              }
+            }
           }
         }
       }
     },
     "/persons/{id}": {
       "parameters": [
-        { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
       ],
       "get": {
         "summary": "Get person by ID",
         "responses": {
-          "200": { "description": "Person", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Person" } } } },
+          "200": {
+            "description": "Person",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Person" }
+              }
+            }
+          },
           "404": { "description": "Not found" }
         }
       },
@@ -343,8 +484,16 @@
                 "type": "object",
                 "properties": {
                   "name": { "type": "string" },
-                  "birthMonth": { "type": "integer", "minimum": 1, "maximum": 12 },
-                  "birthDay": { "type": "integer", "minimum": 1, "maximum": 31 },
+                  "birthMonth": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 12
+                  },
+                  "birthDay": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 31
+                  },
                   "birthYear": { "type": "integer", "minimum": 1900 },
                   "tags": { "type": "array", "items": { "type": "string" } }
                 }
@@ -353,7 +502,14 @@
           }
         },
         "responses": {
-          "200": { "description": "Updated person", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Person" } } } }
+          "200": {
+            "description": "Updated person",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Person" }
+              }
+            }
+          }
         }
       },
       "delete": {
@@ -380,7 +536,10 @@
                       "properties": {
                         "title": { "type": "string" },
                         "url": { "type": "string", "format": "uri" },
-                        "tags": { "type": "array", "items": { "type": "string" } }
+                        "tags": {
+                          "type": "array",
+                          "items": { "type": "string" }
+                        }
                       },
                       "required": ["title"]
                     }
@@ -392,7 +551,14 @@
           }
         },
         "responses": {
-          "201": { "description": "List created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/List" } } } }
+          "201": {
+            "description": "List created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/List" }
+              }
+            }
+          }
         }
       },
       "get": {
@@ -400,7 +566,14 @@
         "responses": {
           "200": {
             "description": "Lists",
-            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/List" } } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/List" }
+                }
+              }
+            }
           }
         }
       }
@@ -409,12 +582,24 @@
       "get": {
         "summary": "Search lists by name",
         "parameters": [
-          { "name": "name", "in": "query", "required": true, "schema": { "type": "string" } }
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          }
         ],
         "responses": {
           "200": {
             "description": "Matching lists",
-            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/List" } } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/List" }
+                }
+              }
+            }
           }
         }
       }
@@ -423,12 +608,24 @@
       "get": {
         "summary": "Get recently updated lists",
         "parameters": [
-          { "name": "limit", "in": "query", "required": false, "schema": { "type": "integer", "minimum": 1, "default": 5 } }
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "minimum": 1, "default": 5 }
+          }
         ],
         "responses": {
           "200": {
             "description": "Recent lists",
-            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/List" } } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/List" }
+                }
+              }
+            }
           }
         }
       }
@@ -437,24 +634,48 @@
       "get": {
         "summary": "Get lists by person",
         "parameters": [
-          { "name": "personId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+          {
+            "name": "personId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
         ],
         "responses": {
           "200": {
             "description": "Lists for the given person",
-            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/List" } } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/List" }
+                }
+              }
+            }
           }
         }
       }
     },
     "/lists/{id}": {
       "parameters": [
-        { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
       ],
       "get": {
         "summary": "Get list by ID",
         "responses": {
-          "200": { "description": "List", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/List" } } } },
+          "200": {
+            "description": "List",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/List" }
+              }
+            }
+          },
           "404": { "description": "Not found" }
         }
       },
@@ -473,10 +694,17 @@
                     "items": {
                       "type": "object",
                       "properties": {
-                        "id": { "type": "string", "format": "uuid", "description": "Omit for new items." },
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "Omit for new items."
+                        },
                         "title": { "type": "string" },
                         "url": { "type": "string", "format": "uri" },
-                        "tags": { "type": "array", "items": { "type": "string" } }
+                        "tags": {
+                          "type": "array",
+                          "items": { "type": "string" }
+                        }
                       },
                       "required": ["title"]
                     }
@@ -487,7 +715,14 @@
           }
         },
         "responses": {
-          "200": { "description": "Updated list", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/List" } } } }
+          "200": {
+            "description": "Updated list",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/List" }
+              }
+            }
+          }
         }
       },
       "delete": {
@@ -497,8 +732,18 @@
     },
     "/lists/{listId}/items/{itemId}": {
       "parameters": [
-        { "name": "listId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
-        { "name": "itemId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        {
+          "name": "listId",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        },
+        {
+          "name": "itemId",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
       ],
       "delete": {
         "summary": "Remove an item from a list",
@@ -507,8 +752,18 @@
     },
     "/lists/{listId}/items/{itemId}/tags": {
       "parameters": [
-        { "name": "listId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
-        { "name": "itemId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        {
+          "name": "listId",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        },
+        {
+          "name": "itemId",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
       ],
       "post": {
         "summary": "Add a tag to a list item",
@@ -516,7 +771,11 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "type": "object", "properties": { "tag": { "type": "string" } }, "required": ["tag"] }
+              "schema": {
+                "type": "object",
+                "properties": { "tag": { "type": "string" } },
+                "required": ["tag"]
+              }
             }
           }
         },
@@ -525,9 +784,24 @@
     },
     "/lists/{listId}/items/{itemId}/tags/{tagId}": {
       "parameters": [
-        { "name": "listId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
-        { "name": "itemId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
-        { "name": "tagId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        {
+          "name": "listId",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        },
+        {
+          "name": "itemId",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        },
+        {
+          "name": "tagId",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
       ],
       "delete": {
         "summary": "Remove a tag from a list item",
@@ -556,7 +830,14 @@
           }
         },
         "responses": {
-          "201": { "description": "Record created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/GiftRecord" } } } }
+          "201": {
+            "description": "Record created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GiftRecord" }
+              }
+            }
+          }
         }
       },
       "get": {
@@ -564,7 +845,14 @@
         "responses": {
           "200": {
             "description": "Records",
-            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/GiftRecord" } } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/GiftRecord" }
+                }
+              }
+            }
           }
         }
       },
@@ -577,26 +865,50 @@
       "get": {
         "summary": "Search gift records by item text",
         "parameters": [
-          { "name": "itemText", "in": "query", "required": true, "schema": { "type": "string" } }
+          {
+            "name": "itemText",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          }
         ],
         "responses": {
           "200": {
             "description": "Matching records",
-            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/GiftRecord" } } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/GiftRecord" }
+                }
+              }
+            }
           }
         }
       }
     },
     "/records/person/{personId}": {
       "parameters": [
-        { "name": "personId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        {
+          "name": "personId",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
       ],
       "get": {
         "summary": "Get all gift records for a specific person",
         "responses": {
           "200": {
             "description": "Records for the person",
-            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/GiftRecord" } } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/GiftRecord" }
+                }
+              }
+            }
           }
         }
       },
@@ -607,12 +919,24 @@
     },
     "/records/{id}": {
       "parameters": [
-        { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
       ],
       "get": {
         "summary": "Get gift record by ID",
         "responses": {
-          "200": { "description": "Record", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/GiftRecord" } } } },
+          "200": {
+            "description": "Record",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GiftRecord" }
+              }
+            }
+          },
           "404": { "description": "Not found" }
         }
       },
@@ -635,7 +959,14 @@
           }
         },
         "responses": {
-          "200": { "description": "Updated record", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/GiftRecord" } } } }
+          "200": {
+            "description": "Updated record",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GiftRecord" }
+              }
+            }
+          }
         }
       },
       "delete": {
@@ -645,14 +976,26 @@
     },
     "/records/{id}/tags": {
       "parameters": [
-        { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
       ],
       "get": {
         "summary": "Get all tags for a gift record",
         "responses": {
           "200": {
             "description": "Tags",
-            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Tag" } } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Tag" }
+                }
+              }
+            }
           }
         }
       },
@@ -662,7 +1005,11 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "type": "object", "properties": { "tag": { "type": "string" } }, "required": ["tag"] }
+              "schema": {
+                "type": "object",
+                "properties": { "tag": { "type": "string" } },
+                "required": ["tag"]
+              }
             }
           }
         },
@@ -671,8 +1018,19 @@
     },
     "/records/{id}/tags/{tag}": {
       "parameters": [
-        { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
-        { "name": "tag", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Tag name to remove." }
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        },
+        {
+          "name": "tag",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string" },
+          "description": "Tag name to remove."
+        }
       ],
       "delete": {
         "summary": "Remove a tag from a gift record by name",
@@ -686,12 +1044,23 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "type": "object", "properties": { "name": { "type": "string" } }, "required": ["name"] }
+              "schema": {
+                "type": "object",
+                "properties": { "name": { "type": "string" } },
+                "required": ["name"]
+              }
             }
           }
         },
         "responses": {
-          "201": { "description": "Tag created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Tag" } } } }
+          "201": {
+            "description": "Tag created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Tag" }
+              }
+            }
+          }
         }
       },
       "get": {
@@ -699,19 +1068,38 @@
         "responses": {
           "200": {
             "description": "Tags",
-            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Tag" } } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Tag" }
+                }
+              }
+            }
           }
         }
       }
     },
     "/tags/{id}": {
       "parameters": [
-        { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
       ],
       "get": {
         "summary": "Get tag by ID",
         "responses": {
-          "200": { "description": "Tag", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Tag" } } } },
+          "200": {
+            "description": "Tag",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Tag" }
+              }
+            }
+          },
           "404": { "description": "Not found" }
         }
       },
@@ -721,12 +1109,23 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "type": "object", "properties": { "name": { "type": "string" } }, "required": ["name"] }
+              "schema": {
+                "type": "object",
+                "properties": { "name": { "type": "string" } },
+                "required": ["name"]
+              }
             }
           }
         },
         "responses": {
-          "200": { "description": "Updated tag", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Tag" } } } }
+          "200": {
+            "description": "Updated tag",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Tag" }
+              }
+            }
+          }
         }
       },
       "delete": {
@@ -741,7 +1140,11 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "type": "object", "properties": { "name": { "type": "string" } }, "required": ["name"] }
+              "schema": {
+                "type": "object",
+                "properties": { "name": { "type": "string" } },
+                "required": ["name"]
+              }
             }
           }
         },
@@ -754,12 +1157,24 @@
     },
     "/exchanges/{id}": {
       "parameters": [
-        { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
       ],
       "get": {
         "summary": "Get full exchange (with participants, assignments, exclusions)",
         "responses": {
-          "200": { "description": "Full exchange", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/FullExchange" } } } },
+          "200": {
+            "description": "Full exchange",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/FullExchange" }
+              }
+            }
+          },
           "404": { "description": "Not found" }
         }
       },
@@ -774,7 +1189,12 @@
     },
     "/exchanges/{id}/participants": {
       "parameters": [
-        { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
       ],
       "post": {
         "summary": "Add a participant to an exchange",
@@ -782,7 +1202,13 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "type": "object", "properties": { "personId": { "type": "string", "format": "uuid" } }, "required": ["personId"] }
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "personId": { "type": "string", "format": "uuid" }
+                },
+                "required": ["personId"]
+              }
             }
           }
         },
@@ -791,7 +1217,12 @@
     },
     "/exchanges/{id}/exclusions": {
       "parameters": [
-        { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
       ],
       "post": {
         "summary": "Set exclusions for a participant in an exchange",
@@ -803,7 +1234,10 @@
                 "type": "object",
                 "properties": {
                   "personId": { "type": "string", "format": "uuid" },
-                  "excludedPersonIds": { "type": "array", "items": { "type": "string", "format": "uuid" } }
+                  "excludedPersonIds": {
+                    "type": "array",
+                    "items": { "type": "string", "format": "uuid" }
+                  }
                 },
                 "required": ["personId", "excludedPersonIds"]
               }
@@ -815,21 +1249,38 @@
     },
     "/exchanges/{id}/generate": {
       "parameters": [
-        { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
       ],
       "get": {
         "summary": "Generate assignments for an exchange",
         "responses": {
           "200": {
             "description": "Generated assignments",
-            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Assignment" } } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Assignment" }
+                }
+              }
+            }
           }
         }
       }
     },
     "/exchanges/{id}/clone": {
       "parameters": [
-        { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
       ],
       "post": {
         "summary": "Clone an exchange",
@@ -838,7 +1289,12 @@
     },
     "/exchanges/{id}/assignments": {
       "parameters": [
-        { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
       ],
       "post": {
         "summary": "Save assignments for an exchange",
@@ -849,7 +1305,10 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "assignments": { "type": "array", "items": { "$ref": "#/components/schemas/Assignment" } }
+                  "assignments": {
+                    "type": "array",
+                    "items": { "$ref": "#/components/schemas/Assignment" }
+                  }
                 },
                 "required": ["assignments"]
               }

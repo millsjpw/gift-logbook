@@ -41,9 +41,7 @@ export async function removeTagFromRecord(
 ): Promise<void> {
   await db
     .delete(recordTags)
-    .where(
-      and(eq(recordTags.recordId, recordId), eq(recordTags.tagId, tagId)),
-    );
+    .where(and(eq(recordTags.recordId, recordId), eq(recordTags.tagId, tagId)));
 }
 
 export async function removeAllTagsFromRecord(recordId: string): Promise<void> {

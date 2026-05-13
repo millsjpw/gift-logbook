@@ -43,9 +43,7 @@ export async function syncTagsForListItem(
   listItemId: string,
   tagIds: string[],
 ): Promise<void> {
-  await db
-    .delete(listItemTags)
-    .where(eq(listItemTags.listItemId, listItemId));
+  await db.delete(listItemTags).where(eq(listItemTags.listItemId, listItemId));
   if (tagIds.length > 0) {
     await db
       .insert(listItemTags)
