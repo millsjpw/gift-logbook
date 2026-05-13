@@ -1,5 +1,17 @@
 # gift-logbook
 
+## 2.0.0
+
+### Major Changes
+
+- [#96](https://github.com/millsjpw/gift-logbook/pull/96) [`1066806`](https://github.com/millsjpw/gift-logbook/commit/106680654a63fc77125e676f572057a0acd86941) Thanks [@millsjpw](https://github.com/millsjpw)! - Robust tagging, breaking API changes, removal of meta fields.
+
+  Tags were the better choice, and relational tables have been created.
+
+  Interfaces are available to add and remove tags from entities.
+
+  Ability to edit and remove tags will come at a later date.
+
 ## 1.1.3
 
 ### Patch Changes
