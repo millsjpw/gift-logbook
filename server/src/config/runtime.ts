@@ -11,10 +11,7 @@ type Config = {
     migrationConfig: MigrationConfig;
   };
   session: {
-    defaultDuration: number;
-    refreshDuration: number;
-    secret: string;
-    issuer: string;
+    duration: number;
   };
 };
 
@@ -32,9 +29,6 @@ export const config: Config = {
     migrationConfig,
   },
   session: {
-    defaultDuration: requireNumber("JWT_DEFAULT_DURATION"),
-    refreshDuration: requireNumber("JWT_REFRESH_DURATION"),
-    secret: requireEnv("JWT_SECRET"),
-    issuer: requireEnv("JWT_ISSUER"),
+    duration: requireNumber("SESSION_DURATION"),
   },
 };

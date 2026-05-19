@@ -22,7 +22,7 @@ export default function RecentListsCard() {
   }, []);
 
   return (
-    <div className="rounded-xl border border-gray-300 bg-white shadow-md p-6">
+    <div className="rounded-xl border border-gray-300 bg-white shadow-sm p-6">
       <h2 className="text-lg font-semibold text-gray-800 mb-4">
         📋 Recent Lists
       </h2>

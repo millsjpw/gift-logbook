@@ -6,7 +6,8 @@ import {
   UserForbiddenError,
   NotFoundError,
 } from "./errors.js";
-import { getBearerToken, verifyToken } from "../services/auth.js";
+import { SESSION_COOKIE } from "./cookies.js";
+import { getSessionUser } from "../services/auth.js";
 
 export function middlewareLogResponses(
   req: Request,
@@ -55,14 +56,23 @@ export function middlewareErrorHandler(
   respondWithError(res, statusCode, message);
 }
 
-export function middlewareRequireAuth(
+export async function middlewareRequireAuth(
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
   try {
-    const token = getBearerToken(req);
-    req.auth = { userId: verifyToken(token) };
+    const sessionToken: string | undefined = req.cookies?.[SESSION_COOKIE];
+    if (!sessionToken) {
+      return next(new UserNotAuthenticatedError("Authentication required"));
+    }
+
+    const user = await getSessionUser(sessionToken);
+    if (!user) {
+      return next(new UserNotAuthenticatedError("Invalid or expired session"));
+    }
+
+    req.auth = { userId: user.id };
     return next();
   } catch (err: any) {
     console.error(`\n[AUTH ERROR] ${req.method} ${req.url}`, err.message, "\n");
@@ -70,17 +80,19 @@ export function middlewareRequireAuth(
   }
 }
 
-export function middlewareOptionalAuth(
+export async function middlewareOptionalAuth(
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
   try {
-    const authHeader = req.get("Authorization");
-    if (!authHeader) return next();
+    const sessionToken: string | undefined = req.cookies?.[SESSION_COOKIE];
+    if (!sessionToken) return next();
 
-    const token = getBearerToken(req);
-    req.auth = { userId: verifyToken(token) };
+    const user = await getSessionUser(sessionToken);
+    if (user) {
+      req.auth = { userId: user.id };
+    }
   } catch (err: any) {
     console.error(`\n[AUTH ERROR] ${req.method} ${req.url}`, err.message, "\n");
   }

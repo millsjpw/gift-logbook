@@ -1,6 +1,5 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { clearTokens } from "../api/tokens";
-import { isAuthenticated } from "../api/auth";
+import { useAuth } from "../context/AuthContext";
 import {
   ArrowRightEndOnRectangleIcon,
   ArrowRightStartOnRectangleIcon,
@@ -14,10 +13,10 @@ import {
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const loggedIn = isAuthenticated();
+  const { isAuthenticated: loggedIn, signOut } = useAuth();
 
-  function handleLogout() {
-    clearTokens();
+  async function handleLogout() {
+    await signOut();
     navigate("/login");
   }
 

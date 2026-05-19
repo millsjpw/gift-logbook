@@ -1,30 +1,18 @@
-import {
-  clearTokens,
-  getRefreshToken,
-  setTokens,
-  getAccessToken,
-} from "./tokens";
+export type User = {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: string;
+  updatedAt: string;
+};
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
-let authReady = false;
-
-export function setAuthReady() {
-  authReady = true;
-}
-
-export function isAuthReady() {
-  return authReady;
-}
-
-export function isAuthenticated() {
-  return !!getAccessToken();
-}
-
-export async function login(email: string, password: string) {
+export async function login(email: string, password: string): Promise<User> {
   const response = await fetch(`${BASE_URL}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify({ email, password }),
   });
 
@@ -32,17 +20,18 @@ export async function login(email: string, password: string) {
     throw new Error("Login failed");
   }
 
-  const data = await response.json();
-
-  setTokens(data.accessToken, data.refreshToken);
-
-  return data;
+  return response.json();
 }
 
-export async function register(name: string, email: string, password: string) {
+export async function register(
+  name: string,
+  email: string,
+  password: string,
+): Promise<User> {
   const response = await fetch(`${BASE_URL}/users`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify({ name, email, password }),
   });
 
@@ -50,35 +39,28 @@ export async function register(name: string, email: string, password: string) {
     throw new Error("Registration failed");
   }
 
-  const data = await response.json();
-
-  setTokens(data.accessToken, data.refreshToken);
-
-  return data;
+  return response.json();
 }
 
-export async function refreshAccessToken() {
-  const refreshToken = getRefreshToken();
-
-  if (!refreshToken) {
-    clearTokens();
-    throw new Error("No refresh token available");
-  }
-
-  const response = await fetch(`${BASE_URL}/auth/refresh`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ refreshToken }),
+export async function getMe(): Promise<User | null> {
+  const response = await fetch(`${BASE_URL}/auth/me`, {
+    credentials: "include",
   });
 
-  if (!response.ok) {
-    clearTokens();
-    throw new Error("Failed to refresh access token");
+  if (response.status === 401) {
+    return null;
   }
 
-  const data = await response.json();
+  if (!response.ok) {
+    return null;
+  }
 
-  setTokens(data.accessToken, data.refreshToken);
+  return response.json();
+}
 
-  return data.accessToken;
+export async function logout(): Promise<void> {
+  await fetch(`${BASE_URL}/auth/logout`, {
+    method: "POST",
+    credentials: "include",
+  });
 }

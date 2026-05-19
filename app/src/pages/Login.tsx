@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { login, register } from '../api/auth';
 import { useNavigate } from 'react-router-dom';
-import { setTokens } from '../api/tokens';
+import { useAuth } from '../context/AuthContext';
 import Layout from '../components/Layout';
 
 export default function Login() {
     const navigate = useNavigate();
+    const { setUser } = useAuth();
     const [mode, setMode] = useState<'login' | 'register'>('login');
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -19,14 +20,14 @@ export default function Login() {
         setLoading(true);
 
         try {
-            let data;
+            let user;
             if (mode === 'login') {
-                data = await login(email, password);
+                user = await login(email, password);
             } else {
-                data = await register(name, email, password);
+                user = await register(name, email, password);
             }
 
-            setTokens(data.accessToken, data.refreshToken);
+            setUser(user);
             navigate('/');
         } catch (err: any) {
             setError(err.message || 'Something went wrong');

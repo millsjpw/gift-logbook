@@ -1,41 +1,22 @@
-import { getAccessToken, clearTokens } from "./tokens";
-import { refreshAccessToken } from "./auth";
-
 type ApiError = {
   error: string;
 };
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
-async function request(
-  path: string,
-  token?: string | null,
-  options: RequestInit = {},
-) {
-  return fetch(`${BASE_URL}${path}`, {
+export async function apiFetch(path: string, options: RequestInit = {}) {
+  const res = await fetch(`${BASE_URL}${path}`, {
     ...options,
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     },
   });
-}
-
-export async function apiFetch(path: string, options: RequestInit = {}) {
-  let accessToken = getAccessToken();
-
-  let res = await request(path, accessToken, options);
 
   if (res.status === 401) {
-    try {
-      accessToken = await refreshAccessToken();
-      res = await request(path, accessToken, options);
-    } catch (err) {
-      clearTokens();
-      window.location.href = "/login";
-      throw err;
-    }
+    window.location.href = "/login";
+    throw new Error("Not authenticated");
   }
 
   if (!res.ok) {

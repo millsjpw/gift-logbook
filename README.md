@@ -11,7 +11,7 @@ Nothing out there would be able to meet our specific needs, so I built it myself
 
 ## Features
 
-- JWT-based authentication
+- Session-based authentication with secure HttpOnly cookies
 - Gift tracking by person and list
 - Tagging system
 - Exchange and assignment generation
@@ -23,7 +23,7 @@ Nothing out there would be able to meet our specific needs, so I built it myself
 - Express
 - PostgreSQL
 - Drizzle ORM
-- JWT Authentication
+- Cookie-based sessions (HttpOnly, SameSite)
 - OpenAPI (Redoc)
 
 ---
@@ -65,16 +65,13 @@ npm run dev:app
 
 Create a `.env` file in the `server/` directory (or export these in your shell):
 
-| Variable             | Description                               | Default      |
-| -------------------- | ----------------------------------------- | ------------ |
-| PORT                 | Server port                               | 3000         |
-| PLATFORM             | Runtime environment                       | local        |
-| DB_URL               | PostgreSQL connection string              | —            |
-| DB_URL_TEST          | Separate test DB (prevents dev data loss) | —            |
-| JWT_SECRET           | Secret for signing tokens                 | —            |
-| JWT_DEFAULT_DURATION | Access token lifetime (seconds)           | 3600         |
-| JWT_REFRESH_DURATION | Refresh token lifetime (seconds)          | 86400        |
-| JWT_ISSUER           | Token issuer                              | gift-logbook |
+| Variable         | Description                               | Default |
+| ---------------- | ----------------------------------------- | ------- |
+| PORT             | Server port                               | 3000    |
+| PLATFORM         | Runtime environment                       | local   |
+| DB_URL           | PostgreSQL connection string              | —       |
+| DB_URL_TEST      | Separate test DB (prevents dev data loss) | —       |
+| SESSION_DURATION | Session cookie lifetime (seconds)         | —       |
 
 ### Example `server/.env`
 
@@ -83,10 +80,7 @@ PORT=3000
 PLATFORM=local
 DB_URL=postgres://user:pass@localhost:5432/gift_logbook
 DB_URL_TEST=postgres://user:pass@localhost:5432/gift_logbook_test
-JWT_DEFAULT_DURATION=3600
-JWT_REFRESH_DURATION=86400
-JWT_SECRET=change-me-to-a-secure-secret
-JWT_ISSUER=gift-logbook
+SESSION_DURATION=2592000
 ```
 
 ## Usage
@@ -133,9 +127,9 @@ npm run test:unit
 
 #### Auth
 
-- `POST /auth/login — login`
-- `POST /auth/refresh — refresh token`
-- `POST /auth/logout — logout`
+- `POST /auth/login — login (sets session cookie)`
+- `GET /auth/me — return current authenticated user`
+- `POST /auth/logout — logout (clears session cookie)`
 
 #### Users
 

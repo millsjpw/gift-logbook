@@ -3,7 +3,7 @@ import { SpeedInsights } from "@vercel/speed-insights/react";
 import { Analytics } from "@vercel/analytics/react";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import { isAuthenticated } from "./api/auth";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import type { JSX } from "react/jsx-dev-runtime";
 import MyPeople from "./pages/MyPeople";
 import MyLists from "./pages/MyLists";
@@ -13,74 +13,84 @@ import GiftExchangeView from "./pages/GiftExchangeView";
 import Logbook from "./pages/Logbook";
 
 function ProtectedRoute({ children }: { children: JSX.Element }) {
-  return isAuthenticated() ? children : <Navigate to="/login" />;
+  const { isAuthenticated, isLoading } = useAuth();
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen text-gray-500">
+        Loading…
+      </div>
+    );
+  }
+  return isAuthenticated ? children : <Navigate to="/login" />;
 }
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route
-          path="/people"
-          element={
-            <ProtectedRoute>
-              <MyPeople />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/lists"
-          element={
-            <ProtectedRoute>
-              <MyLists />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/lists/:id"
-          element={
-            <ProtectedRoute>
-              <ListView />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/gift-exchanges"
-          element={
-            <ProtectedRoute>
-              <GiftExchanges />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/gift-exchanges/:id"
-          element={
-            <ProtectedRoute>
-              <GiftExchangeView />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/logbook"
-          element={
-            <ProtectedRoute>
-              <Logbook />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
-      <SpeedInsights />
-      <Analytics />
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/people"
+            element={
+              <ProtectedRoute>
+                <MyPeople />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/lists"
+            element={
+              <ProtectedRoute>
+                <MyLists />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/lists/:id"
+            element={
+              <ProtectedRoute>
+                <ListView />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/gift-exchanges"
+            element={
+              <ProtectedRoute>
+                <GiftExchanges />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/gift-exchanges/:id"
+            element={
+              <ProtectedRoute>
+                <GiftExchangeView />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/logbook"
+            element={
+              <ProtectedRoute>
+                <Logbook />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+        <SpeedInsights />
+        <Analytics />
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 
