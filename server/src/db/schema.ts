@@ -10,6 +10,7 @@ import {
   primaryKey,
   check,
   integer,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
@@ -477,3 +478,22 @@ export type ExchangeAssignmentResponse = Omit<
   ExchangeAssignment,
   "createdAt" | "updatedAt" | "round"
 > & { giverName: string; receiverName: string };
+
+// =====================
+// User Settings
+// =====================
+
+export const userSettings = pgTable("user_settings", {
+  userId: uuid("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  darkMode: boolean("dark_mode").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+});
+
+export type NewUserSettings = typeof userSettings.$inferInsert;
+export type UserSettings = typeof userSettings.$inferSelect;

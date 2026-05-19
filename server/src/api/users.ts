@@ -57,3 +57,23 @@ export async function handleDeleteUser(req: Request, res: Response) {
   await userService.deleteUser(userId);
   res.status(204).send();
 }
+
+export async function handleGetSettings(req: Request, res: Response) {
+  const userId = req.params.id as string;
+  const settings = await userService.getUserSettings(userId);
+  respondWithJSON(res, 200, settings);
+}
+
+export async function handleUpdateSettings(req: Request, res: Response) {
+  const userId = req.params.id as string;
+  const { darkMode } = req.body;
+
+  if (darkMode === undefined) {
+    throw new BadRequestError(
+      "At least one setting must be provided for update",
+    );
+  }
+
+  const updated = await userService.updateUserSettings(userId, { darkMode });
+  respondWithJSON(res, 200, updated);
+}
