@@ -69,7 +69,9 @@ export async function handleUpdateSettings(req: Request, res: Response) {
   const { darkMode } = req.body;
 
   if (darkMode === undefined) {
-    throw new BadRequestError("At least one setting must be provided for update");
+    throw new BadRequestError(
+      "At least one setting must be provided for update",
+    );
   }
 
   const updated = await userService.updateUserSettings(userId, { darkMode });
