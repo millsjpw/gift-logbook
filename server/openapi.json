@@ -54,13 +54,7 @@
           "createdAt": { "type": "string", "format": "date-time" },
           "updatedAt": { "type": "string", "format": "date-time" }
         },
-        "required": [
-          "id",
-          "name",
-          "email",
-          "createdAt",
-          "updatedAt"
-        ]
+        "required": ["id", "name", "email", "createdAt", "updatedAt"]
       },
       "Tag": {
         "type": "object",

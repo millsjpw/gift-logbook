@@ -45,7 +45,10 @@ describe("users service", () => {
     expect(hashPassword).toHaveBeenCalledWith("pw");
     expect(userDb.createUser).toHaveBeenCalled();
     expect(makeSessionToken).toHaveBeenCalled();
-    expect(sessionsDb.createSession).toHaveBeenCalledWith("u1", "session-token");
+    expect(sessionsDb.createSession).toHaveBeenCalledWith(
+      "u1",
+      "session-token",
+    );
     expect(res.sessionToken).toBe("session-token");
     expect(res.user.id).toBe("u1");
     expect((res.user as any).hashedPassword).toBeUndefined();

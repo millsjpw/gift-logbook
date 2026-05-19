@@ -1,7 +1,11 @@
 import type { Request, Response } from "express";
 import { BadRequestError, UserNotAuthenticatedError } from "./errors.js";
 import { respondWithJSON } from "./json.js";
-import { SESSION_COOKIE, sessionCookieOptions, clearCookieOptions } from "./cookies.js";
+import {
+  SESSION_COOKIE,
+  sessionCookieOptions,
+  clearCookieOptions,
+} from "./cookies.js";
 import * as authService from "../services/auth.js";
 
 export async function handleLogin(req: Request, res: Response) {
