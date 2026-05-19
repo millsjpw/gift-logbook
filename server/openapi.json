@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Gift Logbook API",
-    "version": "1.0.0",
+    "version": "3.0.0",
     "description": "OpenAPI v3 specification for the Gift Logbook service."
   },
   "servers": [
@@ -18,10 +18,10 @@
   ],
   "components": {
     "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "session"
       }
     },
     "schemas": {
@@ -46,23 +46,20 @@
       },
       "LoginResponse": {
         "type": "object",
+        "description": "Authenticated user. A session cookie is set in the response.",
         "properties": {
           "id": { "type": "string", "format": "uuid" },
           "name": { "type": "string" },
           "email": { "type": "string", "format": "email" },
           "createdAt": { "type": "string", "format": "date-time" },
-          "updatedAt": { "type": "string", "format": "date-time" },
-          "token": { "type": "string" },
-          "refreshToken": { "type": "string" }
+          "updatedAt": { "type": "string", "format": "date-time" }
         },
         "required": [
           "id",
           "name",
           "email",
           "createdAt",
-          "updatedAt",
-          "token",
-          "refreshToken"
+          "updatedAt"
         ]
       },
       "Tag": {
@@ -189,7 +186,7 @@
       }
     }
   },
-  "security": [{ "bearerAuth": [] }],
+  "security": [{ "cookieAuth": [] }],
   "paths": {
     "/health": {
       "get": {
@@ -223,19 +220,21 @@
         }
       }
     },
-    "/auth/refresh": {
-      "post": {
-        "summary": "Refresh access token",
+    "/auth/me": {
+      "get": {
+        "summary": "Get current user",
+        "description": "Returns the authenticated user for the current session cookie.",
+        "security": [{ "cookieAuth": [] }],
         "responses": {
           "200": {
-            "description": "New token pair",
+            "description": "Authenticated user",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/LoginResponse" }
+                "schema": { "$ref": "#/components/schemas/User" }
               }
             }
           },
-          "401": { "description": "Invalid or expired refresh token" }
+          "401": { "description": "Not authenticated" }
         }
       }
     },

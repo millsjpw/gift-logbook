@@ -3,8 +3,7 @@ import { vi, describe, it, expect, beforeEach } from "vitest";
 // Mock the auth functions used by the users service
 vi.mock("../auth.js", () => ({
   hashPassword: vi.fn().mockResolvedValue("hashed"),
-  generateToken: vi.fn().mockReturnValue("access-token"),
-  makeRefreshToken: vi.fn().mockReturnValue("refresh-token"),
+  makeSessionToken: vi.fn().mockReturnValue("session-token"),
 }));
 
 // Mock underlying DB queries
@@ -24,14 +23,14 @@ vi.mock("../../db/queries/sessions.js", () => ({
 import * as usersService from "../users.js";
 import * as userDb from "../../db/queries/users.js";
 import * as sessionsDb from "../../db/queries/sessions.js";
-import { hashPassword, generateToken, makeRefreshToken } from "../auth.js";
+import { hashPassword, makeSessionToken } from "../auth.js";
 
 beforeEach(() => {
   vi.clearAllMocks();
 });
 
 describe("users service", () => {
-  it("addUser hashes password, creates user, creates session, and returns tokens", async () => {
+  it("addUser hashes password, creates user, creates session, and returns user with sessionToken", async () => {
     const fakeUser = {
       id: "u1",
       name: "A",
@@ -40,23 +39,16 @@ describe("users service", () => {
       updatedAt: new Date(),
     };
     (userDb.createUser as any).mockResolvedValue(fakeUser);
-    (generateToken as any).mockReturnValue("access-token");
-    (makeRefreshToken as any).mockReturnValue("refresh-token");
+    (makeSessionToken as any).mockReturnValue("session-token");
 
     const res = await usersService.addUser("A", "a@b", "pw");
     expect(hashPassword).toHaveBeenCalledWith("pw");
     expect(userDb.createUser).toHaveBeenCalled();
-    expect(generateToken).toHaveBeenCalledWith("u1");
-    expect(makeRefreshToken).toHaveBeenCalled();
-    expect(sessionsDb.createSession).toHaveBeenCalledWith(
-      "u1",
-      "refresh-token",
-    );
-    expect(res).toEqual({
-      ...fakeUser,
-      accessToken: "access-token",
-      refreshToken: "refresh-token",
-    });
+    expect(makeSessionToken).toHaveBeenCalled();
+    expect(sessionsDb.createSession).toHaveBeenCalledWith("u1", "session-token");
+    expect(res.sessionToken).toBe("session-token");
+    expect(res.user.id).toBe("u1");
+    expect((res.user as any).hashedPassword).toBeUndefined();
   });
 
   it("updateUser hashes password when provided", async () => {

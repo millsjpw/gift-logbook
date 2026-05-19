@@ -7,7 +7,7 @@ export async function createSession(userId: string, token: string) {
   const session = {
     userId,
     token,
-    expiresAt: new Date(Date.now() + config.session.refreshDuration * 1000),
+    expiresAt: new Date(Date.now() + config.session.duration * 1000),
     revokedAt: null,
   };
   const [createdSession] = await db
@@ -47,7 +47,7 @@ export async function updateSessionToken(oldToken: string, newToken: string) {
     .update(sessions)
     .set({
       token: newToken,
-      expiresAt: new Date(Date.now() + config.session.refreshDuration * 1000),
+      expiresAt: new Date(Date.now() + config.session.duration * 1000),
     })
     .where(eq(sessions.token, oldToken))
     .returning();

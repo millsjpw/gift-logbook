@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import path from "path";
 import { config } from "./config/runtime.js";
 import {
@@ -37,6 +38,7 @@ app.use(
 );
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(middlewareLogResponses);
 
 app.get("/health", (_, res) => {
@@ -66,7 +68,7 @@ app.get("/docs", (_, res) => {
 
 // Auth API
 app.post("/auth/login", authApi.handleLogin);
-app.post("/auth/refresh", authApi.handleRefreshToken);
+app.get("/auth/me", authApi.handleMe);
 app.post("/auth/logout", authApi.handleLogout);
 
 // Users API

@@ -1,8 +1,8 @@
 import type { Request, Response } from "express";
 import { BadRequestError } from "./errors.js";
 import { respondWithJSON } from "./json.js";
+import { SESSION_COOKIE, sessionCookieOptions } from "./cookies.js";
 import * as userService from "../services/users.js";
-import { UserResponse } from "../db/schema.js";
 
 export async function handleCreateUser(req: Request, res: Response) {
   type parameters = {
@@ -17,11 +17,13 @@ export async function handleCreateUser(req: Request, res: Response) {
     throw new BadRequestError("Missing required fields: name, email, password");
   }
 
-  const user: UserResponse = await userService.addUser(
+  const { user, sessionToken } = await userService.addUser(
     params.name,
     params.email,
     params.password,
   );
+
+  res.cookie(SESSION_COOKIE, sessionToken, sessionCookieOptions());
   respondWithJSON(res, 201, user);
 }
 

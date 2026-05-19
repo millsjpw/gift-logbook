@@ -1,34 +1,42 @@
 import type { Request, Response } from "express";
-import { BadRequestError } from "./errors.js";
+import { BadRequestError, UserNotAuthenticatedError } from "./errors.js";
 import { respondWithJSON } from "./json.js";
+import { SESSION_COOKIE, sessionCookieOptions, clearCookieOptions } from "./cookies.js";
 import * as authService from "../services/auth.js";
 
 export async function handleLogin(req: Request, res: Response) {
-  type parameters = {
-    email: string;
-    password: string;
-  };
+  const { email, password } = req.body;
 
-  const params: parameters = req.body;
-
-  if (!params.email || !params.password) {
+  if (!email || !password) {
     throw new BadRequestError("Missing required fields: email, password");
   }
 
-  const user = await authService.login(params.email, params.password);
+  const { user, sessionToken } = await authService.login(email, password);
+
+  res.cookie(SESSION_COOKIE, sessionToken, sessionCookieOptions());
   respondWithJSON(res, 200, user);
 }
 
-export async function handleRefreshToken(req: Request, res: Response) {
-  const refreshToken = authService.getBearerToken(req);
+export async function handleMe(req: Request, res: Response) {
+  const sessionToken: string | undefined = req.cookies?.[SESSION_COOKIE];
+  if (!sessionToken) {
+    throw new UserNotAuthenticatedError("Not authenticated");
+  }
 
-  const result = await authService.refreshAccessToken(refreshToken);
+  const user = await authService.getSessionUser(sessionToken);
+  if (!user) {
+    res.clearCookie(SESSION_COOKIE, clearCookieOptions());
+    throw new UserNotAuthenticatedError("Invalid or expired session");
+  }
 
-  respondWithJSON(res, 200, result);
+  respondWithJSON(res, 200, user);
 }
 
 export async function handleLogout(req: Request, res: Response) {
-  const refreshToken = authService.getBearerToken(req);
-  await authService.logout(refreshToken);
+  const sessionToken: string | undefined = req.cookies?.[SESSION_COOKIE];
+  if (sessionToken) {
+    await authService.logout(sessionToken);
+  }
+  res.clearCookie(SESSION_COOKIE, clearCookieOptions());
   res.status(204).send();
 }
