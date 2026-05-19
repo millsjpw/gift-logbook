@@ -10,6 +10,13 @@ export default defineConfig({
   bundle: true,
   splitting: false,
   clean: true,
-  noExternal: ["express", "cors", "jsonwebtoken", "drizzle-orm", "postgres"],
+  noExternal: [
+    "express",
+    "cors",
+    "jsonwebtoken",
+    "drizzle-orm",
+    "postgres",
+    "cookie-parser",
+  ],
   external: ["argon2"],
 });
