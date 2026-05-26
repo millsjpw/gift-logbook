@@ -127,7 +127,7 @@ export default function GiftExchanges() {
             onChange={(e) => setAddName(e.target.value)}
             disabled={addSaving}
             placeholder="New exchange name"
-            className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+            className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 dark:bg-gray-800 dark:text-white dark:disabled:bg-gray-700"
           />
           <button
             type="submit"
@@ -144,17 +144,21 @@ export default function GiftExchanges() {
 
         {/* Exchanges Table */}
         {exchanges.length === 0 ? (
-          <p>No exchanges found.</p>
+          <p className="dark:text-gray-400">No exchanges found.</p>
         ) : (
           <div className="overflow-x-auto mt-6">
-            <table className="table-fixed w-full border border-gray-200 divide-y divide-gray-300">
-              <thead className="bg-gray-50">
+            <table className="table-fixed w-full border border-gray-200 dark:border-gray-700 divide-y divide-gray-300 dark:divide-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
-                  <th className="px-4 py-2 text-left w-[72%]">Exchange Name</th>
-                  <th className="px-4 py-2 text-center w-[28%]">Actions</th>
+                  <th className="px-4 py-2 text-left w-[72%] dark:text-gray-200">
+                    Exchange Name
+                  </th>
+                  <th className="px-4 py-2 text-center w-[28%] dark:text-gray-200">
+                    Actions
+                  </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-300">
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-300 dark:divide-gray-700">
                 {exchanges.map((fe) => {
                   const isEditing = editingId === fe.exchange.id;
                   return (
@@ -162,7 +166,7 @@ export default function GiftExchanges() {
                       key={fe.exchange.id}
                       className={
                         !isEditing
-                          ? "cursor-pointer hover:bg-gray-50"
+                          ? "cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600"
                           : undefined
                       }
                       onClick={() => {
@@ -189,14 +193,14 @@ export default function GiftExchanges() {
                               if (e.key === "Escape") exitEditing();
                             }}
                             disabled={saving}
-                            className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                            className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 dark:bg-gray-700 dark:text-white dark:disabled:bg-gray-600"
                           />
                         ) : (
                           <div className="flex flex-col justify-center">
-                            <span className="font-medium">
+                            <span className="font-medium dark:text-gray-100">
                               {fe.exchange.name}
                             </span>
-                            <div className="text-gray-400 text-tiny">
+                            <div className="text-gray-400 dark:text-gray-500 text-tiny">
                               updated {formatTimeAgo(fe.exchange.updatedAt)}
                             </div>
                           </div>
@@ -240,13 +244,13 @@ export default function GiftExchanges() {
                           <div className="flex justify-center gap-2">
                             <button
                               onClick={() => startEditing(fe)}
-                              className="p-1 rounded hover:bg-gray-100"
+                              className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
                             >
                               <PencilSquareIcon className="h-5 w-5 text-blue-500 hover:text-blue-700" />
                             </button>
                             <button
                               onClick={() => handleDelete(fe.exchange.id)}
-                              className="p-1 rounded hover:bg-gray-100"
+                              className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
                             >
                               <TrashIcon className="h-5 w-5 text-red-500 hover:text-red-700" />
                             </button>

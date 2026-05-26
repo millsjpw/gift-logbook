@@ -20,20 +20,22 @@ export default function UpcomingBirthdaysCard() {
   }, []);
 
   return (
-    <div className="rounded-xl border border-gray-300 bg-white shadow-sm p-6">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">
+    <div className="rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm p-6">
+      <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
         🎂 Upcoming Birthdays
       </h2>
 
       {loading && (
         <div className="flex flex-col gap-2">
-          <p className="text-sm text-gray-400 animate-pulse">Loading…</p>
+          <p className="text-sm text-gray-400 dark:text-gray-500 animate-pulse">
+            Loading…
+          </p>
           {slow && (
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-gray-400 dark:text-gray-500">
               This is taking a while. Try{" "}
               <button
                 onClick={() => window.location.reload()}
-                className="underline hover:text-gray-600"
+                className="underline hover:text-gray-600 dark:hover:text-gray-300"
               >
                 refreshing the page
               </button>
@@ -46,7 +48,7 @@ export default function UpcomingBirthdaysCard() {
       {!loading && error && <p className="text-sm text-red-500">{error}</p>}
 
       {!loading && !error && birthdays.length === 0 && (
-        <p className="text-sm text-gray-400">
+        <p className="text-sm text-gray-400 dark:text-gray-500">
           No upcoming birthdays. Add birthdates to your people to see them here.
         </p>
       )}
@@ -56,7 +58,7 @@ export default function UpcomingBirthdaysCard() {
           {birthdays.map((entry, i) => (
             <li
               key={i}
-              className="flex items-center gap-3 text-sm text-gray-700"
+              className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-200"
             >
               <span className="w-2 h-2 rounded-full bg-blue-400 shrink-0" />
               {entry}

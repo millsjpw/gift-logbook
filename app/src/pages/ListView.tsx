@@ -239,29 +239,31 @@ export default function ListView() {
                     value={nameDraft}
                     onChange={(e) => setNameDraft(e.target.value)}
                     disabled={headerSaving}
-                    className="text-2xl font-bold px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                    className="text-2xl font-bold px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 dark:bg-gray-800 dark:text-white dark:disabled:bg-gray-700"
                   />
                   <button
                     onClick={saveName}
                     disabled={headerSaving || !nameDraft.trim()}
-                    className="p-1 rounded hover:bg-gray-100 disabled:text-gray-300"
+                    className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 disabled:text-gray-300"
                   >
                     <CheckIcon className="h-5 w-5 text-blue-500" />
                   </button>
                   <button
                     onClick={cancelEdit}
                     disabled={headerSaving}
-                    className="p-1 rounded hover:bg-gray-100"
+                    className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     <XMarkIcon className="h-5 w-5 text-gray-500" />
                   </button>
                 </>
               ) : (
                 <>
-                  <h1 className="text-2xl font-bold">{list.name}</h1>
+                  <h1 className="text-2xl font-bold dark:text-gray-100">
+                    {list.name}
+                  </h1>
                   <button
                     onClick={startEditName}
-                    className="p-1 rounded hover:bg-gray-100"
+                    className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     <PencilSquareIcon className="h-4 w-4 text-blue-400 hover:text-blue-600" />
                   </button>
@@ -270,7 +272,7 @@ export default function ListView() {
             </div>
 
             {/* Person */}
-            <div className="flex items-center gap-2 mb-4 text-gray-600">
+            <div className="flex items-center gap-2 mb-4 text-gray-600 dark:text-gray-400">
               {editField === "person" ? (
                 <>
                   <span className="text-sm">For:</span>
@@ -283,14 +285,14 @@ export default function ListView() {
                   <button
                     onClick={savePerson}
                     disabled={headerSaving}
-                    className="p-1 rounded hover:bg-gray-100"
+                    className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     <CheckIcon className="h-5 w-5 text-blue-500" />
                   </button>
                   <button
                     onClick={cancelEdit}
                     disabled={headerSaving}
-                    className="p-1 rounded hover:bg-gray-100"
+                    className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     <XMarkIcon className="h-5 w-5 text-gray-500" />
                   </button>
@@ -303,7 +305,7 @@ export default function ListView() {
                   </span>
                   <button
                     onClick={startEditPerson}
-                    className="p-1 rounded hover:bg-gray-100"
+                    className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     <PencilSquareIcon className="h-4 w-4 text-blue-400 hover:text-blue-600" />
                   </button>
@@ -327,7 +329,7 @@ export default function ListView() {
                   value={addTitle}
                   onChange={(e) => setAddTitle(e.target.value)}
                   disabled={addSaving}
-                  className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                  className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 dark:bg-gray-800 dark:text-white dark:disabled:bg-gray-700"
                 />
                 <input
                   type="url"
@@ -335,7 +337,7 @@ export default function ListView() {
                   value={addUrl}
                   onChange={(e) => setAddUrl(e.target.value)}
                   disabled={addSaving}
-                  className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                  className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 dark:bg-gray-800 dark:text-white dark:disabled:bg-gray-700"
                 />
                 <TagInput
                   tags={addTags}
@@ -359,7 +361,9 @@ export default function ListView() {
 
             {/* Items */}
             {list.items.length === 0 ? (
-              <p className="text-gray-500">No items in this list yet.</p>
+              <p className="text-gray-500 dark:text-gray-400">
+                No items in this list yet.
+              </p>
             ) : (
               <div className="space-y-2">
                 {list.items.map((item) => (

@@ -102,11 +102,11 @@ export default function TagInput({
 
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-xs text-gray-500">
+      <span className="text-xs text-gray-500 dark:text-gray-400">
         Tags (press Enter or comma to add)
       </span>
       <div
-        className="relative flex flex-wrap items-center gap-1 px-2 py-1 border border-gray-300 rounded-md bg-white focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 min-h-[36px] cursor-text"
+        className="relative flex flex-wrap items-center gap-1 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 min-h-[36px] cursor-text"
         onClick={() => inputRef.current?.focus()}
       >
         {tags.map((tag) => (
@@ -127,10 +127,10 @@ export default function TagInput({
           onBlur={() => setTimeout(() => setIsOpen(false), 150)}
           disabled={disabled}
           placeholder={tags.length === 0 ? (placeholder ?? "Add a tag…") : ""}
-          className="outline-none text-sm flex-1 min-w-[6rem] bg-transparent"
+          className="outline-none text-sm flex-1 min-w-[6rem] bg-transparent dark:text-white dark:placeholder-gray-400"
         />
         {showDropdown && (
-          <ul className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-20 max-h-48 overflow-y-auto">
+          <ul className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-20 max-h-48 overflow-y-auto">
             {suggestions.map((s, i) => (
               <li key={s.id}>
                 <button
@@ -140,8 +140,8 @@ export default function TagInput({
                     pickSuggestion(s);
                   }}
                   onMouseEnter={() => setHighlightedIndex(i)}
-                  className={`w-full text-left px-3 py-1.5 text-sm flex items-center gap-2 ${
-                    i === highlightedIndex ? "bg-gray-100" : "hover:bg-gray-50"
+                  className={`w-full text-left px-3 py-1.5 text-sm flex items-center gap-2 dark:text-gray-200 ${
+                    i === highlightedIndex ? "bg-gray-100 dark:bg-gray-700" : "hover:bg-gray-50 dark:hover:bg-gray-700"
                   }`}
                 >
                   <span

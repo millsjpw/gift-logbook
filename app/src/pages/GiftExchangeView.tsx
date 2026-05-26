@@ -41,7 +41,9 @@ export default function GiftExchangeView() {
             <h1 className="text-2xl font-bold mb-4">
               {exchange.exchange.name}
             </h1>
-            <p className="text-gray-500">Exchange view coming soon.</p>
+            <p className="text-gray-500 dark:text-gray-400">
+              Exchange view coming soon.
+            </p>
           </div>
         )}
       </PageLoader>

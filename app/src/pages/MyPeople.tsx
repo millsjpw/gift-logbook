@@ -187,7 +187,7 @@ export default function MyPeople() {
                   onChange={(e) => setAddName(e.target.value)}
                   disabled={addSaving}
                   placeholder="New person name"
-                  className="w-48 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                  className="w-48 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:disabled:bg-gray-600"
                 />
                 <BirthdayPicker
                   value={addBirthday}
@@ -220,11 +220,11 @@ export default function MyPeople() {
           <p>You haven't created any people yet.</p>
         ) : (
           <div className="overflow-x-auto mt-6">
-            <table className="table-fixed w-full border border-gray-200 divide-y divide-gray-300">
-              <thead className="bg-gray-50">
+            <table className="table-fixed w-full border border-gray-200 divide-y divide-gray-300 dark:border-gray-700 dark:divide-gray-700 rounded-md">
+              <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
                   <th
-                    className="px-4 py-2 text-left w-[45%] cursor-pointer"
+                    className="px-4 py-2 text-left w-[45%] cursor-pointer dark:text-gray-200"
                     onClick={() => toggleSort("name")}
                   >
                     Name
@@ -235,16 +235,24 @@ export default function MyPeople() {
                         <ArrowDownIcon className="h-4 w-4 inline m-2" />
                       ))}
                   </th>
-                  <th className="px-4 py-2 text-left w-[30%]">Birthday</th>
-                  <th className="px-4 py-2 text-center w-[25%]">Actions</th>
+                  <th className="px-4 py-2 text-left w-[30%] dark:text-gray-200">
+                    Birthday
+                  </th>
+                  <th className="px-4 py-2 text-center w-[25%] dark:text-gray-200">
+                    Actions
+                  </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-300">
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-300 dark:divide-gray-700">
                 {sortedPeople.map((person) => {
                   const isEditing = editingId === person.id;
                   return (
                     <Fragment key={person.id}>
-                      <tr className={isEditing ? "bg-blue-50" : ""}>
+                      <tr
+                        className={
+                          isEditing ? "bg-blue-50 dark:bg-blue-900/30" : ""
+                        }
+                      >
                         <td className="px-4 py-2 align-middle">
                           {isEditing ? (
                             <input
@@ -257,12 +265,14 @@ export default function MyPeople() {
                                 }))
                               }
                               disabled={editSaving}
-                              className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                              className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 dark:bg-gray-700 dark:text-white dark:disabled:bg-gray-600"
                             />
                           ) : (
                             <div className="flex flex-col justify-center">
-                              <span className="font-medium">{person.name}</span>
-                              <div className="text-gray-400 text-tiny">
+                              <span className="font-medium dark:text-gray-200">
+                                {person.name}
+                              </span>
+                              <div className="text-gray-400 text-tiny dark:text-gray-400">
                                 updated {formatTimeAgo(person.updatedAt)}
                               </div>
                             </div>
@@ -281,7 +291,7 @@ export default function MyPeople() {
                               isDisabled={editSaving}
                             />
                           ) : (
-                            <span>
+                            <span className="dark:text-gray-200">
                               {formatBirthday({
                                 birthMonth: person.birthMonth,
                                 birthDay: person.birthDay,
@@ -313,7 +323,7 @@ export default function MyPeople() {
                                   className={`px-3 py-1 rounded-md text-white ${
                                     editSaving
                                       ? "bg-gray-400 cursor-not-allowed"
-                                      : "bg-gray-400 hover:bg-gray-500"
+                                      : "bg-gray-400 hover:bg-gray-500 dark:hover:bg-gray-600"
                                   }`}
                                 >
                                   Cancel
@@ -329,13 +339,13 @@ export default function MyPeople() {
                             <div className="justify-center gap-2 flex">
                               <button
                                 onClick={() => startEditing(person)}
-                                className="p-1 rounded hover:bg-gray-100"
+                                className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
                               >
                                 <PencilSquareIcon className="h-5 w-5 text-blue-500 hover:text-blue-700" />
                               </button>
                               <button
                                 onClick={() => handleDelete(person.id)}
-                                className="p-1 rounded hover:bg-gray-100"
+                                className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
                               >
                                 <TrashIcon className="h-5 w-5 text-red-500 hover:text-red-700" />
                               </button>
@@ -344,7 +354,7 @@ export default function MyPeople() {
                         </td>
                       </tr>
                       {isEditing && (
-                        <tr className="bg-blue-50">
+                        <tr className="bg-blue-50 dark:bg-blue-900/30">
                           <td colSpan={3} className="px-4 pb-3">
                             <TagInput
                               tags={editDraft.tags}

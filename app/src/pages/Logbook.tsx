@@ -275,18 +275,18 @@ export default function Logbook() {
           <div className="flex flex-col gap-2 w-full">
             <div className="flex items-end justify-between gap-3">
               <div className="flex flex-col gap-1">
-                <label className="text-sm text-gray-600">Item *</label>
+                <label className="text-sm text-gray-600 dark:text-gray-400">Item *</label>
                 <input
                   type="text"
                   value={addItemText}
                   onChange={(e) => setAddItemText(e.target.value)}
                   disabled={addSaving}
                   placeholder="What did you give?"
-                  className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 w-48"
+                  className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 dark:bg-gray-700 dark:text-white dark:disabled:bg-gray-700 w-48"
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-sm text-gray-600">For *</label>
+                <label className="text-sm text-gray-600 dark:text-gray-400">For *</label>
                 <PersonTypeahead
                   persons={persons}
                   value={addPersonName}
@@ -295,7 +295,7 @@ export default function Logbook() {
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-sm text-gray-600">Amount</label>
+                <label className="text-sm text-gray-600 dark:text-gray-400">Amount</label>
                 <input
                   type="number"
                   min="0"
@@ -304,11 +304,11 @@ export default function Logbook() {
                   onChange={(e) => setAddAmount(e.target.value)}
                   disabled={addSaving}
                   placeholder="0.00"
-                  className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 w-28"
+                  className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 dark:bg-gray-700 dark:text-white dark:disabled:bg-gray-700 w-28"
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-sm text-gray-600">Date</label>
+                <label className="text-sm text-gray-600 dark:text-gray-400">Date</label>
                 <DatePickerInput
                   value={addDate}
                   onChange={setAddDate}
@@ -340,40 +340,40 @@ export default function Logbook() {
 
         {/* Table */}
         {records.length === 0 ? (
-          <p className="text-gray-500">No records yet.</p>
+          <p className="text-gray-500 dark:text-gray-400">No records yet.</p>
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="min-w-full border border-gray-200 divide-y divide-gray-300">
-                <thead className="bg-gray-50">
+              <table className="min-w-full border border-gray-200 dark:border-gray-700 divide-y divide-gray-300 dark:divide-gray-700">
+                <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr className="text-left">
                     <th
-                      className="px-4 py-2 font-semibold cursor-pointer select-none whitespace-nowrap"
+                      className="px-4 py-2 font-semibold cursor-pointer select-none whitespace-nowrap dark:text-gray-200"
                       onClick={() => toggleSort("date")}
                     >
                       Date <SortIcon colKey="date" />
                     </th>
                     <th
-                      className="px-4 py-2 font-semibold cursor-pointer select-none whitespace-nowrap"
+                      className="px-4 py-2 font-semibold cursor-pointer select-none whitespace-nowrap dark:text-gray-200"
                       onClick={() => toggleSort("itemText")}
                     >
                       Item <SortIcon colKey="itemText" />
                     </th>
-                    <th className="px-4 py-2 font-semibold whitespace-nowrap">
+                    <th className="px-4 py-2 font-semibold whitespace-nowrap dark:text-gray-200">
                       For
                     </th>
                     <th
-                      className="px-4 py-2 font-semibold cursor-pointer select-none whitespace-nowrap"
+                      className="px-4 py-2 font-semibold cursor-pointer select-none whitespace-nowrap dark:text-gray-200"
                       onClick={() => toggleSort("amount")}
                     >
                       Amount <SortIcon colKey="amount" />
                     </th>
-                    <th className="px-4 py-2 font-semibold text-center whitespace-nowrap">
+                    <th className="px-4 py-2 font-semibold text-center whitespace-nowrap dark:text-gray-200">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-300">
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-300 dark:divide-gray-700">
                   {pageRecords.map((record) => {
                     const isEditing = editingId === record.id;
                     const personName =
@@ -382,7 +382,7 @@ export default function Logbook() {
                       <Fragment key={record.id}>
                         <tr
                           className={
-                            isEditing ? "bg-blue-50" : "hover:bg-gray-50"
+                            isEditing ? "bg-blue-50 dark:bg-blue-900/30" : "hover:bg-gray-50 dark:hover:bg-gray-600"
                           }
                         >
                           <td className="px-4 py-2 align-middle">
@@ -395,7 +395,7 @@ export default function Logbook() {
                                 isDisabled={editSaving}
                               />
                             ) : (
-                              <span className="whitespace-nowrap">
+                              <span className="whitespace-nowrap dark:text-gray-200">
                                 {formatDate(record.date)}
                               </span>
                             )}
@@ -412,11 +412,11 @@ export default function Logbook() {
                                   }))
                                 }
                                 disabled={editSaving}
-                                className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 w-full min-w-36"
+                                className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 dark:bg-gray-700 dark:text-white dark:disabled:bg-gray-600 w-full min-w-36"
                               />
                             ) : (
                               <div>
-                                <span className="font-medium">
+                                <span className="font-medium dark:text-gray-100">
                                   {record.itemText}
                                 </span>
                                 {record.tags.length > 0 && (
@@ -439,7 +439,7 @@ export default function Logbook() {
                               </div>
                             )}
                           </td>
-                          <td className="px-4 py-2 align-middle">
+                          <td className="px-4 py-2 align-middle dark:text-gray-200">
                             {personName}
                           </td>
                           <td className="px-4 py-2 align-middle">
@@ -456,10 +456,10 @@ export default function Logbook() {
                                   }))
                                 }
                                 disabled={editSaving}
-                                className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 w-28"
+                                className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 dark:bg-gray-700 dark:text-white dark:disabled:bg-gray-600 w-28"
                               />
                             ) : (
-                              <span>{formatAmount(record.amount)}</span>
+                              <span className="dark:text-gray-200">{formatAmount(record.amount)}</span>
                             )}
                           </td>
                           <td className="px-4 py-2 align-middle">
@@ -501,13 +501,13 @@ export default function Logbook() {
                               <div className="flex justify-center gap-2">
                                 <button
                                   onClick={() => startEditing(record)}
-                                  className="p-1 rounded hover:bg-gray-100"
-                                >
-                                  <PencilSquareIcon className="h-5 w-5 text-blue-500 hover:text-blue-700" />
-                                </button>
-                                <button
-                                  onClick={() => handleDelete(record.id)}
-                                  className="p-1 rounded hover:bg-gray-100"
+                                    className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+                                  >
+                                    <PencilSquareIcon className="h-5 w-5 text-blue-500 hover:text-blue-700" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDelete(record.id)}
+                                    className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
                                 >
                                   <TrashIcon className="h-5 w-5 text-red-500 hover:text-red-700" />
                                 </button>
@@ -516,7 +516,7 @@ export default function Logbook() {
                           </td>
                         </tr>
                         {isEditing && (
-                          <tr className="bg-blue-50">
+                          <tr className="bg-blue-50 dark:bg-blue-900/30">
                             <td colSpan={5} className="px-4 pb-3">
                               <TagInput
                                 tags={editDraft.tags}
@@ -536,7 +536,7 @@ export default function Logbook() {
             </div>
 
             {/* Pagination */}
-            <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-gray-600">
+            <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-300">
               <div className="flex items-center gap-2">
                 <span>Rows per page:</span>
                 <select
@@ -545,7 +545,7 @@ export default function Logbook() {
                     setPageSize(Number(e.target.value));
                     setCurrentPage(1);
                   }}
-                  className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-200"
                 >
                   {PAGE_SIZE_OPTIONS.map((s) => (
                     <option key={s} value={s}>
@@ -558,7 +558,7 @@ export default function Logbook() {
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={safePage === 1}
-                  className="px-3 py-1 rounded-md border border-gray-300 disabled:text-gray-300 disabled:border-gray-200 hover:bg-gray-100 disabled:hover:bg-white"
+                  className="px-3 py-1 rounded-md border border-gray-300 dark:border-gray-600 disabled:text-gray-300 dark:disabled:text-gray-600 disabled:border-gray-200 dark:disabled:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:hover:bg-white dark:disabled:hover:bg-transparent"
                 >
                   Previous
                 </button>
@@ -570,12 +570,12 @@ export default function Logbook() {
                     setCurrentPage((p) => Math.min(totalPages, p + 1))
                   }
                   disabled={safePage === totalPages}
-                  className="px-3 py-1 rounded-md border border-gray-300 disabled:text-gray-300 disabled:border-gray-200 hover:bg-gray-100 disabled:hover:bg-white"
+                  className="px-3 py-1 rounded-md border border-gray-300 dark:border-gray-600 disabled:text-gray-300 dark:disabled:text-gray-600 disabled:border-gray-200 dark:disabled:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:hover:bg-white dark:disabled:hover:bg-transparent"
                 >
                   Next
                 </button>
               </div>
-              <span className="text-gray-400">
+              <span className="text-gray-400 dark:text-gray-500">
                 {sortedRecords.length} record
                 {sortedRecords.length !== 1 ? "s" : ""} total
               </span>

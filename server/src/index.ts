@@ -76,16 +76,6 @@ app.post("/users", usersApi.handleCreateUser);
 app.get("/users/:id", middlewareRequireAuth, usersApi.handleGetUser);
 app.put("/users/:id", middlewareRequireAuth, usersApi.handleUpdateUser);
 app.delete("/users/:id", middlewareRequireAuth, usersApi.handleDeleteUser);
-app.get(
-  "/users/:id/settings",
-  middlewareRequireAuth,
-  usersApi.handleGetSettings,
-);
-app.patch(
-  "/users/:id/settings",
-  middlewareRequireAuth,
-  usersApi.handleUpdateSettings,
-);
 
 // Persons API
 app.post("/persons", middlewareRequireAuth, personsApi.handleCreatePerson);

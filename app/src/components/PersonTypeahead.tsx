@@ -90,7 +90,7 @@ export default function PersonTypeahead({
         <Input
           ref={inputRef}
           placeholder="Search people…"
-          className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+          className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:disabled:bg-gray-600"
           onFocus={() => {
             if (value) {
               measureInput();
@@ -112,19 +112,19 @@ export default function PersonTypeahead({
                   No matches
                 </span>
               )}
-              className="bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto"
+              className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-48 overflow-y-auto"
             >
               {(person) => (
                 <ListBoxItem
                   id={person.id}
                   textValue={person.name}
                   className={({ isFocused, isSelected }) =>
-                    `px-3 py-1.5 cursor-pointer text-sm outline-none ${
+                    `px-3 py-1.5 cursor-pointer text-sm outline-none dark:text-gray-200 ${
                       isSelected
-                        ? "bg-blue-100"
+                        ? "bg-blue-100 dark:bg-blue-800"
                         : isFocused
-                          ? "bg-blue-50"
-                          : "hover:bg-gray-50"
+                          ? "bg-blue-50 dark:bg-blue-900"
+                          : "hover:bg-gray-50 dark:hover:bg-gray-700"
                     }`
                   }
                 >

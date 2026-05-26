@@ -1,6 +1,5 @@
 import * as userDb from "../db/queries/users.js";
-import * as userSettingsDb from "../db/queries/user_settings.js";
-import { UserResponse, UserSettings } from "../db/schema.js";
+import { UserResponse } from "../db/schema.js";
 import { hashPassword, makeSessionToken, LoginResult } from "./auth.js";
 import * as sessionsDb from "../db/queries/sessions.js";
 import { NotFoundError } from "../api/errors.js";
@@ -50,15 +49,4 @@ export async function updateUser(
 
 export async function deleteUser(id: string): Promise<void> {
   await userDb.deleteUser(id);
-}
-
-export async function getUserSettings(userId: string): Promise<UserSettings> {
-  return await userSettingsDb.getSettings(userId);
-}
-
-export async function updateUserSettings(
-  userId: string,
-  values: { darkMode?: boolean },
-): Promise<UserSettings> {
-  return await userSettingsDb.upsertSettings(userId, values);
 }
