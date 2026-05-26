@@ -2,8 +2,8 @@ import * as tagsDb from "../db/queries/tags.js";
 import { Tag } from "../db/schema.js";
 import { NotFoundError, UserForbiddenError } from "../api/errors.js";
 
-export async function createTag(userId: string, name: string): Promise<Tag> {
-  return await tagsDb.createTag(userId, name);
+export async function createTag(userId: string, name: string, color?: string): Promise<Tag> {
+  return await tagsDb.createTag(userId, name, color);
 }
 
 export async function getTagById(id: string): Promise<Tag | null> {
@@ -17,7 +17,8 @@ export async function getTagsByUserId(userId: string): Promise<Tag[]> {
 export async function updateTag(
   userId: string,
   id: string,
-  name: string,
+  name?: string,
+  color?: string,
 ): Promise<Tag> {
   const tag = await tagsDb.getTagById(id);
   if (!tag) {
@@ -28,7 +29,7 @@ export async function updateTag(
       "You do not have permission to update this tag",
     );
   }
-  return await tagsDb.updateTag(id, name);
+  return await tagsDb.updateTag(id, name, color);
 }
 
 export async function deleteTag(userId: string, id: string): Promise<void> {
