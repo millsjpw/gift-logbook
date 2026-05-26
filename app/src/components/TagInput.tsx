@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { apiFetch } from "../api/client";
 import type { Tag } from "../models/Tag";
+import TagBadge from "./TagBadge";
 
 interface TagInputProps {
   tags: string[];
@@ -16,23 +17,28 @@ export default function TagInput({
   placeholder,
 }: TagInputProps) {
   const [inputValue, setInputValue] = useState("");
-  const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     apiFetch("/tags")
-      .then((data: Tag[]) => setAvailableTags(data.map((t) => t.name)))
+      .then((data: Tag[]) => setAvailableTags(data))
       .catch(() => {}); // degrade gracefully — typeahead just won't show
   }, []);
 
   const suggestions = availableTags
     .filter(
       (t) =>
-        t.toLowerCase().includes(inputValue.toLowerCase()) && !tags.includes(t),
+        t.name.toLowerCase().includes(inputValue.toLowerCase()) &&
+        !tags.includes(t.name),
     )
     .slice(0, 8);
+
+  function getTagColor(name: string): string {
+    return availableTags.find((t) => t.name === name)?.color ?? "#1d4ed8";
+  }
 
   function commit(value: string) {
     const trimmed = value.trim();
@@ -82,9 +88,9 @@ export default function TagInput({
     }
   }
 
-  function pickSuggestion(suggestion: string) {
-    if (!tags.includes(suggestion)) {
-      onChange([...tags, suggestion]);
+  function pickSuggestion(suggestion: Tag) {
+    if (!tags.includes(suggestion.name)) {
+      onChange([...tags, suggestion.name]);
     }
     setInputValue("");
     setIsOpen(false);
@@ -104,27 +110,12 @@ export default function TagInput({
         onClick={() => inputRef.current?.focus()}
       >
         {tags.map((tag) => (
-          <span
+          <TagBadge
             key={tag}
-            className="flex items-center gap-0.5 px-2 py-0.5 rounded-full text-xs font-medium"
-            style={{ backgroundColor: "#dbeafe", color: "#1e40af" }}
-          >
-            {tag}
-            {!disabled && (
-              <button
-                type="button"
-                tabIndex={-1}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  removeTag(tag);
-                }}
-                className="ml-0.5 leading-none hover:text-blue-900"
-                aria-label={`Remove ${tag}`}
-              >
-                ×
-              </button>
-            )}
-          </span>
+            name={tag}
+            color={getTagColor(tag)}
+            onRemove={disabled ? undefined : () => removeTag(tag)}
+          />
         ))}
         <input
           ref={inputRef}
@@ -141,7 +132,7 @@ export default function TagInput({
         {showDropdown && (
           <ul className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-20 max-h-48 overflow-y-auto">
             {suggestions.map((s, i) => (
-              <li key={s}>
+              <li key={s.id}>
                 <button
                   type="button"
                   onMouseDown={(e) => {
@@ -149,13 +140,15 @@ export default function TagInput({
                     pickSuggestion(s);
                   }}
                   onMouseEnter={() => setHighlightedIndex(i)}
-                  className={`w-full text-left px-3 py-1.5 text-sm ${
-                    i === highlightedIndex
-                      ? "bg-blue-100 text-blue-800"
-                      : "hover:bg-blue-50 hover:text-blue-800"
+                  className={`w-full text-left px-3 py-1.5 text-sm flex items-center gap-2 ${
+                    i === highlightedIndex ? "bg-gray-100" : "hover:bg-gray-50"
                   }`}
                 >
-                  {s}
+                  <span
+                    className="w-3 h-3 rounded-full shrink-0 border border-black/10"
+                    style={{ backgroundColor: s.color }}
+                  />
+                  {s.name}
                 </button>
               </li>
             ))}

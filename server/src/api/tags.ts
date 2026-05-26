@@ -6,13 +6,13 @@ import { Tag } from "../db/schema.js";
 
 export async function handleCreateTag(req: Request, res: Response) {
   const userId = req.auth!.userId;
-  const { name } = req.body;
+  const { name, color } = req.body;
 
   if (!name) {
     throw new BadRequestError("Missing required field: name");
   }
 
-  const tag: Tag = await tagsService.createTag(userId, name);
+  const tag: Tag = await tagsService.createTag(userId, name, color);
   respondWithJSON(res, 201, tag);
 }
 
@@ -46,12 +46,12 @@ export async function handleDeleteTag(req: Request, res: Response) {
 export async function handleUpdateTag(req: Request, res: Response) {
   const userId = req.auth!.userId;
   const tagId = req.params.id as string;
-  const { name } = req.body;
+  const { name, color } = req.body;
 
-  if (!name) {
-    throw new BadRequestError("Missing required field: name");
+  if (!name && !color) {
+    throw new BadRequestError("Missing required field: name or color");
   }
 
-  const updatedTag = await tagsService.updateTag(userId, tagId, name);
+  const updatedTag = await tagsService.updateTag(userId, tagId, name, color);
   respondWithJSON(res, 200, updatedTag);
 }

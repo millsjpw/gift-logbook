@@ -6,6 +6,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/solid";
 import type { ListItem } from "../models/ListItem";
+import TagBadge from "./TagBadge";
 import TagInput from "./TagInput";
 
 type ListItemCardProps = {
@@ -145,12 +146,7 @@ export default function ListItemCard({
         {item.tags?.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2">
             {item.tags.map((tag) => (
-              <span
-                key={tag.id}
-                className="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-700"
-              >
-                {tag.name}
-              </span>
+              <TagBadge key={tag.id} name={tag.name} color={tag.color} />
             ))}
           </div>
         )}

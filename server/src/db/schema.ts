@@ -209,6 +209,7 @@ export const tags = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     name: varchar("name", { length: 256 }).notNull(),
+    color: varchar("color", { length: 7 }).notNull().default("#1d4ed8"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at")
       .notNull()

@@ -1,10 +1,21 @@
+import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import SettingsModal from "./SettingsModal";
+import {
+  Button,
+  Menu,
+  MenuItem,
+  MenuTrigger,
+  Popover,
+} from "react-aria-components";
 import { useAuth } from "../context/AuthContext";
 import {
   ArrowRightEndOnRectangleIcon,
   ArrowRightStartOnRectangleIcon,
   BookOpenIcon,
+  ChevronDownIcon,
   ClipboardDocumentListIcon,
+  Cog6ToothIcon,
   GiftIcon,
   Squares2X2Icon,
   UsersIcon,
@@ -13,7 +24,9 @@ import {
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated: loggedIn, signOut } = useAuth();
+  const { isAuthenticated: loggedIn, user, signOut } = useAuth();
+  const [isMenuOpen, setMenuOpen] = useState(false);
+  const [isSettingsOpen, setSettingsOpen] = useState(false);
 
   async function handleLogout() {
     await signOut();
@@ -31,8 +44,11 @@ export default function Navbar() {
     }`;
   }
 
+  const firstName = user?.name.split(" ")[0] ?? "";
+
   return (
-    <nav className="bg-gray-800 text-white px-6 py-4 flex items-center justify-between">
+    <>
+      <nav className="bg-gray-800 text-white px-6 py-4 flex items-center justify-between">
       <div className="flex space-x-1">
         {loggedIn && (
           <>
@@ -75,13 +91,32 @@ export default function Navbar() {
       </div>
 
       {loggedIn ? (
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-1.5 bg-red-600 hover:bg-red-700 px-3 py-2 rounded-md text-sm font-medium"
-        >
-          <ArrowRightStartOnRectangleIcon className="w-5 h-5 shrink-0" />
-          <span className="hidden sm:inline">Logout</span>
-        </button>
+        <MenuTrigger isOpen={isMenuOpen} onOpenChange={setMenuOpen}>
+          <Button className="flex items-center gap-1.5 bg-red-600 hover:bg-red-700 px-3 py-2 rounded-md text-sm font-medium cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-400">
+            <span className="hidden sm:inline">{firstName}</span>
+            <ChevronDownIcon
+              className={`w-4 h-4 shrink-0 transition-transform duration-200 ${isMenuOpen ? "rotate-180" : ""}`}
+            />
+          </Button>
+          <Popover>
+            <Menu className="outline-none bg-white rounded-md shadow-lg border border-gray-200 py-1 min-w-44 text-gray-900">
+              <MenuItem
+                onAction={() => setSettingsOpen(true)}
+                className="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer outline-none hover:bg-gray-100 data-[focused]:bg-gray-100"
+              >
+                <Cog6ToothIcon className="w-4 h-4 shrink-0 text-gray-500" />
+                Settings
+              </MenuItem>
+              <MenuItem
+                onAction={handleLogout}
+                className="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer outline-none hover:bg-gray-100 data-[focused]:bg-gray-100"
+              >
+                <ArrowRightStartOnRectangleIcon className="w-4 h-4 shrink-0 text-gray-500" />
+                Logout
+              </MenuItem>
+            </Menu>
+          </Popover>
+        </MenuTrigger>
       ) : (
         <Link
           to="/login"
@@ -92,5 +127,11 @@ export default function Navbar() {
         </Link>
       )}
     </nav>
+
+    <SettingsModal
+      isOpen={isSettingsOpen}
+      onClose={() => setSettingsOpen(false)}
+    />
+    </>
   );
 }

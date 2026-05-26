@@ -2,10 +2,11 @@ import { db } from "../db.js";
 import { tags, NewTag, Tag } from "../schema.js";
 import { eq, and, sql } from "drizzle-orm";
 
-export async function createTag(userId: string, name: string) {
+export async function createTag(userId: string, name: string, color?: string) {
   const tag: NewTag = {
     userId,
     name,
+    ...(color && { color }),
   };
   const [createdTag] = await db.insert(tags).values(tag).returning();
   return createdTag;
@@ -21,9 +22,10 @@ export async function getTagById(id: string) {
   return tag;
 }
 
-export async function updateTag(id: string, name?: string) {
+export async function updateTag(id: string, name?: string, color?: string) {
   const updateData: Partial<NewTag> = {};
   if (name) updateData.name = name;
+  if (color) updateData.color = color;
 
   const [updatedTag] = await db
     .update(tags)

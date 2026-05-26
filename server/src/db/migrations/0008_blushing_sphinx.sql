@@ -1,0 +1,1 @@
+ALTER TABLE "tags" ALTER COLUMN "color" SET DEFAULT '#1d4ed8';
