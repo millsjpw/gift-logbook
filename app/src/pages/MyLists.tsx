@@ -143,7 +143,7 @@ export default function MyLists() {
             onChange={(e) => setAddName(e.target.value)}
             disabled={addSaving}
             placeholder="New list name"
-            className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+            className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 dark:bg-gray-800 dark:text-white dark:disabled:bg-gray-700"
           />
           <button
             type="submit"
@@ -160,14 +160,14 @@ export default function MyLists() {
 
         {/* Lists Table */}
         {lists.length === 0 ? (
-          <p>No lists found.</p>
+          <p className="dark:text-gray-400">No lists found.</p>
         ) : (
           <div className="overflow-x-auto mt-6">
-            <table className="table-fixed w-full border border-gray-200 divide-y divide-gray-300">
-              <thead className="bg-gray-50">
+            <table className="table-fixed w-full border border-gray-200 dark:border-gray-700 divide-y divide-gray-300 dark:divide-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
                   <th
-                    className="px-4 py-2 text-left w-[72%] cursor-pointer select-none hover:bg-gray-100"
+                    className="px-4 py-2 text-left w-[72%] cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200"
                     onClick={handleSort}
                   >
                     List Name
@@ -178,10 +178,12 @@ export default function MyLists() {
                         <ArrowDownIcon className="h-4 w-4 inline m-2" />
                       ))}{" "}
                   </th>
-                  <th className="px-4 py-2 text-center w-[28%]">Actions</th>
+                  <th className="px-4 py-2 text-center w-[28%] dark:text-gray-200">
+                    Actions
+                  </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-300">
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-300 dark:divide-gray-700">
                 {sortedLists.map((list) => {
                   const isEditing = editingId === list.id;
                   return (
@@ -189,7 +191,7 @@ export default function MyLists() {
                       key={list.id}
                       className={
                         !isEditing
-                          ? "cursor-pointer hover:bg-gray-50"
+                          ? "cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600"
                           : undefined
                       }
                       onClick={() => {
@@ -219,12 +221,14 @@ export default function MyLists() {
                             }}
                             disabled={saving}
                             autoFocus
-                            className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                            className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 dark:bg-gray-700 dark:text-white dark:disabled:bg-gray-600"
                           />
                         ) : (
                           <div className="flex flex-col justify-center">
-                            <span className="font-medium">{list.name}</span>
-                            <div className="text-gray-400 text-tiny">
+                            <span className="font-medium dark:text-gray-100">
+                              {list.name}
+                            </span>
+                            <div className="text-gray-400 dark:text-gray-500 text-tiny">
                               updated {formatTimeAgo(list.updatedAt)}
                             </div>
                           </div>
@@ -268,13 +272,13 @@ export default function MyLists() {
                           <div className="flex justify-center gap-2">
                             <button
                               onClick={() => startEditing(list)}
-                              className="p-1 rounded hover:bg-gray-100"
+                              className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
                             >
                               <PencilSquareIcon className="h-5 w-5 text-blue-500 hover:text-blue-700" />
                             </button>
                             <button
                               onClick={() => handleDelete(list.id)}
-                              className="p-1 rounded hover:bg-gray-100"
+                              className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
                             >
                               <TrashIcon className="h-5 w-5 text-red-500 hover:text-red-700" />
                             </button>

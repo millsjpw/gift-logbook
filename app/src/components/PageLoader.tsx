@@ -27,14 +27,14 @@ export default function PageLoader({
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 gap-3 text-gray-500">
+      <div className="flex flex-col items-center justify-center py-16 gap-3 text-gray-500 dark:text-gray-400">
         <p className="animate-pulse text-base">Loading…</p>
         {slow && (
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-gray-400 dark:text-gray-500">
             This is taking a while. Try{" "}
             <button
               onClick={() => window.location.reload()}
-              className="underline hover:text-gray-600"
+              className="underline hover:text-gray-600 dark:hover:text-gray-300"
             >
               refreshing the page
             </button>
@@ -47,7 +47,7 @@ export default function PageLoader({
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 gap-2 text-red-600">
+      <div className="flex flex-col items-center justify-center py-16 gap-2 text-red-600 dark:text-red-400">
         <p className="text-base font-medium">Failed to load</p>
         <p className="text-sm">{error}</p>
       </div>

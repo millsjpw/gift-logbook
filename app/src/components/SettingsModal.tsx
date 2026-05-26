@@ -16,7 +16,6 @@ import {
   ModalOverlay,
   Popover,
   SliderTrack,
-  Switch,
   parseColor,
 } from "react-aria-components";
 import { TrashIcon, XMarkIcon } from "@heroicons/react/24/solid";
@@ -35,13 +34,11 @@ interface Props {
 export default function SettingsModal({ isOpen, onClose }: Props) {
   const { user, setUser } = useAuth();
   const [name, setName] = useState(user?.name ?? "");
-  const [darkMode, setDarkMode] = useState(false);
   const [tags, setTags] = useState<LocalTag[]>([]);
   const [deletedTagIds, setDeletedTagIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
 
   const originalName = useRef(user?.name ?? "");
-  const originalDarkMode = useRef(false);
   const originalTagNames = useRef<Record<string, string>>({});
   const originalTagColors = useRef<Record<string, string>>({});
 
@@ -51,13 +48,6 @@ export default function SettingsModal({ isOpen, onClose }: Props) {
     setName(user.name);
     originalName.current = user.name;
     setDeletedTagIds([]);
-
-    apiFetch(`/users/${user.id}/settings`)
-      .then((s: { darkMode: boolean }) => {
-        setDarkMode(s.darkMode);
-        originalDarkMode.current = s.darkMode;
-      })
-      .catch(() => {});
 
     apiFetch("/tags")
       .then((t: Tag[]) => {
@@ -73,6 +63,10 @@ export default function SettingsModal({ isOpen, onClose }: Props) {
       })
       .catch(() => {});
   }, [isOpen, user]);
+
+  function handleClose() {
+    onClose();
+  }
 
   function updateTagName(id: string, value: string) {
     setTags((prev) =>
@@ -104,15 +98,6 @@ export default function SettingsModal({ isOpen, onClose }: Props) {
         );
       }
 
-      if (darkMode !== originalDarkMode.current) {
-        ops.push(
-          apiFetch(`/users/${user.id}/settings`, {
-            method: "PATCH",
-            body: JSON.stringify({ darkMode }),
-          }),
-        );
-      }
-
       for (const tag of tags) {
         const origName = originalTagNames.current[tag.id];
         const origColor = originalTagColors.current[tag.id];
@@ -139,7 +124,8 @@ export default function SettingsModal({ isOpen, onClose }: Props) {
       }
 
       await Promise.all(ops);
-      onClose();
+      originalName.current = name.trim() || originalName.current;
+      handleClose();
     } finally {
       setSaving(false);
     }
@@ -149,28 +135,28 @@ export default function SettingsModal({ isOpen, onClose }: Props) {
     <ModalOverlay
       isOpen={isOpen}
       onOpenChange={(open) => {
-        if (!open) onClose();
+        if (!open) handleClose();
       }}
       isDismissable
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
     >
-      <Modal className="bg-white rounded-lg shadow-xl w-full max-w-lg flex flex-col max-h-[90vh]">
+      <Modal className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-lg flex flex-col max-h-[90vh]">
         <Dialog
           aria-label="Settings"
           className="flex flex-col flex-1 overflow-hidden outline-none"
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 shrink-0">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
             <Heading
               slot="title"
-              className="text-lg font-semibold text-gray-900"
+              className="text-lg font-semibold text-gray-900 dark:text-gray-100"
             >
               Settings
             </Heading>
             <Button
-              onPress={onClose}
+              onPress={handleClose}
               aria-label="Close settings"
-              className="text-gray-400 hover:text-gray-600 rounded-md p-1 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 rounded-md p-1 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             >
               <XMarkIcon className="h-5 w-5" />
             </Button>
@@ -182,7 +168,7 @@ export default function SettingsModal({ isOpen, onClose }: Props) {
             <div>
               <label
                 htmlFor="settings-name"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
               >
                 Name
               </label>
@@ -191,41 +177,18 @@ export default function SettingsModal({ isOpen, onClose }: Props) {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
               />
-            </div>
-
-            {/* Dark mode */}
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-700">
-                Dark Mode
-              </span>
-              <Switch
-                isSelected={darkMode}
-                onChange={setDarkMode}
-                aria-label="Dark Mode"
-                className="cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
-              >
-                <div
-                  className={`relative w-10 h-6 rounded-full transition-colors duration-200 ${
-                    darkMode ? "bg-blue-600" : "bg-gray-300"
-                  }`}
-                >
-                  <div
-                    className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${
-                      darkMode ? "translate-x-4" : "translate-x-0"
-                    }`}
-                  />
-                </div>
-              </Switch>
             </div>
 
             {/* Tags */}
             <div>
-              <p className="text-sm font-medium text-gray-700 mb-2">Tags</p>
-              <div className="max-h-80 overflow-y-auto border border-gray-200 rounded-md divide-y divide-gray-100">
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Tags
+              </p>
+              <div className="max-h-80 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-md divide-y divide-gray-100 dark:divide-gray-700">
                 {tags.length === 0 ? (
-                  <p className="px-3 py-3 text-sm text-gray-400">
+                  <p className="px-3 py-3 text-sm text-gray-400 dark:text-gray-500">
                     No tags yet.
                   </p>
                 ) : (
@@ -279,7 +242,7 @@ export default function SettingsModal({ isOpen, onClose }: Props) {
                         type="text"
                         value={tag.name}
                         onChange={(e) => updateTagName(tag.id, e.target.value)}
-                        className="flex-1 min-w-0 text-sm bg-transparent outline-none border-b border-transparent focus:border-gray-400 transition-colors"
+                        className="flex-1 min-w-0 text-sm bg-transparent dark:text-gray-100 outline-none border-b border-transparent focus:border-gray-400 dark:focus:border-gray-500 transition-colors"
                         aria-label={`Tag name: ${tag.name}`}
                       />
                       <button
@@ -297,7 +260,7 @@ export default function SettingsModal({ isOpen, onClose }: Props) {
           </div>
 
           {/* Footer */}
-          <div className="flex justify-end px-6 py-4 border-t border-gray-200 shrink-0">
+          <div className="flex justify-end px-6 py-4 border-t border-gray-200 dark:border-gray-700 shrink-0">
             <Button
               onPress={handleSave}
               isDisabled={saving}

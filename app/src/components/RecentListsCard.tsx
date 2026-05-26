@@ -22,20 +22,22 @@ export default function RecentListsCard() {
   }, []);
 
   return (
-    <div className="rounded-xl border border-gray-300 bg-white shadow-sm p-6">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">
+    <div className="rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm p-6">
+      <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
         📋 Recent Lists
       </h2>
 
       {loading && (
         <div className="flex flex-col gap-2">
-          <p className="text-sm text-gray-400 animate-pulse">Loading…</p>
+          <p className="text-sm text-gray-400 dark:text-gray-500 animate-pulse">
+            Loading…
+          </p>
           {slow && (
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-gray-400 dark:text-gray-500">
               This is taking a while. Try{" "}
               <button
                 onClick={() => window.location.reload()}
-                className="underline hover:text-gray-600"
+                className="underline hover:text-gray-600 dark:hover:text-gray-300"
               >
                 refreshing the page
               </button>
@@ -48,9 +50,12 @@ export default function RecentListsCard() {
       {!loading && error && <p className="text-sm text-red-500">{error}</p>}
 
       {!loading && !error && lists.length === 0 && (
-        <p className="text-sm text-gray-400">
+        <p className="text-sm text-gray-400 dark:text-gray-500">
           No lists yet.{" "}
-          <Link to="/lists" className="underline hover:text-gray-600">
+          <Link
+            to="/lists"
+            className="underline hover:text-gray-600 dark:hover:text-gray-300"
+          >
             Create one
           </Link>{" "}
           to get started.
@@ -62,12 +67,12 @@ export default function RecentListsCard() {
           {lists.map((list) => (
             <li
               key={list.id}
-              className="flex items-center gap-2 text-sm text-gray-700"
+              className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200"
             >
               <span className="w-2 h-2 rounded-full bg-blue-400 shrink-0" />
               <Link
                 to={`/lists/${list.id}`}
-                className="text-blue-600 hover:underline"
+                className="text-blue-600 dark:text-blue-400 hover:underline"
               >
                 {list.name}
               </Link>

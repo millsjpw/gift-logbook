@@ -20,12 +20,6 @@ vi.mock("../../db/queries/sessions.js", () => ({
   createSession: vi.fn().mockResolvedValue(undefined),
 }));
 
-// Mock user settings DB
-vi.mock("../../db/queries/user_settings.js", () => ({
-  getSettings: vi.fn(),
-  upsertSettings: vi.fn(),
-}));
-
 import * as usersService from "../users.js";
 import * as userDb from "../../db/queries/users.js";
 import * as sessionsDb from "../../db/queries/sessions.js";

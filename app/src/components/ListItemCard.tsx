@@ -63,7 +63,7 @@ export default function ListItemCard({
 
   if (isEditing) {
     return (
-      <div className="px-4 py-3 border border-blue-300 rounded-md bg-white">
+      <div className="px-4 py-3 border border-blue-300 dark:border-blue-600 rounded-md bg-white dark:bg-gray-800">
         <div className="flex flex-col gap-2">
           <input
             type="text"
@@ -71,7 +71,7 @@ export default function ListItemCard({
             onChange={(e) => setTitleDraft(e.target.value)}
             disabled={saving}
             placeholder="Item title"
-            className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+            className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 dark:bg-gray-700 dark:text-white dark:disabled:bg-gray-600"
           />
           <input
             type="url"
@@ -79,7 +79,7 @@ export default function ListItemCard({
             onChange={(e) => setUrlDraft(e.target.value)}
             disabled={saving}
             placeholder="URL (optional)"
-            className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+            className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 dark:bg-gray-700 dark:text-white dark:disabled:bg-gray-600"
           />
           <TagInput
             tags={tagsDraft}
@@ -91,7 +91,7 @@ export default function ListItemCard({
             <button
               onClick={saveEdit}
               disabled={saving || !titleDraft.trim()}
-              className="p-1 rounded hover:bg-gray-100 disabled:text-gray-300"
+              className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 disabled:text-gray-300"
               aria-label="Save item"
             >
               <CheckIcon className="h-5 w-5 text-blue-500" />
@@ -99,7 +99,7 @@ export default function ListItemCard({
             <button
               onClick={cancelEdit}
               disabled={saving}
-              className="p-1 rounded hover:bg-gray-100"
+              className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
               aria-label="Cancel edit"
             >
               <XMarkIcon className="h-5 w-5 text-gray-500" />
@@ -111,18 +111,18 @@ export default function ListItemCard({
   }
 
   return (
-    <div className="relative px-4 py-3 border border-gray-200 rounded-md bg-white">
+    <div className="relative px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800">
       <div className="absolute top-3 right-2 flex gap-1">
         <button
           onClick={startEdit}
-          className="p-1 rounded hover:bg-gray-100"
+          className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
           aria-label="Edit item"
         >
           <PencilSquareIcon className="h-4 w-4 text-blue-400 hover:text-blue-600" />
         </button>
         <button
           onClick={() => onDelete(item.id)}
-          className="p-1 rounded hover:bg-gray-100"
+          className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
           aria-label="Delete item"
         >
           <TrashIcon className="h-4 w-4 text-red-500 hover:text-red-700" />
@@ -135,12 +135,12 @@ export default function ListItemCard({
             href={item.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-medium text-blue-600 hover:underline"
+            className="font-medium text-blue-600 dark:text-blue-400 hover:underline"
           >
             {item.title}
           </a>
         ) : (
-          <span className="font-medium">{item.title}</span>
+          <span className="font-medium dark:text-gray-100">{item.title}</span>
         )}
 
         {item.tags?.length > 0 && (
