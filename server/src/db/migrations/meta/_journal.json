@@ -54,8 +54,22 @@
     {
       "idx": 7,
       "version": "7",
+      "when": 1779741530000,
+      "tag": "0007_famous_moon_knight",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1779741535000,
+      "tag": "0008_blushing_sphinx",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
       "when": 1779824495246,
-      "tag": "0007_careless_screwball",
+      "tag": "0009_careless_screwball",
       "breakpoints": true
     }
   ]
