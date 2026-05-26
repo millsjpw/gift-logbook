@@ -1,5 +1,15 @@
 # gift-logbook
 
+## 3.2.0
+
+### Minor Changes
+
+- [#109](https://github.com/millsjpw/gift-logbook/pull/109) [`37074d9`](https://github.com/millsjpw/gift-logbook/commit/37074d9d8afed462aaed7b4dfe1bb41c9ba3c126) Thanks [@millsjpw](https://github.com/millsjpw)! - Adding the modal for Settings
+
+- [#109](https://github.com/millsjpw/gift-logbook/pull/109) [`37074d9`](https://github.com/millsjpw/gift-logbook/commit/37074d9d8afed462aaed7b4dfe1bb41c9ba3c126) Thanks [@millsjpw](https://github.com/millsjpw)! - Adding custom tags for colors, and their API and UI updates
+
+- [#111](https://github.com/millsjpw/gift-logbook/pull/111) [`26467fe`](https://github.com/millsjpw/gift-logbook/commit/26467fe5da0a3e6fa83617722397a5d7234f427d) Thanks [@millsjpw](https://github.com/millsjpw)! - Dark mode update
+
 ## 3.1.0
 
 ### Minor Changes
