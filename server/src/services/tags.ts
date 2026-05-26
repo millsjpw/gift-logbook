@@ -2,7 +2,11 @@ import * as tagsDb from "../db/queries/tags.js";
 import { Tag } from "../db/schema.js";
 import { NotFoundError, UserForbiddenError } from "../api/errors.js";
 
-export async function createTag(userId: string, name: string, color?: string): Promise<Tag> {
+export async function createTag(
+  userId: string,
+  name: string,
+  color?: string,
+): Promise<Tag> {
   return await tagsDb.createTag(userId, name, color);
 }
 
