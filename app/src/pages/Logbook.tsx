@@ -5,6 +5,7 @@ import PageLoader from "../components/PageLoader";
 import PersonTypeahead from "../components/PersonTypeahead";
 import DatePickerInput from "../components/DatePickerInput";
 import TagInput from "../components/TagInput";
+import TagBadge from "../components/TagBadge";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -271,8 +272,8 @@ export default function Logbook() {
       <PageLoader loading={loading} error={error}>
         {/* Add Record Form */}
         <form onSubmit={handleAdd} className="mb-8">
-          <div className="flex flex-col gap-2 w-fit">
-            <div className="flex items-end gap-3">
+          <div className="flex flex-col gap-2 w-full">
+            <div className="flex items-end justify-between gap-3">
               <div className="flex flex-col gap-1">
                 <label className="text-sm text-gray-600">Item *</label>
                 <input
@@ -343,9 +344,9 @@ export default function Logbook() {
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="min-w-full text-sm border border-gray-200 rounded-lg overflow-hidden">
-                <thead>
-                  <tr className="bg-gray-50 text-gray-600 text-left">
+              <table className="min-w-full border border-gray-200 divide-y divide-gray-300">
+                <thead className="bg-gray-50">
+                  <tr className="text-left">
                     <th
                       className="px-4 py-2 font-semibold cursor-pointer select-none whitespace-nowrap"
                       onClick={() => toggleSort("date")}
@@ -372,7 +373,7 @@ export default function Logbook() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="bg-white divide-y divide-gray-300">
                   {pageRecords.map((record) => {
                     const isEditing = editingId === record.id;
                     const personName =
@@ -421,16 +422,12 @@ export default function Logbook() {
                                 {record.tags.length > 0 && (
                                   <div className="flex items-center gap-1 mt-0.5 overflow-hidden">
                                     {record.tags.slice(0, 3).map((t) => (
-                                      <span
+                                      <TagBadge
                                         key={t.id}
-                                        className="shrink-0 max-w-[6rem] truncate px-1.5 py-0.5 rounded-full text-xs font-medium"
-                                        style={{
-                                          backgroundColor: "#dbeafe",
-                                          color: "#1e40af",
-                                        }}
-                                      >
-                                        {t.name}
-                                      </span>
+                                        name={t.name}
+                                        color={t.color}
+                                        className="shrink-0 max-w-[6rem] truncate"
+                                      />
                                     ))}
                                     {record.tags.length > 3 && (
                                       <span className="shrink-0 text-gray-400 text-xs">
