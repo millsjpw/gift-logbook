@@ -1,5 +1,11 @@
 # gift-logbook
 
+## 4.0.0
+
+### Major Changes
+
+- [#115](https://github.com/millsjpw/gift-logbook/pull/115) [`79800f6`](https://github.com/millsjpw/gift-logbook/commit/79800f653811803c3f5e429751be6d9be066a30e) Thanks [@millsjpw](https://github.com/millsjpw)! - Reworked exchange_exclusions into person_exclusions so that they are tied to the person rather than the exchange. Introduced new and modified endpoints as a result. Functionality improved to allow for exchange creation, randomizing, and saving
+
 ## 3.2.0
 
 ### Minor Changes
