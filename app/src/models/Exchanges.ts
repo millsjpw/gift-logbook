@@ -20,11 +20,9 @@ export type ExchangeAssignment = {
   receiverName: string;
 };
 
-export type ExchangeExclusion = {
-  exchangeId: string;
+export type PersonExclusion = {
   personId1: string;
   personId2: string;
-  personName1: string;
   personName2: string;
 };
 
@@ -32,5 +30,4 @@ export type FullExchange = {
   exchange: Exchange;
   participants: ExchangeParticipant[];
   assignments?: ExchangeAssignment[];
-  exclusions?: ExchangeExclusion[];
 };

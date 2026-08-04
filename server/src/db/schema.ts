@@ -381,16 +381,12 @@ export type ExchangeParticipantResponse = Omit<
 > & { personName: string };
 
 // =====================
-// Exchange Exclusions (one-way)
+// Person Exclusions (one-way: person1 will not give to person2)
 // =====================
 
-export const exchangeExclusions = pgTable(
-  "exchange_exclusions",
+export const personExclusions = pgTable(
+  "person_exclusions",
   {
-    exchangeId: uuid("exchange_id")
-      .notNull()
-      .references(() => exchanges.id, { onDelete: "cascade" }),
-
     personId1: uuid("person_id_1")
       .notNull()
       .references(() => persons.id, { onDelete: "cascade" }),
@@ -406,21 +402,18 @@ export const exchangeExclusions = pgTable(
       .$onUpdate(() => new Date()),
   },
   (table) => [
-    primaryKey({
-      columns: [table.exchangeId, table.personId1, table.personId2],
-    }),
-    index("exchange_exclusion_exchange_index").on(table.exchangeId),
-    index("exchange_exclusion_person1_index").on(table.personId1),
-    index("exchange_exclusion_person2_index").on(table.personId2),
+    primaryKey({ columns: [table.personId1, table.personId2] }),
+    index("person_exclusion_person1_index").on(table.personId1),
+    index("person_exclusion_person2_index").on(table.personId2),
   ],
 );
 
-export type NewExchangeExclusion = typeof exchangeExclusions.$inferInsert;
-export type ExchangeExclusion = typeof exchangeExclusions.$inferSelect;
-export type ExchangeExclusionResponse = Omit<
-  ExchangeExclusion,
+export type NewPersonExclusion = typeof personExclusions.$inferInsert;
+export type PersonExclusion = typeof personExclusions.$inferSelect;
+export type PersonExclusionResponse = Omit<
+  PersonExclusion,
   "createdAt" | "updatedAt"
-> & { personName1: string; personName2: string };
+> & { personName2: string };
 
 // =====================
 // Exchange Assignments

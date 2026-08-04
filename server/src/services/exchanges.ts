@@ -1,12 +1,11 @@
 import * as exchangesDb from "../db/queries/exchanges.js";
 import * as exchParticipantsDb from "../db/queries/exchange_participants.js";
 import * as exchAssignmentsDb from "../db/queries/exchange_assignments.js";
-import * as exchExclusionsDb from "../db/queries/exchange_exclusions.js";
+import * as personExclusionsDb from "../db/queries/person_exclusions.js";
 import {
   Exchange,
   ExchangeParticipantResponse,
   ExchangeAssignmentResponse,
-  ExchangeExclusionResponse,
 } from "../db/schema.js";
 import { BadRequestError, NotFoundError } from "../api/errors.js";
 
@@ -14,24 +13,22 @@ export type FullExchange = {
   exchange: Exchange;
   participants: ExchangeParticipantResponse[];
   assignments: ExchangeAssignmentResponse[];
-  exclusions: ExchangeExclusionResponse[];
 };
 
 export async function getFullExchange(
   exchangeId: string,
 ): Promise<FullExchange> {
-  const [exchange, participants, assignments, exclusions] = await Promise.all([
+  const [exchange, participants, assignments] = await Promise.all([
     exchangesDb.getExchangeById(exchangeId),
     exchParticipantsDb.getParticipantsByExchangeId(exchangeId),
     exchAssignmentsDb.getAssignmentsByExchangeId(exchangeId),
-    exchExclusionsDb.getExclusionsByExchangeId(exchangeId),
   ]);
 
   if (!exchange) {
     throw new NotFoundError("Exchange not found");
   }
 
-  return { exchange, participants, assignments, exclusions };
+  return { exchange, participants, assignments };
 }
 
 export async function createExchange(userId: string, name: string) {
@@ -53,33 +50,33 @@ export async function addParticipant(exchangeId: string, personId: string) {
   );
 }
 
-export async function setExclusions(
+export async function removeParticipant(exchangeId: string, personId: string) {
+  await exchParticipantsDb.removeParticipantFromExchange(exchangeId, personId);
+}
+
+export async function replaceParticipants(
   exchangeId: string,
-  personId: string,
-  excludedPersonIds: string[],
+  personIds: string[],
 ) {
-  await exchExclusionsDb.removeExclusionsForPersonInExchange(
-    exchangeId,
-    personId,
-  );
-  // bulk insert new exclusions
-  const exclusions = excludedPersonIds.map((excludedId) => ({
-    personId1: personId,
-    personId2: excludedId,
-  }));
-  await exchExclusionsDb.bulkInsertExclusions(exchangeId, exclusions);
+  await exchParticipantsDb.removeAllParticipantsFromExchange(exchangeId);
+  if (personIds.length > 0) {
+    await exchParticipantsDb.bulkInsertParticipants(exchangeId, personIds);
+  }
+  return exchParticipantsDb.getParticipantsByExchangeId(exchangeId);
 }
 
 export async function generateAssignments(exchangeId: string) {
-  const { participants, exclusions } = await getFullExchange(exchangeId);
+  const { participants } = await getFullExchange(exchangeId);
 
-  const previousAssignments =
-    await exchAssignmentsDb.getAssignmentsByExchangeId(exchangeId);
   const participantIds = participants.map((p) => p.personId);
+  const [previousAssignments, exclusions] = await Promise.all([
+    exchAssignmentsDb.getAssignmentsByExchangeId(exchangeId),
+    personExclusionsDb.getExclusionsByPersonIds(participantIds),
+  ]);
   const constraints = buildConstraintMap(
     participantIds,
     exclusions,
-    previousAssignments ?? [],
+    previousAssignments,
   );
 
   validateParticipants(participants, constraints);
@@ -98,8 +95,7 @@ export async function generateAssignments(exchangeId: string) {
 }
 
 export async function cloneExchange(exchangeId: string, userId: string) {
-  const { exchange, participants, exclusions } =
-    await getFullExchange(exchangeId);
+  const { exchange, participants } = await getFullExchange(exchangeId);
 
   const newExchange = await exchangesDb.createExchange(
     userId,
@@ -109,10 +105,6 @@ export async function cloneExchange(exchangeId: string, userId: string) {
   await exchParticipantsDb.bulkInsertParticipants(
     newExchange.id,
     participants.map((p) => p.personId),
-  );
-  await exchExclusionsDb.bulkInsertExclusions(
-    newExchange.id,
-    exclusions.map((e) => ({ personId1: e.personId1, personId2: e.personId2 })),
   );
 
   return newExchange;
@@ -165,7 +157,7 @@ type ConstraintMap = Map<string, Set<string>>;
 
 function buildConstraintMap(
   participants: string[],
-  exclusions: ExchangeExclusionResponse[],
+  exclusions: { personId1: string; personId2: string }[],
   previousAssignments: ExchangeAssignmentResponse[],
 ): ConstraintMap {
   const map: ConstraintMap = new Map();

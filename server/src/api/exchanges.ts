@@ -47,18 +47,27 @@ export async function handleAddParticipant(req: Request, res: Response) {
   respondWithJSON(res, 201, participant);
 }
 
-export async function handleSetExclusions(req: Request, res: Response) {
+export async function handleRemoveParticipant(req: Request, res: Response) {
   const exchangeId = req.params.id as string;
-  const { personId, excludedPersonIds } = req.body;
+  const personId = req.params.personId as string;
 
-  if (!personId || !Array.isArray(excludedPersonIds)) {
-    throw new BadRequestError(
-      "Missing required fields: personId, excludedPersonIds (array)",
-    );
+  await exchangeService.removeParticipant(exchangeId, personId);
+  res.status(204).send();
+}
+
+export async function handleReplaceParticipants(req: Request, res: Response) {
+  const exchangeId = req.params.id as string;
+  const { personIds } = req.body;
+
+  if (!Array.isArray(personIds)) {
+    throw new BadRequestError("Missing required field: personIds (array)");
   }
 
-  await exchangeService.setExclusions(exchangeId, personId, excludedPersonIds);
-  res.status(204).send();
+  const participants = await exchangeService.replaceParticipants(
+    exchangeId,
+    personIds,
+  );
+  respondWithJSON(res, 200, participants);
 }
 
 export async function handleGenerateAssignments(req: Request, res: Response) {

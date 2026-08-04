@@ -92,6 +92,16 @@ app.get(
 app.get("/persons/:id", middlewareRequireAuth, personsApi.handleGetPerson);
 app.put("/persons/:id", middlewareRequireAuth, personsApi.handleUpdatePerson);
 app.get(
+  "/persons/:id/exclusions",
+  middlewareRequireAuth,
+  personsApi.handleGetExclusions,
+);
+app.put(
+  "/persons/:id/exclusions",
+  middlewareRequireAuth,
+  personsApi.handleSetExclusions,
+);
+app.get(
   "/persons",
   middlewareRequireAuth,
   personsApi.handleGetPeopleCreatedByUser,
@@ -220,10 +230,15 @@ app.post(
   middlewareRequireAuth,
   exchangesApi.handleAddParticipant,
 );
-app.post(
-  "/exchanges/:id/exclusions",
+app.put(
+  "/exchanges/:id/participants",
   middlewareRequireAuth,
-  exchangesApi.handleSetExclusions,
+  exchangesApi.handleReplaceParticipants,
+);
+app.delete(
+  "/exchanges/:id/participants/:personId",
+  middlewareRequireAuth,
+  exchangesApi.handleRemoveParticipant,
 );
 app.get(
   "/exchanges/:id/generate",
