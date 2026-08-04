@@ -1,7 +1,11 @@
 import { describe, it, expect } from "vitest";
 import * as persons from "../queries/persons.js";
 import * as personExclusions from "../queries/person_exclusions.js";
-import { createTestUser, createTestPerson, cleanupTestUser } from "./testUtils.js";
+import {
+  createTestUser,
+  createTestPerson,
+  cleanupTestUser,
+} from "./testUtils.js";
 
 describe("person_exclusions queries", () => {
   it("set and get exclusions for a person", async () => {
@@ -27,7 +31,10 @@ describe("person_exclusions queries", () => {
       expect(after[0].personId2).toBe(p2.id);
 
       // Batch lookup by participant ids
-      const batch = await personExclusions.getExclusionsByPersonIds([p1.id, p2.id]);
+      const batch = await personExclusions.getExclusionsByPersonIds([
+        p1.id,
+        p2.id,
+      ]);
       expect(batch.length).toBe(1);
       expect(batch[0].personId1).toBe(p1.id);
 
