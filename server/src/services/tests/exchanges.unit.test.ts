@@ -31,7 +31,6 @@ import * as exchService from "../exchanges.js";
 import * as exchangesDb from "../../db/queries/exchanges.js";
 import * as participantsDb from "../../db/queries/exchange_participants.js";
 import * as assignmentsDb from "../../db/queries/exchange_assignments.js";
-import * as exclusionsDb from "../../db/queries/exchange_exclusions.js";
 import * as personExclusionsDb from "../../db/queries/person_exclusions.js";
 import { NotFoundError, BadRequestError } from "../../api/errors.js";
 
