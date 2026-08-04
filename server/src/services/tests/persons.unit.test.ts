@@ -22,6 +22,12 @@ vi.mock("../../db/queries/tags.js", () => ({
   deleteTagsByUserId: vi.fn(),
   createTag: vi.fn(),
 }));
+vi.mock("../../db/queries/person_exclusions.js", () => ({
+  getExclusionsForPerson: vi.fn().mockResolvedValue([]),
+  setExclusionsForPerson: vi.fn().mockResolvedValue(undefined),
+  getExclusionsByPersonIds: vi.fn().mockResolvedValue([]),
+  deleteAllExclusionsForPerson: vi.fn().mockResolvedValue(undefined),
+}));
 import * as personsService from "../persons.js";
 import * as personsDb from "../../db/queries/persons.js";
 import { NotFoundError, UserForbiddenError } from "../../api/errors.js";

@@ -1,44 +1,51 @@
 import { describe, it, expect } from "vitest";
-import * as exchanges from "../queries/exchanges.js";
 import * as persons from "../queries/persons.js";
-import * as exclusions from "../queries/exchange_exclusions.js";
+import * as personExclusions from "../queries/person_exclusions.js";
 import {
   createTestUser,
   createTestPerson,
   cleanupTestUser,
 } from "./testUtils.js";
 
-describe("exchange_exclusions queries", () => {
-  it("add and remove exclusions", async () => {
+describe("person_exclusions queries", () => {
+  it("set and get exclusions for a person", async () => {
     let user;
-    let ex;
     let p1;
     let p2;
-    let exc;
+    let p3;
     try {
-      user = (await createTestUser("ee")).user;
-      ex = await exchanges.createExchange(user.id, "Exclusion Test");
+      user = (await createTestUser("pe")).user;
       p1 = await createTestPerson(user.id, "A");
       p2 = await createTestPerson(user.id, "B");
-      exc = await exclusions.addExclusionToExchange(ex.id, p1.id, p2.id);
-      expect(exc).toBeDefined();
+      p3 = await createTestPerson(user.id, "C");
 
-      const list = await exclusions.getExclusionsByExchangeId(ex.id);
-      expect(list.length).toBeGreaterThan(0);
+      await personExclusions.setExclusionsForPerson(p1.id, [p2.id, p3.id]);
 
-      const forP = await exclusions.getExclusionsForPersonInExchange(
-        ex.id,
+      const list = await personExclusions.getExclusionsForPerson(p1.id);
+      expect(list.length).toBe(2);
+
+      // Full replace — remove one exclusion
+      await personExclusions.setExclusionsForPerson(p1.id, [p2.id]);
+      const after = await personExclusions.getExclusionsForPerson(p1.id);
+      expect(after.length).toBe(1);
+      expect(after[0].personId2).toBe(p2.id);
+
+      // Batch lookup by participant ids
+      const batch = await personExclusions.getExclusionsByPersonIds([
         p1.id,
-      );
-      expect(forP.length).toBeGreaterThan(0);
+        p2.id,
+      ]);
+      expect(batch.length).toBe(1);
+      expect(batch[0].personId1).toBe(p1.id);
 
-      await exclusions.removeExclusionFromExchange(ex.id, p1.id, p2.id);
-      const after = await exclusions.getExclusionsByExchangeId(ex.id);
-      expect(after.length).toBe(0);
+      // Clear all
+      await personExclusions.setExclusionsForPerson(p1.id, []);
+      const empty = await personExclusions.getExclusionsForPerson(p1.id);
+      expect(empty.length).toBe(0);
     } finally {
       if (p1?.id) await persons.deletePerson(p1.id);
       if (p2?.id) await persons.deletePerson(p2.id);
-      if (ex?.id) await exchanges.deleteExchange(ex.id);
+      if (p3?.id) await persons.deletePerson(p3.id);
       if (user?.id) await cleanupTestUser(user.id);
     }
   });

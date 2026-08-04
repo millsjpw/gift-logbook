@@ -1,5 +1,6 @@
 import * as personsDb from "../db/queries/persons.js";
 import * as personTagsDb from "../db/queries/person_tags.js";
+import * as personExclusionsDb from "../db/queries/person_exclusions.js";
 import * as tagsDb from "../db/queries/tags.js";
 import { Person, Tag } from "../db/schema.js";
 import { NotFoundError, UserForbiddenError } from "../api/errors.js";
@@ -100,6 +101,17 @@ export async function updatePerson(
       ? await resolveAndSyncPersonTags(updated.id, userId, tags)
       : await personTagsDb.getTagsByPersonId(updated.id);
   return { ...updated, tags: resolvedTags };
+}
+
+export async function getExclusions(personId: string) {
+  return personExclusionsDb.getExclusionsForPerson(personId);
+}
+
+export async function setExclusions(
+  personId: string,
+  excludedPersonIds: string[],
+): Promise<void> {
+  await personExclusionsDb.setExclusionsForPerson(personId, excludedPersonIds);
 }
 
 function ordinalSuffix(n: number): string {

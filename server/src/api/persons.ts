@@ -146,3 +146,23 @@ export async function handleGetUpcomingBirthdays(req: Request, res: Response) {
   );
   respondWithJSON(res, 200, birthdays);
 }
+
+export async function handleGetExclusions(req: Request, res: Response) {
+  const personId = req.params.id as string;
+  const exclusions = await personService.getExclusions(personId);
+  respondWithJSON(res, 200, exclusions);
+}
+
+export async function handleSetExclusions(req: Request, res: Response) {
+  const personId = req.params.id as string;
+  const { excludedPersonIds } = req.body;
+
+  if (!Array.isArray(excludedPersonIds)) {
+    throw new BadRequestError(
+      "Missing required field: excludedPersonIds (array)",
+    );
+  }
+
+  await personService.setExclusions(personId, excludedPersonIds);
+  res.status(204).send();
+}

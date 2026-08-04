@@ -29,13 +29,16 @@ export async function addAssignmentToExchange(
 
 export async function bulkInsertAssignments(
   exchangeId: string,
-  assignments: { giverId: string; receiverId: string }[],
+  assignments: { giverId: string; receiverId: string; round: number }[],
 ) {
-  const assignmentRecords = assignments.map(({ giverId, receiverId }) => ({
-    exchangeId,
-    giverId,
-    receiverId,
-  }));
+  const assignmentRecords = assignments.map(
+    ({ giverId, receiverId, round }) => ({
+      exchangeId,
+      giverId,
+      receiverId,
+      round,
+    }),
+  );
   const createdAssignments = await db
     .insert(exchangeAssignments)
     .values(assignmentRecords)
