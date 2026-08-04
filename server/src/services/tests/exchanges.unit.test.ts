@@ -23,11 +23,16 @@ vi.mock("../../db/queries/exchange_exclusions.js", () => ({
   bulkInsertExclusions: vi.fn(),
 }));
 
+vi.mock("../../db/queries/person_exclusions.js", () => ({
+  getExclusionsByPersonIds: vi.fn(),
+}));
+
 import * as exchService from "../exchanges.js";
 import * as exchangesDb from "../../db/queries/exchanges.js";
 import * as participantsDb from "../../db/queries/exchange_participants.js";
 import * as assignmentsDb from "../../db/queries/exchange_assignments.js";
 import * as exclusionsDb from "../../db/queries/exchange_exclusions.js";
+import * as personExclusionsDb from "../../db/queries/person_exclusions.js";
 import { NotFoundError, BadRequestError } from "../../api/errors.js";
 
 beforeEach(() => vi.clearAllMocks());
@@ -44,15 +49,11 @@ describe("exchanges service", () => {
     (assignmentsDb.getAssignmentsByExchangeId as any).mockResolvedValue([
       { giverId: "p1", receiverId: "p2" },
     ]);
-    (exclusionsDb.getExclusionsByExchangeId as any).mockResolvedValue([
-      { personId1: "p1", personId2: "p3" },
-    ]);
 
     const res = await exchService.getFullExchange("e1");
     expect(res.exchange).toBeDefined();
     expect(res.participants.length).toBe(1);
     expect(res.assignments.length).toBe(1);
-    expect(res.exclusions.length).toBe(1);
   });
 
   it("getFullExchange throws NotFoundError when exchange not found", async () => {
@@ -76,21 +77,9 @@ describe("exchanges service", () => {
     );
   });
 
-  it("setExclusions removes old and bulk inserts new", async () => {
-    (exclusionsDb.removeExclusionsForPersonInExchange as any).mockResolvedValue(
-      undefined,
-    );
-    (exclusionsDb.bulkInsertExclusions as any).mockResolvedValue(undefined);
-
-    await exchService.setExclusions("e1", "p1", ["p2", "p3"]);
-
-    expect(
-      exclusionsDb.removeExclusionsForPersonInExchange,
-    ).toHaveBeenCalledWith("e1", "p1");
-    expect(exclusionsDb.bulkInsertExclusions).toHaveBeenCalledWith("e1", [
-      { personId1: "p1", personId2: "p2" },
-      { personId1: "p1", personId2: "p3" },
-    ]);
+  it("setExclusions on a person delegates to person_exclusions db", async () => {
+    // setExclusions now lives on the persons service; exchanges no longer own it
+    expect(exchService).not.toHaveProperty("setExclusions");
   });
 
   it("generateAssignments throws BadRequestError with <2 participants", async () => {
@@ -101,7 +90,7 @@ describe("exchanges service", () => {
     (participantsDb.getParticipantsByExchangeId as any).mockResolvedValue([
       { personId: "p1" },
     ]);
-    (exclusionsDb.getExclusionsByExchangeId as any).mockResolvedValue([]);
+    (personExclusionsDb.getExclusionsByPersonIds as any).mockResolvedValue([]);
     (assignmentsDb.getAssignmentsByExchangeId as any).mockResolvedValue([]);
 
     await expect(exchService.generateAssignments("e1")).rejects.toThrow(
@@ -119,7 +108,7 @@ describe("exchanges service", () => {
       { personId: "b" },
       { personId: "c" },
     ]);
-    (exclusionsDb.getExclusionsByExchangeId as any).mockResolvedValue([]);
+    (personExclusionsDb.getExclusionsByPersonIds as any).mockResolvedValue([]);
     (assignmentsDb.getAssignmentsByExchangeId as any).mockResolvedValue([]);
 
     const assignments = await exchService.generateAssignments("e2");
@@ -135,21 +124,17 @@ describe("exchanges service", () => {
     expect(new Set(givers)).toEqual(new Set(["a", "b", "c"]));
   });
 
-  it("cloneExchange creates copy and bulk inserts data", async () => {
+  it("cloneExchange creates copy and bulk inserts participants only", async () => {
     const exchange = { id: "o", name: "Orig" };
     const participants = [{ personId: "p1" }, { personId: "p2" }];
-    const exclusions = [{ personId1: "p1", personId2: "p2" }];
 
     (exchangesDb.getExchangeById as any).mockResolvedValue(exchange);
     (participantsDb.getParticipantsByExchangeId as any).mockResolvedValue(
       participants,
     );
-    (exclusionsDb.getExclusionsByExchangeId as any).mockResolvedValue(
-      exclusions,
-    );
+    (assignmentsDb.getAssignmentsByExchangeId as any).mockResolvedValue([]);
     (exchangesDb.createExchange as any).mockResolvedValue({ id: "new" });
     (participantsDb.bulkInsertParticipants as any).mockResolvedValue(undefined);
-    (exclusionsDb.bulkInsertExclusions as any).mockResolvedValue(undefined);
 
     const newEx = await exchService.cloneExchange("o", "u2");
     expect(exchangesDb.createExchange).toHaveBeenCalledWith(
@@ -159,9 +144,6 @@ describe("exchanges service", () => {
     expect(participantsDb.bulkInsertParticipants).toHaveBeenCalledWith("new", [
       "p1",
       "p2",
-    ]);
-    expect(exclusionsDb.bulkInsertExclusions).toHaveBeenCalledWith("new", [
-      { personId1: "p1", personId2: "p2" },
     ]);
     expect(newEx).toBeDefined();
   });
