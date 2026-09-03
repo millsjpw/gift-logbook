@@ -21,7 +21,6 @@ describe("records queries", () => {
         "Item Name",
         12.34,
         new Date(),
-        {},
       );
       expect(record).toHaveProperty("id");
 
@@ -42,7 +41,6 @@ describe("records queries", () => {
         "New Item",
         20,
         new Date(),
-        {},
       );
       expect(updated.itemText).toBe("New Item");
     } finally {
