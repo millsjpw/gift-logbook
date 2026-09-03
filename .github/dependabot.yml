@@ -5,3 +5,9 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    ignore:
+      # v2 requires Changesets CLI v3 and renamed action inputs
+      # (version -> version-script, commit -> commit-message); upgrade
+      # release.yml and @changesets/cli together, not via an automated bump.
+      - dependency-name: "changesets/action"
+        update-types: ["version-update:semver-major"]
