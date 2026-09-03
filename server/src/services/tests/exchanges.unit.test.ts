@@ -17,12 +17,6 @@ vi.mock("../../db/queries/exchange_assignments.js", () => ({
   bulkInsertAssignments: vi.fn(),
 }));
 
-vi.mock("../../db/queries/exchange_exclusions.js", () => ({
-  getExclusionsByExchangeId: vi.fn(),
-  removeExclusionsForPersonInExchange: vi.fn(),
-  bulkInsertExclusions: vi.fn(),
-}));
-
 vi.mock("../../db/queries/person_exclusions.js", () => ({
   getExclusionsByPersonIds: vi.fn(),
 }));

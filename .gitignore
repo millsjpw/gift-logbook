@@ -26,3 +26,6 @@ dist/
 # Neon local tooling
 .agents/
 skills-lock.json
+
+# Claude Code local working notes
+CLAUDE.md
