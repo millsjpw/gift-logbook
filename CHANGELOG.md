@@ -1,5 +1,11 @@
 # gift-logbook
 
+## 4.0.1
+
+### Patch Changes
+
+- [#118](https://github.com/millsjpw/gift-logbook/pull/118) [`8c30d22`](https://github.com/millsjpw/gift-logbook/commit/8c30d225d926a015f5bc367653ad9821aa8cae5a) Thanks [@millsjpw](https://github.com/millsjpw)! - Removed orphaned exchange_exclusions query code left over from the person_exclusions rework, and fixed stale test arguments that were failing `tsc --noEmit` without CI catching it.
+
 ## 4.0.0
 
 ### Major Changes
