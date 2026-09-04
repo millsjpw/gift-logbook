@@ -2,8 +2,9 @@ import * as recordsDb from "../db/queries/records.js";
 import * as recordTagsDb from "../db/queries/record_tags.js";
 import * as tagsDb from "../db/queries/tags.js";
 import * as logbookMembersDb from "../db/queries/logbook_members.js";
+import * as personsDb from "../db/queries/persons.js";
 import { GiftRecord, Tag } from "../db/schema.js";
-import { NotFoundError } from "../api/errors.js";
+import { NotFoundError, BadRequestError } from "../api/errors.js";
 import { assertLogbookAccess } from "./authz.js";
 
 export type RecordWithTags = GiftRecord & { tags: Tag[] };
@@ -38,6 +39,12 @@ export async function addRecord(
   tags?: string[],
 ): Promise<RecordWithTags> {
   assertLogbookAccess(await logbookMembersDb.isMember(logbookId, userId));
+
+  const person = await personsDb.getPersonById(personId);
+  if (!person || person.logbookId !== logbookId) {
+    throw new BadRequestError("The specified person is not in this logbook");
+  }
+
   const record = await recordsDb.addRecord(
     logbookId,
     userId,
