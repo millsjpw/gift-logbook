@@ -3,6 +3,7 @@ import { BadRequestError } from "./errors.js";
 import { respondWithJSON } from "./json.js";
 import { SESSION_COOKIE, sessionCookieOptions } from "./cookies.js";
 import * as userService from "../services/users.js";
+import { assertSelf } from "../services/authz.js";
 
 export async function handleCreateUser(req: Request, res: Response) {
   type parameters = {
@@ -29,12 +30,14 @@ export async function handleCreateUser(req: Request, res: Response) {
 
 export async function handleGetUser(req: Request, res: Response) {
   const userId = req.params.id as string;
+  assertSelf(req.auth!.userId, userId);
   const user = await userService.getUserById(userId);
   respondWithJSON(res, 200, user);
 }
 
 export async function handleUpdateUser(req: Request, res: Response) {
   const userId = req.params.id as string;
+  assertSelf(req.auth!.userId, userId);
   const { name, email, password } = req.body;
 
   if (!name && !email && !password) {
@@ -54,6 +57,7 @@ export async function handleUpdateUser(req: Request, res: Response) {
 
 export async function handleDeleteUser(req: Request, res: Response) {
   const userId = req.params.id as string;
+  assertSelf(req.auth!.userId, userId);
   await userService.deleteUser(userId);
   res.status(204).send();
 }

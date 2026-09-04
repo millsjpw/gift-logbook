@@ -1,11 +1,8 @@
 import type { Request, Response } from "express";
-import {
-  BadRequestError,
-  NotFoundError,
-  UserForbiddenError,
-} from "./errors.js";
+import { BadRequestError, NotFoundError } from "./errors.js";
 import { respondWithJSON } from "./json.js";
 import * as listService from "../services/lists.js";
+import { assertListAccess } from "../services/authz.js";
 
 export async function handleCreateList(req: Request, res: Response) {
   const userId = req.auth!.userId;
@@ -20,8 +17,9 @@ export async function handleCreateList(req: Request, res: Response) {
 }
 
 export async function handleGetListById(req: Request, res: Response) {
+  const userId = req.auth!.userId;
   const listId = req.params.id as string;
-  const list = await listService.getListById(listId);
+  const list = await listService.getListById(userId, listId);
   if (!list) {
     throw new NotFoundError("List not found");
   }
@@ -77,15 +75,11 @@ export async function handleUpdateList(req: Request, res: Response) {
     );
   }
 
-  const existingList = await listService.getListById(listId);
+  const existingList = await listService.getListById(userId, listId);
   if (!existingList) {
     throw new NotFoundError("List not found");
   }
-  if (existingList.userId !== userId) {
-    throw new UserForbiddenError(
-      "You do not have permission to update this list",
-    );
-  }
+  assertListAccess(userId, existingList, "write");
 
   const updatedList = await listService.updateList(userId, {
     ...existingList,

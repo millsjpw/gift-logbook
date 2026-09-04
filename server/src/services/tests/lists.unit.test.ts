@@ -40,7 +40,7 @@ import { UserForbiddenError } from "../../api/errors.js";
 beforeEach(() => vi.clearAllMocks());
 
 describe("lists service", () => {
-  it("getListById returns combined list and items", async () => {
+  it("getListById returns combined list and items for the owner", async () => {
     (listsDb.getListById as any).mockResolvedValue({
       id: "l1",
       userId: "u1",
@@ -50,9 +50,20 @@ describe("lists service", () => {
       { id: "i1", listId: "l1" },
     ]);
     (listItemTagsDb.getTagsByListItemId as any).mockResolvedValue([]);
-    const res = await listsService.getListById("l1");
+    const res = await listsService.getListById("u1", "l1");
     expect(res).toBeDefined();
     expect((res as any).items.length).toBe(1);
+  });
+
+  it("getListById throws UserForbiddenError for a non-owner", async () => {
+    (listsDb.getListById as any).mockResolvedValue({
+      id: "l1",
+      userId: "u1",
+      name: "L",
+    });
+    await expect(listsService.getListById("other", "l1")).rejects.toThrow(
+      UserForbiddenError,
+    );
   });
 
   it("updateList throws UserForbiddenError when not owner", async () => {
