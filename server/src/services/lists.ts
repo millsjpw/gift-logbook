@@ -3,7 +3,8 @@ import * as listItemsDb from "../db/queries/list_items.js";
 import * as listItemTagsDb from "../db/queries/list_item_tags.js";
 import * as tagsDb from "../db/queries/tags.js";
 import { List, ListItem, Tag } from "../db/schema.js";
-import { UserForbiddenError, NotFoundError } from "../api/errors.js";
+import { NotFoundError } from "../api/errors.js";
+import { assertListAccess } from "./authz.js";
 
 type ListItemInput = {
   id?: string;
@@ -53,11 +54,15 @@ export async function createList(
   return { ...list, items: await hydrateItems(list.id) };
 }
 
-export async function getListById(id: string): Promise<FullList | null> {
+export async function getListById(
+  userId: string,
+  id: string,
+): Promise<FullList | null> {
   const list = await listsDb.getListById(id);
   if (!list) {
     return null;
   }
+  assertListAccess(userId, list, "read");
   const items = await hydrateItems(id);
   return { ...list, items };
 }
@@ -109,11 +114,7 @@ export async function updateList(
   userId: string,
   list: Omit<FullList, "items"> & { items: ListItemInput[] },
 ): Promise<FullList> {
-  if (list.userId !== userId) {
-    throw new UserForbiddenError(
-      "You do not have permission to update this list",
-    );
-  }
+  assertListAccess(userId, list, "write");
   const { id, name, personId } = list;
   const updatedList = await listsDb.updateList(id, name, personId ?? undefined);
   for (const item of list.items) {
@@ -150,11 +151,7 @@ export async function deleteList(userId: string, id: string): Promise<void> {
   if (!list) {
     return; // already deleted, treat as success
   }
-  if (list.userId !== userId) {
-    throw new UserForbiddenError(
-      "You do not have permission to delete this list",
-    );
-  }
+  assertListAccess(userId, list, "write");
   await listsDb.deleteList(id);
 }
 
@@ -171,11 +168,7 @@ export async function deleteItemFromList(
   if (!list) {
     return; // list doesn't exist, treat as success
   }
-  if (list.userId !== userId) {
-    throw new UserForbiddenError(
-      "You do not have permission to delete items from this list",
-    );
-  }
+  assertListAccess(userId, list, "write");
   await listItemsDb.deleteListItem(itemId);
 }
 
@@ -187,10 +180,7 @@ export async function addTagToListItem(
 ): Promise<void> {
   const list = await listsDb.getListById(listId);
   if (!list) throw new NotFoundError("List not found");
-  if (list.userId !== userId)
-    throw new UserForbiddenError(
-      "You do not have permission to modify this list",
-    );
+  assertListAccess(userId, list, "write");
   await listItemTagsDb.addTagToListItem(itemId, tagId);
 }
 
@@ -202,9 +192,6 @@ export async function removeTagFromListItem(
 ): Promise<void> {
   const list = await listsDb.getListById(listId);
   if (!list) throw new NotFoundError("List not found");
-  if (list.userId !== userId)
-    throw new UserForbiddenError(
-      "You do not have permission to modify this list",
-    );
+  assertListAccess(userId, list, "write");
   await listItemTagsDb.removeTagFromListItem(itemId, tagId);
 }
