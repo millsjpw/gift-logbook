@@ -67,6 +67,50 @@ export type NewSession = typeof sessions.$inferInsert;
 export type Session = typeof sessions.$inferSelect;
 
 // =====================
+// Logbooks
+// =====================
+
+export const logbooks = pgTable("logbooks", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 256 }).notNull(),
+  ownerUserId: uuid("owner_user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+});
+
+export type NewLogbook = typeof logbooks.$inferInsert;
+export type Logbook = typeof logbooks.$inferSelect;
+
+// =====================
+// Logbook Members
+// =====================
+
+export const logbookMembers = pgTable(
+  "logbook_members",
+  {
+    logbookId: uuid("logbook_id")
+      .notNull()
+      .references(() => logbooks.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.logbookId, table.userId] }),
+    index("logbook_member_user_index").on(table.userId),
+  ],
+);
+
+export type NewLogbookMember = typeof logbookMembers.$inferInsert;
+export type LogbookMember = typeof logbookMembers.$inferSelect;
+
+// =====================
 // Persons
 // =====================
 
@@ -80,9 +124,18 @@ export const persons = pgTable(
       .notNull()
       .defaultNow()
       .$onUpdate(() => new Date()),
-    userId: uuid("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+    // Nullable during the Phase 2 migration window; becomes NOT NULL once the
+    // one-off backfill (server/src/scripts/backfill-logbooks.ts) has run.
+    logbookId: uuid("logbook_id").references(() => logbooks.id, {
+      onDelete: "cascade",
+    }),
+    // No longer the authorization source of truth once logbookId is populated —
+    // kept as a nullable "created by" audit column. onDelete is "set null" (not
+    // "cascade") so deleting a user doesn't delete persons in a logbook they
+    // still share with someone else.
+    userId: uuid("user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
     birthMonth: integer("birth_month"),
     birthDay: integer("birth_day"),
     birthYear: integer("birth_year"),
@@ -202,9 +255,16 @@ export const records = pgTable(
       .notNull()
       .defaultNow()
       .$onUpdate(() => new Date()),
-    userId: uuid("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+    // Nullable during the Phase 2 migration window; becomes NOT NULL once the
+    // one-off backfill (server/src/scripts/backfill-logbooks.ts) has run.
+    logbookId: uuid("logbook_id").references(() => logbooks.id, {
+      onDelete: "cascade",
+    }),
+    // No longer the authorization source of truth once logbookId is populated —
+    // kept as a nullable "created by" audit column. See persons.userId above.
+    userId: uuid("user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
     personId: uuid("person_id").references(() => persons.id, {
       onDelete: "set null",
     }),
