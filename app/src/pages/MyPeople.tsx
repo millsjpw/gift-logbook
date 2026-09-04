@@ -10,6 +10,7 @@ import {
 import Layout from "../components/Layout";
 import BirthdayPicker from "../components/BirthdayPicker";
 import TagInput from "../components/TagInput";
+import { useLogbook } from "../context/LogbookContext";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -28,6 +29,7 @@ type EditDraft = {
 };
 
 export default function MyPeople() {
+  const { activeLogbookId, isLoading: logbookLoading } = useLogbook();
   const [people, setPeople] = useState<Person[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -48,14 +50,17 @@ export default function MyPeople() {
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
 
   useEffect(() => {
+    if (!activeLogbookId) return;
     fetchPeople();
-  }, []);
+  }, [activeLogbookId]);
 
   async function fetchPeople() {
     setLoading(true);
     setError(null);
     try {
-      const data: Person[] = await apiFetch("/persons");
+      const data: Person[] = await apiFetch(
+        `/logbooks/${activeLogbookId}/persons`,
+      );
       setPeople(data);
     } catch (err: any) {
       setError(err.message || "Failed to load people");
@@ -72,16 +77,19 @@ export default function MyPeople() {
     try {
       const { birthMonth, birthDay, birthYear } =
         calendarDateToFields(addBirthday);
-      const newPerson: Person = await apiFetch("/persons", {
-        method: "POST",
-        body: JSON.stringify({
-          name: trimmed,
-          birthMonth,
-          birthDay,
-          birthYear,
-          tags: addTags,
-        }),
-      });
+      const newPerson: Person = await apiFetch(
+        `/logbooks/${activeLogbookId}/persons`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            name: trimmed,
+            birthMonth,
+            birthDay,
+            birthYear,
+            tags: addTags,
+          }),
+        },
+      );
       setPeople((prev) => [...prev, newPerson]);
       setAddName("");
       setAddBirthday(null);
@@ -175,7 +183,7 @@ export default function MyPeople() {
 
   return (
     <Layout>
-      <PageLoader loading={loading} error={error}>
+      <PageLoader loading={loading || logbookLoading} error={error}>
         {/* Add New Person Form */}
         <form onSubmit={handleAdd} className="mb-8">
           <div className="flex justify-center">

@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/react";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { LogbookProvider } from "./context/LogbookContext";
 import type { JSX } from "react/jsx-dev-runtime";
 import MyPeople from "./pages/MyPeople";
 import MyLists from "./pages/MyLists";
@@ -27,69 +28,71 @@ function ProtectedRoute({ children }: { children: JSX.Element }) {
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route
-            path="/people"
-            element={
-              <ProtectedRoute>
-                <MyPeople />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/lists"
-            element={
-              <ProtectedRoute>
-                <MyLists />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/lists/:id"
-            element={
-              <ProtectedRoute>
-                <ListView />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/gift-exchanges"
-            element={
-              <ProtectedRoute>
-                <GiftExchanges />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/gift-exchanges/:id"
-            element={
-              <ProtectedRoute>
-                <GiftExchangeView />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/logbook"
-            element={
-              <ProtectedRoute>
-                <Logbook />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-        <SpeedInsights />
-        <Analytics />
-      </BrowserRouter>
+      <LogbookProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/people"
+              element={
+                <ProtectedRoute>
+                  <MyPeople />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/lists"
+              element={
+                <ProtectedRoute>
+                  <MyLists />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/lists/:id"
+              element={
+                <ProtectedRoute>
+                  <ListView />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/gift-exchanges"
+              element={
+                <ProtectedRoute>
+                  <GiftExchanges />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/gift-exchanges/:id"
+              element={
+                <ProtectedRoute>
+                  <GiftExchangeView />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/logbook"
+              element={
+                <ProtectedRoute>
+                  <Logbook />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+          <SpeedInsights />
+          <Analytics />
+        </BrowserRouter>
+      </LogbookProvider>
     </AuthProvider>
   );
 }

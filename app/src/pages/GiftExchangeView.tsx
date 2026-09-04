@@ -3,6 +3,7 @@ import { useParams, useLocation } from "react-router-dom";
 import Layout from "../components/Layout";
 import PageLoader from "../components/PageLoader";
 import { apiFetch } from "../api/client";
+import { useLogbook } from "../context/LogbookContext";
 import type {
   ExchangeAssignment,
   FullExchange,
@@ -29,6 +30,7 @@ import {
 export default function GiftExchangeView() {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
+  const { activeLogbookId } = useLogbook();
   const [exchange, setExchange] = useState<FullExchange | null>(
     location.state?.exchange ?? null,
   );
@@ -93,7 +95,7 @@ export default function GiftExchangeView() {
 
   async function fetchPersons() {
     try {
-      const data: Person[] = await apiFetch("/persons");
+      const data: Person[] = await apiFetch("/persons/accessible");
       setPersons(data);
     } catch {
       // non-fatal: persons list just won't be available for typeahead
@@ -149,10 +151,13 @@ export default function GiftExchangeView() {
     setAddLoading(true);
     setActionError(null);
     try {
-      const newPerson: Person = await apiFetch("/persons", {
-        method: "POST",
-        body: JSON.stringify({ name: name.trim() }),
-      });
+      const newPerson: Person = await apiFetch(
+        `/logbooks/${activeLogbookId}/persons`,
+        {
+          method: "POST",
+          body: JSON.stringify({ name: name.trim() }),
+        },
+      );
       await apiFetch(`/exchanges/${id}/participants`, {
         method: "POST",
         body: JSON.stringify({ personId: newPerson.id }),
@@ -242,9 +247,7 @@ export default function GiftExchangeView() {
           personIds: source.participants.map((p) => p.personId),
         }),
       });
-      setExchange((prev) =>
-        prev ? { ...prev, participants } : prev,
-      );
+      setExchange((prev) => (prev ? { ...prev, participants } : prev));
       setPendingAssignments(
         source.assignments?.length
           ? source.assignments.map((a) => ({ ...a, exchangeId: id! }))
@@ -334,9 +337,7 @@ export default function GiftExchangeView() {
         {exchange && (
           <div className="p-4 max-w-2xl mx-auto">
             <div className="flex items-center gap-4 mb-6 flex-wrap">
-              <h1 className="text-2xl font-bold">
-                {exchange.exchange.name}
-              </h1>
+              <h1 className="text-2xl font-bold">{exchange.exchange.name}</h1>
               {otherExchanges.length > 0 && (
                 <Select
                   placeholder="Copy from…"

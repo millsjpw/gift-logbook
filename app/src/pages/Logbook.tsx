@@ -6,6 +6,7 @@ import PersonTypeahead from "../components/PersonTypeahead";
 import DatePickerInput from "../components/DatePickerInput";
 import TagInput from "../components/TagInput";
 import TagBadge from "../components/TagBadge";
+import { useLogbook } from "../context/LogbookContext";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -57,6 +58,7 @@ function formatAmount(amount: string | null): string {
 }
 
 export default function Logbook() {
+  const { activeLogbookId } = useLogbook();
   const [records, setRecords] = useState<GiftRecord[]>([]);
   const [persons, setPersons] = useState<Person[]>([]);
   const [loading, setLoading] = useState(true);
@@ -98,13 +100,14 @@ export default function Logbook() {
   );
 
   useEffect(() => {
+    if (!activeLogbookId) return;
     async function load() {
       setLoading(true);
       setError(null);
       try {
         const [recordsData, personsData] = await Promise.all([
-          apiFetch("/records"),
-          apiFetch("/persons"),
+          apiFetch(`/logbooks/${activeLogbookId}/records`),
+          apiFetch(`/logbooks/${activeLogbookId}/persons`),
         ]);
         setRecords(recordsData);
         setPersons(personsData);
@@ -115,7 +118,7 @@ export default function Logbook() {
       }
     }
     load();
-  }, []);
+  }, [activeLogbookId]);
 
   async function handleAdd(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -132,24 +135,32 @@ export default function Logbook() {
       if (match) {
         personId = match.id;
       } else {
-        const newPerson: Person = await apiFetch("/persons", {
-          method: "POST",
-          body: JSON.stringify({ name: trimmedPerson }),
-        });
+        const newPerson: Person = await apiFetch(
+          `/logbooks/${activeLogbookId}/persons`,
+          {
+            method: "POST",
+            body: JSON.stringify({ name: trimmedPerson }),
+          },
+        );
         setPersons((prev) => [...prev, newPerson]);
         personId = newPerson.id;
       }
 
-      const newRecord: GiftRecord = await apiFetch("/records", {
-        method: "POST",
-        body: JSON.stringify({
-          personId,
-          itemText: trimmedText,
-          amount: addAmount ? parseFloat(addAmount) : undefined,
-          date: addDate ? calendarDateToISO(addDate) : new Date().toISOString(),
-          tags: addTags,
-        }),
-      });
+      const newRecord: GiftRecord = await apiFetch(
+        `/logbooks/${activeLogbookId}/records`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            personId,
+            itemText: trimmedText,
+            amount: addAmount ? parseFloat(addAmount) : undefined,
+            date: addDate
+              ? calendarDateToISO(addDate)
+              : new Date().toISOString(),
+            tags: addTags,
+          }),
+        },
+      );
       setRecords((prev) => [newRecord, ...prev]);
       setAddItemText("");
       setAddPersonName("");
@@ -275,7 +286,9 @@ export default function Logbook() {
           <div className="flex flex-col gap-2 w-full">
             <div className="flex items-end justify-between gap-3">
               <div className="flex flex-col gap-1">
-                <label className="text-sm text-gray-600 dark:text-gray-400">Item *</label>
+                <label className="text-sm text-gray-600 dark:text-gray-400">
+                  Item *
+                </label>
                 <input
                   type="text"
                   value={addItemText}
@@ -286,7 +299,9 @@ export default function Logbook() {
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-sm text-gray-600 dark:text-gray-400">For *</label>
+                <label className="text-sm text-gray-600 dark:text-gray-400">
+                  For *
+                </label>
                 <PersonTypeahead
                   persons={persons}
                   value={addPersonName}
@@ -295,7 +310,9 @@ export default function Logbook() {
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-sm text-gray-600 dark:text-gray-400">Amount</label>
+                <label className="text-sm text-gray-600 dark:text-gray-400">
+                  Amount
+                </label>
                 <input
                   type="number"
                   min="0"
@@ -308,7 +325,9 @@ export default function Logbook() {
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-sm text-gray-600 dark:text-gray-400">Date</label>
+                <label className="text-sm text-gray-600 dark:text-gray-400">
+                  Date
+                </label>
                 <DatePickerInput
                   value={addDate}
                   onChange={setAddDate}
@@ -382,7 +401,9 @@ export default function Logbook() {
                       <Fragment key={record.id}>
                         <tr
                           className={
-                            isEditing ? "bg-blue-50 dark:bg-blue-900/30" : "hover:bg-gray-50 dark:hover:bg-gray-600"
+                            isEditing
+                              ? "bg-blue-50 dark:bg-blue-900/30"
+                              : "hover:bg-gray-50 dark:hover:bg-gray-600"
                           }
                         >
                           <td className="px-4 py-2 align-middle">
@@ -459,7 +480,9 @@ export default function Logbook() {
                                 className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 dark:bg-gray-700 dark:text-white dark:disabled:bg-gray-600 w-28"
                               />
                             ) : (
-                              <span className="dark:text-gray-200">{formatAmount(record.amount)}</span>
+                              <span className="dark:text-gray-200">
+                                {formatAmount(record.amount)}
+                              </span>
                             )}
                           </td>
                           <td className="px-4 py-2 align-middle">
@@ -501,13 +524,13 @@ export default function Logbook() {
                               <div className="flex justify-center gap-2">
                                 <button
                                   onClick={() => startEditing(record)}
-                                    className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
-                                  >
-                                    <PencilSquareIcon className="h-5 w-5 text-blue-500 hover:text-blue-700" />
-                                  </button>
-                                  <button
-                                    onClick={() => handleDelete(record.id)}
-                                    className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+                                  className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+                                >
+                                  <PencilSquareIcon className="h-5 w-5 text-blue-500 hover:text-blue-700" />
+                                </button>
+                                <button
+                                  onClick={() => handleDelete(record.id)}
+                                  className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
                                 >
                                   <TrashIcon className="h-5 w-5 text-red-500 hover:text-red-700" />
                                 </button>
