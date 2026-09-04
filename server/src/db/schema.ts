@@ -138,6 +138,30 @@ export type NewList = typeof lists.$inferInsert;
 export type List = typeof lists.$inferSelect;
 
 // =====================
+// List Shares
+// =====================
+
+export const listShares = pgTable(
+  "list_shares",
+  {
+    listId: uuid("list_id")
+      .notNull()
+      .references(() => lists.id, { onDelete: "cascade" }),
+    sharedWithUserId: uuid("shared_with_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.listId, table.sharedWithUserId] }),
+    index("list_share_shared_with_index").on(table.sharedWithUserId),
+  ],
+);
+
+export type NewListShare = typeof listShares.$inferInsert;
+export type ListShare = typeof listShares.$inferSelect;
+
+// =====================
 // List Items
 // =====================
 

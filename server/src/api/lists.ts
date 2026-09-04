@@ -130,3 +130,37 @@ export async function handleRemoveTagFromListItem(req: Request, res: Response) {
   await listService.removeTagFromListItem(userId, listId, itemId, tagId);
   res.status(204).send();
 }
+
+export async function handleGetListsSharedWithMe(req: Request, res: Response) {
+  const userId = req.auth!.userId;
+  const lists = await listService.getListsSharedWithMe(userId);
+  respondWithJSON(res, 200, lists);
+}
+
+export async function handleShareList(req: Request, res: Response) {
+  const userId = req.auth!.userId;
+  const listId = req.params.id as string;
+  const { email } = req.body;
+
+  if (!email) {
+    throw new BadRequestError("Missing required field: email");
+  }
+
+  await listService.shareList(userId, listId, email);
+  res.status(204).send();
+}
+
+export async function handleGetSharesForList(req: Request, res: Response) {
+  const userId = req.auth!.userId;
+  const listId = req.params.id as string;
+  const shares = await listService.getSharesForList(userId, listId);
+  respondWithJSON(res, 200, shares);
+}
+
+export async function handleUnshareList(req: Request, res: Response) {
+  const userId = req.auth!.userId;
+  const listId = req.params.id as string;
+  const sharedWithUserId = req.params.userId as string;
+  await listService.unshareList(userId, listId, sharedWithUserId);
+  res.status(204).send();
+}

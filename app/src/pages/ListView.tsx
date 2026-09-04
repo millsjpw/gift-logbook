@@ -3,15 +3,18 @@ import { useParams, useLocation } from "react-router-dom";
 import type { List } from "../models/List";
 import type { Person } from "../models/Person";
 import { apiFetch } from "../api/client";
+import { useAuth } from "../context/AuthContext";
 import Layout from "../components/Layout";
 import PageLoader from "../components/PageLoader";
 import PersonTypeahead from "../components/PersonTypeahead";
 import ListItemCard from "../components/ListItemCard";
 import TagInput from "../components/TagInput";
+import ShareListDialog from "../components/ShareListDialog";
 import {
   PencilSquareIcon,
   CheckIcon,
   XMarkIcon,
+  UserPlusIcon,
 } from "@heroicons/react/24/solid";
 
 type EditField = "name" | "person" | null;
@@ -19,10 +22,14 @@ type EditField = "name" | "person" | null;
 export default function ListView() {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
+  const { user } = useAuth();
   const [list, setList] = useState<List | null>(location.state?.list ?? null);
   const [persons, setPersons] = useState<Person[]>([]);
   const [loading, setLoading] = useState(!location.state?.list);
   const [error, setError] = useState<string | null>(null);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+
+  const isOwner = !!list && !!user && list.userId === user.id;
 
   // Header edit state
   const [editField, setEditField] = useState<EditField>(null);
@@ -261,12 +268,29 @@ export default function ListView() {
                   <h1 className="text-2xl font-bold dark:text-gray-100">
                     {list.name}
                   </h1>
-                  <button
-                    onClick={startEditName}
-                    className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    <PencilSquareIcon className="h-4 w-4 text-blue-400 hover:text-blue-600" />
-                  </button>
+                  {isOwner && (
+                    <button
+                      onClick={startEditName}
+                      className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      <PencilSquareIcon className="h-4 w-4 text-blue-400 hover:text-blue-600" />
+                    </button>
+                  )}
+                  {isOwner && (
+                    <button
+                      onClick={() => setShareDialogOpen(true)}
+                      className="ml-auto p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+                      aria-label="Share this list"
+                      title="Share this list"
+                    >
+                      <UserPlusIcon className="h-5 w-5 text-blue-400 hover:text-blue-600" />
+                    </button>
+                  )}
+                  {!isOwner && (
+                    <span className="ml-auto text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
+                      Shared with you · view only
+                    </span>
+                  )}
                 </>
               )}
             </div>
@@ -303,12 +327,14 @@ export default function ListView() {
                     For:{" "}
                     <span className="font-medium">{personName ?? "—"}</span>
                   </span>
-                  <button
-                    onClick={startEditPerson}
-                    className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    <PencilSquareIcon className="h-4 w-4 text-blue-400 hover:text-blue-600" />
-                  </button>
+                  {isOwner && (
+                    <button
+                      onClick={startEditPerson}
+                      className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      <PencilSquareIcon className="h-4 w-4 text-blue-400 hover:text-blue-600" />
+                    </button>
+                  )}
                 </>
               )}
             </div>
@@ -318,46 +344,50 @@ export default function ListView() {
             )}
 
             {/* Add item form */}
-            <form
-              onSubmit={handleAddItem}
-              className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-start"
-            >
-              <div className="flex flex-col gap-1 flex-1">
-                <input
-                  type="text"
-                  placeholder="Item title"
-                  value={addTitle}
-                  onChange={(e) => setAddTitle(e.target.value)}
-                  disabled={addSaving}
-                  className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 dark:bg-gray-800 dark:text-white dark:disabled:bg-gray-700"
-                />
-                <input
-                  type="url"
-                  placeholder="URL (optional)"
-                  value={addUrl}
-                  onChange={(e) => setAddUrl(e.target.value)}
-                  disabled={addSaving}
-                  className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 dark:bg-gray-800 dark:text-white dark:disabled:bg-gray-700"
-                />
-                <TagInput
-                  tags={addTags}
-                  onChange={setAddTags}
-                  disabled={addSaving}
-                />
-                {addError && <p className="text-red-600 text-sm">{addError}</p>}
-              </div>
-              <button
-                type="submit"
-                disabled={addSaving || !addTitle.trim()}
-                className={`px-3 py-1 rounded-md text-white self-start ${
-                  addSaving || !addTitle.trim()
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-blue-500 hover:bg-blue-700"
-                }`}
+            {isOwner && (
+              <form
+                onSubmit={handleAddItem}
+                className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-start"
               >
-                Add Item
-              </button>
-            </form>
+                <div className="flex flex-col gap-1 flex-1">
+                  <input
+                    type="text"
+                    placeholder="Item title"
+                    value={addTitle}
+                    onChange={(e) => setAddTitle(e.target.value)}
+                    disabled={addSaving}
+                    className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 dark:bg-gray-800 dark:text-white dark:disabled:bg-gray-700"
+                  />
+                  <input
+                    type="url"
+                    placeholder="URL (optional)"
+                    value={addUrl}
+                    onChange={(e) => setAddUrl(e.target.value)}
+                    disabled={addSaving}
+                    className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 dark:bg-gray-800 dark:text-white dark:disabled:bg-gray-700"
+                  />
+                  <TagInput
+                    tags={addTags}
+                    onChange={setAddTags}
+                    disabled={addSaving}
+                  />
+                  {addError && (
+                    <p className="text-red-600 text-sm">{addError}</p>
+                  )}
+                </div>
+                <button
+                  type="submit"
+                  disabled={addSaving || !addTitle.trim()}
+                  className={`px-3 py-1 rounded-md text-white self-start ${
+                    addSaving || !addTitle.trim()
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-blue-500 hover:bg-blue-700"
+                  }`}
+                >
+                  Add Item
+                </button>
+              </form>
+            )}
 
             {/* Items */}
             {list.items.length === 0 ? (
@@ -372,6 +402,7 @@ export default function ListView() {
                     item={item}
                     onDelete={handleDeleteItem}
                     onEdit={handleEditItem}
+                    readOnly={!isOwner}
                   />
                 ))}
               </div>
@@ -379,6 +410,14 @@ export default function ListView() {
           </div>
         )}
       </PageLoader>
+      {list && isOwner && (
+        <ShareListDialog
+          isOpen={shareDialogOpen}
+          onClose={() => setShareDialogOpen(false)}
+          listId={list.id}
+          listName={list.name}
+        />
+      )}
     </Layout>
   );
 }

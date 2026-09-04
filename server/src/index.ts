@@ -122,6 +122,11 @@ app.post("/lists", middlewareRequireAuth, listsApi.handleCreateList);
 app.get("/lists/search", middlewareRequireAuth, listsApi.handleGetListsByName);
 app.get("/lists/recent", middlewareRequireAuth, listsApi.handleGetRecentLists);
 app.get(
+  "/lists/shared-with-me",
+  middlewareRequireAuth,
+  listsApi.handleGetListsSharedWithMe,
+);
+app.get(
   "/lists/person/:personId",
   middlewareRequireAuth,
   listsApi.handleGetListsByPersonId,
@@ -144,6 +149,17 @@ app.delete(
   "/lists/:listId/items/:itemId/tags/:tagId",
   middlewareRequireAuth,
   listsApi.handleRemoveTagFromListItem,
+);
+app.post("/lists/:id/shares", middlewareRequireAuth, listsApi.handleShareList);
+app.get(
+  "/lists/:id/shares",
+  middlewareRequireAuth,
+  listsApi.handleGetSharesForList,
+);
+app.delete(
+  "/lists/:id/shares/:userId",
+  middlewareRequireAuth,
+  listsApi.handleUnshareList,
 );
 
 // Records API

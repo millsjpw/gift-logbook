@@ -31,11 +31,29 @@ vi.mock("../../db/queries/tags.js", () => ({
   createTag: vi.fn(),
 }));
 
+vi.mock("../../db/queries/list_shares.js", () => ({
+  shareList: vi.fn(),
+  unshareList: vi.fn(),
+  isSharedWith: vi.fn(),
+  getSharesForList: vi.fn(),
+  getListsSharedWithUser: vi.fn(),
+}));
+
+vi.mock("../../db/queries/users.js", () => ({
+  getUserByEmail: vi.fn(),
+}));
+
 import * as listsService from "../lists.js";
 import * as listsDb from "../../db/queries/lists.js";
 import * as itemsDb from "../../db/queries/list_items.js";
 import * as listItemTagsDb from "../../db/queries/list_item_tags.js";
-import { UserForbiddenError } from "../../api/errors.js";
+import * as listSharesDb from "../../db/queries/list_shares.js";
+import * as userDb from "../../db/queries/users.js";
+import {
+  UserForbiddenError,
+  NotFoundError,
+  BadRequestError,
+} from "../../api/errors.js";
 
 beforeEach(() => vi.clearAllMocks());
 
@@ -55,15 +73,29 @@ describe("lists service", () => {
     expect((res as any).items.length).toBe(1);
   });
 
-  it("getListById throws UserForbiddenError for a non-owner", async () => {
+  it("getListById throws UserForbiddenError for an unrelated user", async () => {
     (listsDb.getListById as any).mockResolvedValue({
       id: "l1",
       userId: "u1",
       name: "L",
     });
+    (listSharesDb.isSharedWith as any).mockResolvedValue(false);
     await expect(listsService.getListById("other", "l1")).rejects.toThrow(
       UserForbiddenError,
     );
+  });
+
+  it("getListById returns the list for a user it was shared with", async () => {
+    (listsDb.getListById as any).mockResolvedValue({
+      id: "l1",
+      userId: "u1",
+      name: "L",
+    });
+    (listSharesDb.isSharedWith as any).mockResolvedValue(true);
+    (itemsDb.getListItemsByListId as any).mockResolvedValue([]);
+    const res = await listsService.getListById("other", "l1");
+    expect(res).toBeDefined();
+    expect(listSharesDb.isSharedWith).toHaveBeenCalledWith("l1", "other");
   });
 
   it("updateList throws UserForbiddenError when not owner", async () => {
@@ -89,5 +121,113 @@ describe("lists service", () => {
     (listsDb.getRecentListsByUserId as any).mockResolvedValue([]);
     await listsService.getRecentLists("u1");
     expect(listsDb.getRecentListsByUserId).toHaveBeenCalledWith("u1", 5);
+  });
+
+  describe("shareList", () => {
+    it("throws UserForbiddenError when the caller is not the owner", async () => {
+      (listsDb.getListById as any).mockResolvedValue({
+        id: "l1",
+        userId: "owner",
+      });
+      await expect(
+        listsService.shareList("other", "l1", "wife@example.com"),
+      ).rejects.toThrow(UserForbiddenError);
+    });
+
+    it("throws NotFoundError when no account matches the email", async () => {
+      (listsDb.getListById as any).mockResolvedValue({
+        id: "l1",
+        userId: "owner",
+      });
+      (userDb.getUserByEmail as any).mockResolvedValue(undefined);
+      await expect(
+        listsService.shareList("owner", "l1", "nobody@example.com"),
+      ).rejects.toThrow(NotFoundError);
+    });
+
+    it("throws BadRequestError when sharing with yourself", async () => {
+      (listsDb.getListById as any).mockResolvedValue({
+        id: "l1",
+        userId: "owner",
+      });
+      (userDb.getUserByEmail as any).mockResolvedValue({
+        id: "owner",
+        email: "me@example.com",
+      });
+      await expect(
+        listsService.shareList("owner", "l1", "me@example.com"),
+      ).rejects.toThrow(BadRequestError);
+    });
+
+    it("shares the list with the resolved user", async () => {
+      (listsDb.getListById as any).mockResolvedValue({
+        id: "l1",
+        userId: "owner",
+      });
+      (userDb.getUserByEmail as any).mockResolvedValue({
+        id: "wife",
+        email: "wife@example.com",
+      });
+      await listsService.shareList("owner", "l1", "wife@example.com");
+      expect(listSharesDb.shareList).toHaveBeenCalledWith("l1", "wife");
+    });
+  });
+
+  describe("unshareList", () => {
+    it("throws UserForbiddenError when the caller is not the owner", async () => {
+      (listsDb.getListById as any).mockResolvedValue({
+        id: "l1",
+        userId: "owner",
+      });
+      await expect(
+        listsService.unshareList("other", "l1", "wife"),
+      ).rejects.toThrow(UserForbiddenError);
+    });
+
+    it("removes the share when the caller is the owner", async () => {
+      (listsDb.getListById as any).mockResolvedValue({
+        id: "l1",
+        userId: "owner",
+      });
+      await listsService.unshareList("owner", "l1", "wife");
+      expect(listSharesDb.unshareList).toHaveBeenCalledWith("l1", "wife");
+    });
+  });
+
+  describe("getSharesForList", () => {
+    it("throws UserForbiddenError when the caller is not the owner", async () => {
+      (listsDb.getListById as any).mockResolvedValue({
+        id: "l1",
+        userId: "owner",
+      });
+      await expect(
+        listsService.getSharesForList("other", "l1"),
+      ).rejects.toThrow(UserForbiddenError);
+    });
+
+    it("returns the shares when the caller is the owner", async () => {
+      (listsDb.getListById as any).mockResolvedValue({
+        id: "l1",
+        userId: "owner",
+      });
+      const shares = [
+        { userId: "wife", name: "Wife", email: "wife@example.com" },
+      ];
+      (listSharesDb.getSharesForList as any).mockResolvedValue(shares);
+      const res = await listsService.getSharesForList("owner", "l1");
+      expect(res).toBe(shares);
+    });
+  });
+
+  describe("getListsSharedWithMe", () => {
+    it("hydrates items for each shared list", async () => {
+      (listSharesDb.getListsSharedWithUser as any).mockResolvedValue([
+        { id: "l1", userId: "owner", name: "L" },
+      ]);
+      (itemsDb.getListItemsByListId as any).mockResolvedValue([]);
+      const res = await listsService.getListsSharedWithMe("wife");
+      expect(res).toHaveLength(1);
+      expect(res[0]).toHaveProperty("items");
+    });
   });
 });

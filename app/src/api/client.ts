@@ -20,8 +20,14 @@ export async function apiFetch(path: string, options: RequestInit = {}) {
   }
 
   if (!res.ok) {
-    const errorData: ApiError = await res.json();
-    throw new Error(errorData.error || "API request failed");
+    let message = `API request failed (${res.status})`;
+    try {
+      const errorData: ApiError = await res.json();
+      message = errorData.error || message;
+    } catch {
+      // response body wasn't JSON (e.g. a proxy/HTML error page) — fall back to the status-based message
+    }
+    throw new Error(message);
   }
 
   if (res.status === 204) return null;
