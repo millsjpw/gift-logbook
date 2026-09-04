@@ -5,17 +5,15 @@ import * as personService from "../services/persons.js";
 
 export async function handleCreatePerson(req: Request, res: Response) {
   const { name, tags, birthMonth, birthDay, birthYear } = req.body;
+  const logbookId = req.params.logbookId as string;
   if (!name) {
     throw new BadRequestError("Missing required field: name");
   }
 
-  const userId = req.auth?.userId;
-  if (!userId) {
-    throw new BadRequestError("Authentication required to create a person");
-  }
-
+  const userId = req.auth!.userId;
   const person = await personService.addPerson(
     userId,
+    logbookId,
     name,
     birthMonth ?? null,
     birthDay ?? null,
@@ -26,39 +24,42 @@ export async function handleCreatePerson(req: Request, res: Response) {
 }
 
 export async function handleGetPerson(req: Request, res: Response) {
+  const userId = req.auth!.userId;
   const personId = req.params.id as string;
-  const person = await personService.getPersonById(personId);
+  const person = await personService.getPersonById(userId, personId);
   if (!person) {
     throw new NotFoundError("Person not found");
   }
   respondWithJSON(res, 200, person);
 }
 
-export async function handleGetPeopleCreatedByUser(
-  req: Request,
-  res: Response,
-) {
-  const userId = req.auth?.userId;
-  if (!userId) {
-    throw new BadRequestError("Authentication required to view your people");
-  }
+export async function handleGetPeopleInLogbook(req: Request, res: Response) {
+  const userId = req.auth!.userId;
+  const logbookId = req.params.logbookId as string;
+  const people = await personService.getPeopleInLogbook(userId, logbookId);
+  respondWithJSON(res, 200, people);
+}
 
-  const people = await personService.getAllPeopleCreatedByUser(userId);
+export async function handleGetPersonsAccessible(req: Request, res: Response) {
+  const userId = req.auth!.userId;
+  const people = await personService.getPersonsAccessibleToUser(userId);
   respondWithJSON(res, 200, people);
 }
 
 export async function handleSearchPeopleByName(req: Request, res: Response) {
-  const userId = req.auth?.userId;
-  if (!userId) {
-    throw new BadRequestError("Authentication required to search your people");
-  }
+  const userId = req.auth!.userId;
+  const logbookId = req.params.logbookId as string;
 
   const nameQuery = req.query.name as string;
   if (!nameQuery) {
     throw new BadRequestError("Missing required query parameter: name");
   }
 
-  const people = await personService.searchPeopleByName(userId, nameQuery);
+  const people = await personService.searchPeopleByName(
+    userId,
+    logbookId,
+    nameQuery,
+  );
   respondWithJSON(res, 200, people);
 }
 
@@ -78,11 +79,7 @@ export async function handleUpdatePerson(req: Request, res: Response) {
     );
   }
 
-  const userId = req.auth?.userId;
-  if (!userId) {
-    throw new BadRequestError("Authentication required to update a person");
-  }
-
+  const userId = req.auth!.userId;
   const updatedPerson = await personService.updatePerson(
     userId,
     personId,
@@ -97,34 +94,20 @@ export async function handleUpdatePerson(req: Request, res: Response) {
 
 export async function handleDeletePerson(req: Request, res: Response) {
   const personId = req.params.id as string;
-
-  const userId = req.auth?.userId;
-  if (!userId) {
-    throw new BadRequestError("Authentication required to delete a person");
-  }
-
+  const userId = req.auth!.userId;
   await personService.deletePerson(userId, personId);
   res.status(204).send();
 }
 
-export async function handleDeletePeopleCreatedByUser(
-  req: Request,
-  res: Response,
-) {
-  const userId = req.auth?.userId;
-  if (!userId) {
-    throw new BadRequestError("Authentication required to delete your people");
-  }
-
-  await personService.deletePeopleCreatedByUser(userId);
+export async function handleDeletePeopleInLogbook(req: Request, res: Response) {
+  const userId = req.auth!.userId;
+  const logbookId = req.params.logbookId as string;
+  await personService.deletePeopleInLogbook(userId, logbookId);
   res.status(204).send();
 }
 
 export async function handleGetUpcomingBirthdays(req: Request, res: Response) {
-  const userId = req.auth?.userId;
-  if (!userId) {
-    throw new BadRequestError("Authentication required");
-  }
+  const userId = req.auth!.userId;
 
   const rawLimit = req.query.limit;
   const limit = rawLimit !== undefined ? parseInt(rawLimit as string, 10) : 5;

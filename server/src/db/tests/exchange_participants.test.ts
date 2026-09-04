@@ -11,13 +11,14 @@ import {
 describe("exchange_participants queries", () => {
   it("add and remove participants", async () => {
     let user;
+    let logbookId: string;
     let ex;
     let person;
     let part;
     try {
-      user = (await createTestUser("ep")).user;
+      ({ user, logbookId } = await createTestUser("ep"));
       ex = await exchanges.createExchange(user.id, "Party");
-      person = await createTestPerson(user.id, "P1");
+      person = await createTestPerson(logbookId, user.id, "P1");
       part = await participants.addParticipantToExchange(ex.id, person.id);
       expect(part).toBeDefined();
 

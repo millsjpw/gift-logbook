@@ -10,14 +10,15 @@ import {
 describe("person_exclusions queries", () => {
   it("set and get exclusions for a person", async () => {
     let user;
+    let logbookId: string;
     let p1;
     let p2;
     let p3;
     try {
-      user = (await createTestUser("pe")).user;
-      p1 = await createTestPerson(user.id, "A");
-      p2 = await createTestPerson(user.id, "B");
-      p3 = await createTestPerson(user.id, "C");
+      ({ user, logbookId } = await createTestUser("pe"));
+      p1 = await createTestPerson(logbookId, user.id, "A");
+      p2 = await createTestPerson(logbookId, user.id, "B");
+      p3 = await createTestPerson(logbookId, user.id, "C");
 
       await personExclusions.setExclusionsForPerson(p1.id, [p2.id, p3.id]);
 

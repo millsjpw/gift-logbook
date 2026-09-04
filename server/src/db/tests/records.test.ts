@@ -10,12 +10,14 @@ import {
 describe("records queries", () => {
   it("add, read, update, delete records", async () => {
     let user;
+    let logbookId: string;
     let person;
     let record;
     try {
-      user = (await createTestUser("rec")).user;
-      person = await createTestPerson(user.id, "RecPerson");
+      ({ user, logbookId } = await createTestUser("rec"));
+      person = await createTestPerson(logbookId, user.id, "RecPerson");
       record = await records.addRecord(
+        logbookId,
         user.id,
         person.id,
         "Item Name",
@@ -24,16 +26,16 @@ describe("records queries", () => {
       );
       expect(record).toHaveProperty("id");
 
-      const byUser = await records.getRecordsByUserId(user.id);
-      expect(byUser.length).toBeGreaterThan(0);
+      const byLogbook = await records.getRecordsByLogbookId(logbookId);
+      expect(byLogbook.length).toBeGreaterThan(0);
 
       const byId = await records.getRecordById(record.id);
       expect(byId).toBeDefined();
 
-      const byPerson = await records.getRecordsByPersonId(user.id, person.id);
+      const byPerson = await records.getRecordsByPersonId(logbookId, person.id);
       expect(byPerson.length).toBeGreaterThan(0);
 
-      const byText = await records.getRecordsByItemText(user.id, "Item");
+      const byText = await records.getRecordsByItemText(logbookId, "Item");
       expect(byText.length).toBeGreaterThan(0);
 
       const updated = await records.updateRecord(

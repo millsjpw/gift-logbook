@@ -1,3 +1,18 @@
+// One-off historical migration tool: fixes up users who predate the
+// logbook_id column existing at all. Once every user has a default logbook
+// (guaranteed once services/users.ts:createUser's transactional logbook
+// creation is live, and persons.logbook_id/records.logbook_id are NOT NULL),
+// findPendingUsers should always return an empty list — there's no code path
+// left that can produce a "pending" user going forward.
+//
+// This is also why there's no integration test for this file: exercising it
+// requires a database with a nullable logbook_id (the window between
+// migration A and migration B), and once migration B's NOT NULL constraint
+// exists in the migrations folder, drizzle-kit migrate always applies it
+// too, so that legacy row shape can no longer be constructed in any fresh
+// test database. Correctness was verified with a real integration test
+// while only migration A existed (see git history), and again against real
+// (dev) data via --dry-run and a real run before migration B was added.
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { createDb } from "../db/db.js";
 import { dbConfig } from "../config/db.js";

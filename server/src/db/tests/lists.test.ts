@@ -11,11 +11,12 @@ import { List } from "../schema.js";
 describe("lists queries", () => {
   it("create, read, update, delete list", async () => {
     let user;
+    let logbookId: string;
     let person;
     let created: List | undefined;
     try {
-      user = (await createTestUser("list")).user;
-      person = await createTestPerson(user.id, "ListPerson");
+      ({ user, logbookId } = await createTestUser("list"));
+      person = await createTestPerson(logbookId, user.id, "ListPerson");
       created = await lists.createList(user.id, "Wishlist", person.id);
       expect(created).toHaveProperty("id");
 

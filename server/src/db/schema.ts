@@ -124,15 +124,13 @@ export const persons = pgTable(
       .notNull()
       .defaultNow()
       .$onUpdate(() => new Date()),
-    // Nullable during the Phase 2 migration window; becomes NOT NULL once the
-    // one-off backfill (server/src/scripts/backfill-logbooks.ts) has run.
-    logbookId: uuid("logbook_id").references(() => logbooks.id, {
-      onDelete: "cascade",
-    }),
-    // No longer the authorization source of truth once logbookId is populated —
-    // kept as a nullable "created by" audit column. onDelete is "set null" (not
-    // "cascade") so deleting a user doesn't delete persons in a logbook they
-    // still share with someone else.
+    logbookId: uuid("logbook_id")
+      .notNull()
+      .references(() => logbooks.id, { onDelete: "cascade" }),
+    // No longer the authorization source of truth — kept as a nullable
+    // "created by" audit column. onDelete is "set null" (not "cascade") so
+    // deleting a user doesn't delete persons in a logbook they still share
+    // with someone else.
     userId: uuid("user_id").references(() => users.id, {
       onDelete: "set null",
     }),
@@ -141,7 +139,10 @@ export const persons = pgTable(
     birthYear: integer("birth_year"),
   },
   (table) => [
-    uniqueIndex("user_person_name_index").on(table.userId, lower(table.name)),
+    uniqueIndex("logbook_person_name_index").on(
+      table.logbookId,
+      lower(table.name),
+    ),
     check(
       "birth_month_valid",
       sql`${table.birthMonth} IS NULL OR (${table.birthMonth} >= 1 AND ${table.birthMonth} <= 12)`,
@@ -255,13 +256,11 @@ export const records = pgTable(
       .notNull()
       .defaultNow()
       .$onUpdate(() => new Date()),
-    // Nullable during the Phase 2 migration window; becomes NOT NULL once the
-    // one-off backfill (server/src/scripts/backfill-logbooks.ts) has run.
-    logbookId: uuid("logbook_id").references(() => logbooks.id, {
-      onDelete: "cascade",
-    }),
-    // No longer the authorization source of truth once logbookId is populated —
-    // kept as a nullable "created by" audit column. See persons.userId above.
+    logbookId: uuid("logbook_id")
+      .notNull()
+      .references(() => logbooks.id, { onDelete: "cascade" }),
+    // No longer the authorization source of truth — kept as a nullable
+    // "created by" audit column. See persons.userId above.
     userId: uuid("user_id").references(() => users.id, {
       onDelete: "set null",
     }),
@@ -273,8 +272,8 @@ export const records = pgTable(
     date: timestamp("date").notNull(),
   },
   (table) => [
-    index("user_record_date_index").on(table.userId, table.date),
-    index("user_record_person_index").on(table.userId, table.personId),
+    index("logbook_record_date_index").on(table.logbookId, table.date),
+    index("logbook_record_person_index").on(table.logbookId, table.personId),
     index("person_record_index").on(table.personId),
     check("amount_non_negative", sql`${table.amount} >= 0`),
   ],

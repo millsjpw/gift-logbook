@@ -1,14 +1,11 @@
 import type { Request, Response } from "express";
-import {
-  BadRequestError,
-  NotFoundError,
-  UserForbiddenError,
-} from "./errors.js";
+import { BadRequestError, NotFoundError } from "./errors.js";
 import { respondWithJSON } from "./json.js";
 import * as recordsService from "../services/records.js";
 
 export async function handleAddRecord(req: Request, res: Response) {
   const userId = req.auth!.userId;
+  const logbookId = req.params.logbookId as string;
   const { personId, itemText, amount, date, tags } = req.body;
 
   if (!personId || !itemText) {
@@ -17,6 +14,7 @@ export async function handleAddRecord(req: Request, res: Response) {
 
   const record = await recordsService.addRecord(
     userId,
+    logbookId,
     personId,
     itemText,
     amount,
@@ -30,43 +28,49 @@ export async function handleGetRecordById(req: Request, res: Response) {
   const userId = req.auth!.userId;
   const recordId = req.params.id as string;
 
-  const record = await recordsService.getRecordById(recordId);
+  const record = await recordsService.getRecordById(userId, recordId);
   if (!record) {
     throw new NotFoundError("Record not found");
-  }
-  if (record.userId !== userId) {
-    throw new UserForbiddenError(
-      "You do not have permission to view this record",
-    );
   }
 
   respondWithJSON(res, 200, record);
 }
 
-export async function handleGetRecordsByUserId(req: Request, res: Response) {
+export async function handleGetRecordsByLogbook(req: Request, res: Response) {
   const userId = req.auth!.userId;
+  const logbookId = req.params.logbookId as string;
 
-  const records = await recordsService.getRecordsByUserId(userId);
+  const records = await recordsService.getRecordsByLogbook(userId, logbookId);
   respondWithJSON(res, 200, records);
 }
 
 export async function handleGetRecordsByPersonId(req: Request, res: Response) {
   const userId = req.auth!.userId;
+  const logbookId = req.params.logbookId as string;
   const personId = req.params.personId as string;
 
-  const records = await recordsService.getRecordsByPersonId(userId, personId);
+  const records = await recordsService.getRecordsByPersonId(
+    userId,
+    logbookId,
+    personId,
+  );
   respondWithJSON(res, 200, records);
 }
 
 export async function handleGetRecordsByItemText(req: Request, res: Response) {
   const userId = req.auth!.userId;
+  const logbookId = req.params.logbookId as string;
   const itemText = req.query.itemText as string;
 
   if (!itemText) {
     throw new BadRequestError("Missing required query parameter: itemText");
   }
 
-  const records = await recordsService.getRecordsByItemText(userId, itemText);
+  const records = await recordsService.getRecordsByItemText(
+    userId,
+    logbookId,
+    itemText,
+  );
   respondWithJSON(res, 200, records);
 }
 
@@ -105,16 +109,21 @@ export async function handleDeleteRecordsByPersonId(
   res: Response,
 ) {
   const userId = req.auth!.userId;
+  const logbookId = req.params.logbookId as string;
   const personId = req.params.personId as string;
 
-  await recordsService.deleteRecordsByPersonId(userId, personId);
+  await recordsService.deleteRecordsByPersonId(userId, logbookId, personId);
   res.status(204).send();
 }
 
-export async function handleDeleteRecordsByUserId(req: Request, res: Response) {
+export async function handleDeleteRecordsByLogbook(
+  req: Request,
+  res: Response,
+) {
   const userId = req.auth!.userId;
+  const logbookId = req.params.logbookId as string;
 
-  await recordsService.deleteRecordsByUserId(userId);
+  await recordsService.deleteRecordsByLogbook(userId, logbookId);
   res.status(204).send();
 }
 

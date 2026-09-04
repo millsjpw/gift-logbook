@@ -2,8 +2,10 @@ import * as personsDb from "../db/queries/persons.js";
 import * as personTagsDb from "../db/queries/person_tags.js";
 import * as personExclusionsDb from "../db/queries/person_exclusions.js";
 import * as tagsDb from "../db/queries/tags.js";
+import * as logbookMembersDb from "../db/queries/logbook_members.js";
 import { Person, Tag } from "../db/schema.js";
-import { NotFoundError, UserForbiddenError } from "../api/errors.js";
+import { NotFoundError } from "../api/errors.js";
+import { assertLogbookAccess } from "./authz.js";
 
 export type PersonWithTags = Person & { tags: Tag[] };
 
@@ -29,13 +31,16 @@ async function resolveAndSyncPersonTags(
 
 export async function addPerson(
   userId: string,
+  logbookId: string,
   name: string,
   birthMonth?: number | null,
   birthDay?: number | null,
   birthYear?: number | null,
   tags?: string[],
 ): Promise<PersonWithTags> {
+  assertLogbookAccess(await logbookMembersDb.isMember(logbookId, userId));
   const person = await personsDb.createPerson(
+    logbookId,
     userId,
     name,
     birthMonth,
@@ -49,25 +54,43 @@ export async function addPerson(
 }
 
 export async function getPersonById(
+  userId: string,
   id: string,
 ): Promise<PersonWithTags | null> {
   const person = await personsDb.getPersonById(id);
   if (!person) return null;
+  assertLogbookAccess(
+    await logbookMembersDb.isMember(person.logbookId!, userId),
+  );
   return hydratePerson(person);
 }
 
-export async function getAllPeopleCreatedByUser(
+export async function getPeopleInLogbook(
+  userId: string,
+  logbookId: string,
+): Promise<PersonWithTags[]> {
+  assertLogbookAccess(await logbookMembersDb.isMember(logbookId, userId));
+  const people = await personsDb.getPersonsByLogbookId(logbookId);
+  return Promise.all(people.map(hydratePerson));
+}
+
+/** Union of persons across every logbook the user belongs to — powers
+ * cross-logbook typeaheads (list linking, gift exchanges, birthdays). */
+export async function getPersonsAccessibleToUser(
   userId: string,
 ): Promise<PersonWithTags[]> {
-  const people = await personsDb.getPersonsByUserId(userId);
+  const logbookIds = await logbookMembersDb.getLogbookIdsForUser(userId);
+  const people = await personsDb.getPersonsByLogbookIds(logbookIds);
   return Promise.all(people.map(hydratePerson));
 }
 
 export async function searchPeopleByName(
   userId: string,
+  logbookId: string,
   name: string,
 ): Promise<PersonWithTags[]> {
-  const people = await personsDb.getPersonsByName(userId, name);
+  assertLogbookAccess(await logbookMembersDb.isMember(logbookId, userId));
+  const people = await personsDb.getPersonsByName(logbookId, name);
   return Promise.all(people.map(hydratePerson));
 }
 
@@ -84,11 +107,9 @@ export async function updatePerson(
   if (!person) {
     throw new NotFoundError("Person not found");
   }
-  if (person.userId !== userId) {
-    throw new UserForbiddenError(
-      "You do not have permission to update this person",
-    );
-  }
+  assertLogbookAccess(
+    await logbookMembersDb.isMember(person.logbookId!, userId),
+  );
   const updated = await personsDb.updatePerson(
     id,
     name,
@@ -130,7 +151,8 @@ export async function getUpcomingBirthdays(
   limit = 5,
   daysAhead = 180,
 ): Promise<string[]> {
-  const people = await personsDb.getPersonsByUserId(userId);
+  const logbookIds = await logbookMembersDb.getLogbookIdsForUser(userId);
+  const people = await personsDb.getPersonsByLogbookIds(logbookIds);
 
   const today = new Date();
   const todayMonth = today.getMonth() + 1; // 1-indexed
@@ -188,16 +210,18 @@ export async function deletePerson(userId: string, id: string): Promise<void> {
   if (!person) {
     return; // If the person doesn't exist, we can consider it "deleted"
   }
-  if (person.userId !== userId) {
-    throw new UserForbiddenError(
-      "You do not have permission to delete this person",
-    );
-  }
+  assertLogbookAccess(
+    await logbookMembersDb.isMember(person.logbookId!, userId),
+  );
   await personsDb.deletePerson(id);
 }
 
-export async function deletePeopleCreatedByUser(userId: string): Promise<void> {
-  await personsDb.deletePersonsByUserId(userId);
+export async function deletePeopleInLogbook(
+  userId: string,
+  logbookId: string,
+): Promise<void> {
+  assertLogbookAccess(await logbookMembersDb.isMember(logbookId, userId));
+  await personsDb.deletePersonsByLogbookId(logbookId);
 }
 
 export async function addTagToPerson(
@@ -209,11 +233,9 @@ export async function addTagToPerson(
   if (!person) {
     throw new NotFoundError("Person not found");
   }
-  if (person.userId !== userId) {
-    throw new UserForbiddenError(
-      "You do not have permission to modify this person",
-    );
-  }
+  assertLogbookAccess(
+    await logbookMembersDb.isMember(person.logbookId!, userId),
+  );
   await personTagsDb.addTagToPerson(personId, tagId);
 }
 
@@ -226,11 +248,9 @@ export async function removeTagFromPerson(
   if (!person) {
     throw new NotFoundError("Person not found");
   }
-  if (person.userId !== userId) {
-    throw new UserForbiddenError(
-      "You do not have permission to modify this person",
-    );
-  }
+  assertLogbookAccess(
+    await logbookMembersDb.isMember(person.logbookId!, userId),
+  );
   await personTagsDb.removeTagFromPerson(personId, tagId);
 }
 
@@ -242,10 +262,8 @@ export async function getTagsForPerson(
   if (!person) {
     throw new NotFoundError("Person not found");
   }
-  if (person.userId !== userId) {
-    throw new UserForbiddenError(
-      "You do not have permission to view this person's tags",
-    );
-  }
+  assertLogbookAccess(
+    await logbookMembersDb.isMember(person.logbookId!, userId),
+  );
   return await personTagsDb.getTagsByPersonId(personId);
 }

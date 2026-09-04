@@ -1,17 +1,19 @@
 import { BadRequestError } from "../../api/errors.js";
 import { db } from "../db.js";
 import { persons } from "../schema.js";
-import { eq, and, like } from "drizzle-orm";
+import { eq, and, inArray, like } from "drizzle-orm";
 
 export async function createPerson(
-  userId: string,
+  logbookId: string,
+  createdByUserId: string,
   name: string,
   birthMonth?: number | null,
   birthDay?: number | null,
   birthYear?: number | null,
 ) {
   const person = {
-    userId,
+    logbookId,
+    userId: createdByUserId,
     name,
     birthMonth: birthMonth ?? null,
     birthDay: birthDay ?? null,
@@ -32,11 +34,20 @@ export async function createPerson(
   }
 }
 
-export async function getPersonsByUserId(userId: string) {
+export async function getPersonsByLogbookId(logbookId: string) {
   const personsList = await db
     .select()
     .from(persons)
-    .where(eq(persons.userId, userId));
+    .where(eq(persons.logbookId, logbookId));
+  return personsList;
+}
+
+export async function getPersonsByLogbookIds(logbookIds: string[]) {
+  if (logbookIds.length === 0) return [];
+  const personsList = await db
+    .select()
+    .from(persons)
+    .where(inArray(persons.logbookId, logbookIds));
   return personsList;
 }
 
@@ -49,11 +60,13 @@ export async function getPersonById(id: string) {
   return person;
 }
 
-export async function getPersonsByName(userId: string, name: string) {
+export async function getPersonsByName(logbookId: string, name: string) {
   const personsList = await db
     .select()
     .from(persons)
-    .where(and(eq(persons.userId, userId), like(persons.name, `%${name}%`)));
+    .where(
+      and(eq(persons.logbookId, logbookId), like(persons.name, `%${name}%`)),
+    );
   return personsList;
 }
 
@@ -93,6 +106,6 @@ export async function deletePerson(id: string) {
   await db.delete(persons).where(eq(persons.id, id));
 }
 
-export async function deletePersonsByUserId(userId: string) {
-  await db.delete(persons).where(eq(persons.userId, userId));
+export async function deletePersonsByLogbookId(logbookId: string) {
+  await db.delete(persons).where(eq(persons.logbookId, logbookId));
 }
