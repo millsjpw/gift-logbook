@@ -25,6 +25,11 @@ jobs:
 
       - name: Run server unit tests
         working-directory: ./server
+        env:
+          PORT: "3000"
+          PLATFORM: "test"
+          DB_URL: "postgres://unit-test-unused:5432/unit-test-unused"
+          SESSION_DURATION: "3600"
         run: npm run test:unit -- --coverage
 
   quality-checks:
