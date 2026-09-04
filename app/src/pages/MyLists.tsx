@@ -16,6 +16,7 @@ type EditDraft = { name: string };
 
 export default function MyLists() {
   const [lists, setLists] = useState<List[]>([]);
+  const [sharedLists, setSharedLists] = useState<List[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -36,8 +37,12 @@ export default function MyLists() {
     setLoading(true);
     setError(null);
     try {
-      const listsData: List[] = await apiFetch("/lists");
+      const [listsData, sharedData]: [List[], List[]] = await Promise.all([
+        apiFetch("/lists"),
+        apiFetch("/lists/shared-with-me"),
+      ]);
       setLists(listsData);
+      setSharedLists(sharedData);
     } catch (err: any) {
       setError(err.message || "Failed to load data");
     } finally {
@@ -290,6 +295,48 @@ export default function MyLists() {
                 })}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* Shared with me */}
+        {sharedLists.length > 0 && (
+          <div className="mt-10">
+            <h2 className="text-lg font-semibold mb-3 dark:text-gray-100">
+              Shared with me
+            </h2>
+            <div className="overflow-x-auto">
+              <table className="table-fixed w-full border border-gray-200 dark:border-gray-700 divide-y divide-gray-300 dark:divide-gray-700">
+                <thead className="bg-gray-50 dark:bg-gray-700">
+                  <tr>
+                    <th className="px-4 py-2 text-left dark:text-gray-200">
+                      List Name
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-300 dark:divide-gray-700">
+                  {sharedLists.map((list) => (
+                    <tr
+                      key={list.id}
+                      className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600"
+                      onClick={() =>
+                        navigate(`/lists/${list.id}`, { state: { list } })
+                      }
+                    >
+                      <td className="px-4 py-2 align-middle">
+                        <div className="flex flex-col justify-center">
+                          <span className="font-medium dark:text-gray-100">
+                            {list.name}
+                          </span>
+                          <div className="text-gray-400 dark:text-gray-500 text-tiny">
+                            updated {formatTimeAgo(list.updatedAt)}
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </PageLoader>

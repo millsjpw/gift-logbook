@@ -18,12 +18,14 @@ type ListItemCardProps = {
     url: string,
     tags: string[],
   ) => Promise<void>;
+  readOnly?: boolean;
 };
 
 export default function ListItemCard({
   item,
   onDelete,
   onEdit,
+  readOnly = false,
 }: ListItemCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [titleDraft, setTitleDraft] = useState("");
@@ -112,24 +114,26 @@ export default function ListItemCard({
 
   return (
     <div className="relative px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800">
-      <div className="absolute top-3 right-2 flex gap-1">
-        <button
-          onClick={startEdit}
-          className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
-          aria-label="Edit item"
-        >
-          <PencilSquareIcon className="h-4 w-4 text-blue-400 hover:text-blue-600" />
-        </button>
-        <button
-          onClick={() => onDelete(item.id)}
-          className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
-          aria-label="Delete item"
-        >
-          <TrashIcon className="h-4 w-4 text-red-500 hover:text-red-700" />
-        </button>
-      </div>
+      {!readOnly && (
+        <div className="absolute top-3 right-2 flex gap-1">
+          <button
+            onClick={startEdit}
+            className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+            aria-label="Edit item"
+          >
+            <PencilSquareIcon className="h-4 w-4 text-blue-400 hover:text-blue-600" />
+          </button>
+          <button
+            onClick={() => onDelete(item.id)}
+            className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+            aria-label="Delete item"
+          >
+            <TrashIcon className="h-4 w-4 text-red-500 hover:text-red-700" />
+          </button>
+        </div>
+      )}
 
-      <div className="pr-16">
+      <div className={readOnly ? "" : "pr-16"}>
         {item.url ? (
           <a
             href={item.url}

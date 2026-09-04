@@ -2,8 +2,10 @@ import * as listsDb from "../db/queries/lists.js";
 import * as listItemsDb from "../db/queries/list_items.js";
 import * as listItemTagsDb from "../db/queries/list_item_tags.js";
 import * as tagsDb from "../db/queries/tags.js";
+import * as listSharesDb from "../db/queries/list_shares.js";
+import * as userDb from "../db/queries/users.js";
 import { List, ListItem, Tag } from "../db/schema.js";
-import { NotFoundError } from "../api/errors.js";
+import { NotFoundError, BadRequestError } from "../api/errors.js";
 import { assertListAccess } from "./authz.js";
 
 type ListItemInput = {
@@ -14,6 +16,12 @@ type ListItemInput = {
 };
 type FullListItem = ListItem & { tags: Tag[] };
 type FullList = List & { items: FullListItem[] };
+type ListShareUser = {
+  userId: string;
+  name: string;
+  email: string;
+  createdAt: Date;
+};
 
 async function hydrateItems(listId: string): Promise<FullListItem[]> {
   const items = await listItemsDb.getListItemsByListId(listId);
@@ -62,7 +70,11 @@ export async function getListById(
   if (!list) {
     return null;
   }
-  assertListAccess(userId, list, "read");
+  const shared =
+    list.userId !== userId
+      ? await listSharesDb.isSharedWith(id, userId)
+      : false;
+  assertListAccess(userId, list, "read", shared);
   const items = await hydrateItems(id);
   return { ...list, items };
 }
@@ -194,4 +206,57 @@ export async function removeTagFromListItem(
   if (!list) throw new NotFoundError("List not found");
   assertListAccess(userId, list, "write");
   await listItemTagsDb.removeTagFromListItem(itemId, tagId);
+}
+
+export async function shareList(
+  userId: string,
+  listId: string,
+  targetEmail: string,
+): Promise<void> {
+  const list = await listsDb.getListById(listId);
+  if (!list) throw new NotFoundError("List not found");
+  assertListAccess(userId, list, "write");
+
+  const targetUser = await userDb.getUserByEmail(targetEmail);
+  if (!targetUser) {
+    throw new NotFoundError("No account found with that email");
+  }
+  if (targetUser.id === userId) {
+    throw new BadRequestError("You cannot share a list with yourself");
+  }
+
+  await listSharesDb.shareList(listId, targetUser.id);
+}
+
+export async function unshareList(
+  userId: string,
+  listId: string,
+  sharedWithUserId: string,
+): Promise<void> {
+  const list = await listsDb.getListById(listId);
+  if (!list) throw new NotFoundError("List not found");
+  assertListAccess(userId, list, "write");
+  await listSharesDb.unshareList(listId, sharedWithUserId);
+}
+
+export async function getSharesForList(
+  userId: string,
+  listId: string,
+): Promise<ListShareUser[]> {
+  const list = await listsDb.getListById(listId);
+  if (!list) throw new NotFoundError("List not found");
+  assertListAccess(userId, list, "write");
+  return listSharesDb.getSharesForList(listId);
+}
+
+export async function getListsSharedWithMe(
+  userId: string,
+): Promise<FullList[]> {
+  const shared = await listSharesDb.getListsSharedWithUser(userId);
+  return Promise.all(
+    shared.map(async (list) => ({
+      ...list,
+      items: await hydrateItems(list.id),
+    })),
+  );
 }
