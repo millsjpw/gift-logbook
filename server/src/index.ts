@@ -15,6 +15,7 @@ import * as listsApi from "./api/lists.js";
 import * as recordsApi from "./api/records.js";
 import * as tagsApi from "./api/tags.js";
 import * as exchangesApi from "./api/exchanges.js";
+import * as logbooksApi from "./api/logbooks.js";
 
 const allowedOrigins = (process.env.CORS_ORIGINS ?? "").split(",");
 
@@ -77,15 +78,72 @@ app.get("/users/:id", middlewareRequireAuth, usersApi.handleGetUser);
 app.put("/users/:id", middlewareRequireAuth, usersApi.handleUpdateUser);
 app.delete("/users/:id", middlewareRequireAuth, usersApi.handleDeleteUser);
 
-// Persons API
-app.post("/persons", middlewareRequireAuth, personsApi.handleCreatePerson);
+// Logbooks API
+app.post("/logbooks", middlewareRequireAuth, logbooksApi.handleCreateLogbook);
 app.get(
-  "/persons/search",
+  "/logbooks",
+  middlewareRequireAuth,
+  logbooksApi.handleGetLogbooksForUser,
+);
+app.get(
+  "/logbooks/:id",
+  middlewareRequireAuth,
+  logbooksApi.handleGetLogbookById,
+);
+app.put(
+  "/logbooks/:id",
+  middlewareRequireAuth,
+  logbooksApi.handleUpdateLogbook,
+);
+app.post(
+  "/logbooks/:id/members",
+  middlewareRequireAuth,
+  logbooksApi.handleAddLogbookMember,
+);
+app.get(
+  "/logbooks/:id/members",
+  middlewareRequireAuth,
+  logbooksApi.handleGetLogbookMembers,
+);
+app.delete(
+  "/logbooks/:id/members/:userId",
+  middlewareRequireAuth,
+  logbooksApi.handleRemoveLogbookMember,
+);
+
+// Persons API
+// Logbook-scoped: listing/creating/searching/bulk-deleting persons all
+// happen within one logbook. Single-person routes stay flat (below) since a
+// person id is already globally unique and the service resolves access via
+// the person's own logbook membership.
+app.post(
+  "/logbooks/:logbookId/persons",
+  middlewareRequireAuth,
+  personsApi.handleCreatePerson,
+);
+app.get(
+  "/logbooks/:logbookId/persons/search",
   middlewareRequireAuth,
   personsApi.handleSearchPeopleByName,
 );
 app.get(
-  "/persons/upcoming-birthdays",
+  "/logbooks/:logbookId/persons",
+  middlewareRequireAuth,
+  personsApi.handleGetPeopleInLogbook,
+);
+app.delete(
+  "/logbooks/:logbookId/persons",
+  middlewareRequireAuth,
+  personsApi.handleDeletePeopleInLogbook,
+);
+
+app.get(
+  "/persons/accessible",
+  middlewareRequireAuth,
+  personsApi.handleGetPersonsAccessible,
+);
+app.get(
+  "/persons/accessible/upcoming-birthdays",
   middlewareRequireAuth,
   personsApi.handleGetUpcomingBirthdays,
 );
@@ -101,20 +159,10 @@ app.put(
   middlewareRequireAuth,
   personsApi.handleSetExclusions,
 );
-app.get(
-  "/persons",
-  middlewareRequireAuth,
-  personsApi.handleGetPeopleCreatedByUser,
-);
 app.delete(
   "/persons/:id",
   middlewareRequireAuth,
   personsApi.handleDeletePerson,
-);
-app.delete(
-  "/persons",
-  middlewareRequireAuth,
-  personsApi.handleDeletePeopleCreatedByUser,
 );
 
 // Lists API
@@ -163,18 +211,38 @@ app.delete(
 );
 
 // Records API
-app.post("/records", middlewareRequireAuth, recordsApi.handleAddRecord);
+// Logbook-scoped, same shape as Persons above.
+app.post(
+  "/logbooks/:logbookId/records",
+  middlewareRequireAuth,
+  recordsApi.handleAddRecord,
+);
 app.get(
-  "/records/search",
+  "/logbooks/:logbookId/records/search",
   middlewareRequireAuth,
   recordsApi.handleGetRecordsByItemText,
 );
-app.get("/records", middlewareRequireAuth, recordsApi.handleGetRecordsByUserId);
 app.get(
-  "/records/person/:personId",
+  "/logbooks/:logbookId/records/person/:personId",
   middlewareRequireAuth,
   recordsApi.handleGetRecordsByPersonId,
 );
+app.get(
+  "/logbooks/:logbookId/records",
+  middlewareRequireAuth,
+  recordsApi.handleGetRecordsByLogbook,
+);
+app.delete(
+  "/logbooks/:logbookId/records/person/:personId",
+  middlewareRequireAuth,
+  recordsApi.handleDeleteRecordsByPersonId,
+);
+app.delete(
+  "/logbooks/:logbookId/records",
+  middlewareRequireAuth,
+  recordsApi.handleDeleteRecordsByLogbook,
+);
+
 app.get("/records/:id", middlewareRequireAuth, recordsApi.handleGetRecordById);
 app.put("/records/:id", middlewareRequireAuth, recordsApi.handleUpdateRecord);
 app.post(
@@ -191,16 +259,6 @@ app.delete(
   "/records/:id",
   middlewareRequireAuth,
   recordsApi.handleDeleteRecord,
-);
-app.delete(
-  "/records",
-  middlewareRequireAuth,
-  recordsApi.handleDeleteRecordsByUserId,
-);
-app.delete(
-  "/records/person/:personId",
-  middlewareRequireAuth,
-  recordsApi.handleDeleteRecordsByPersonId,
 );
 app.delete(
   "/records/:id/tags/:tag",

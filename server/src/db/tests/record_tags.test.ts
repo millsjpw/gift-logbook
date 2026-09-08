@@ -12,14 +12,20 @@ import {
 describe("record_tags queries", () => {
   it("add and remove tags on a record", async () => {
     let user;
+    let logbookId: string;
     let person;
     let record;
     let tag;
     let added;
     try {
-      user = (await createTestUser("rt")).user;
-      person = await createTestPerson(user.id, "RTPerson");
-      record = await records.addRecord(user.id, person.id, "Tagged Item");
+      ({ user, logbookId } = await createTestUser("rt"));
+      person = await createTestPerson(logbookId, user.id, "RTPerson");
+      record = await records.addRecord(
+        logbookId,
+        user.id,
+        person.id,
+        "Tagged Item",
+      );
       tag = await tags.createTag(user.id, "Tag1");
       added = await recordTags.addTagToRecord(record.id, tag.id);
       expect(added).toBeDefined();

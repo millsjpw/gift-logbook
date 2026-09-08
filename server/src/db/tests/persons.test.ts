@@ -6,23 +6,24 @@ import { Person } from "../schema.js";
 describe("persons queries", () => {
   it("create, read, update, delete person", async () => {
     let user;
+    let logbookId: string;
     let created: Person | undefined;
     try {
-      user = (await createTestUser("person")).user;
-      created = await persons.createPerson(user.id, "Friend");
+      ({ user, logbookId } = await createTestUser("person"));
+      created = await persons.createPerson(logbookId, user.id, "Friend");
       expect(created).toHaveProperty("id");
       expect(created.birthMonth).toBeNull();
       expect(created.birthDay).toBeNull();
       expect(created.birthYear).toBeNull();
 
-      const list = await persons.getPersonsByUserId(user.id);
+      const list = await persons.getPersonsByLogbookId(logbookId);
       expect(created).toBeDefined();
       expect(list.some((p) => p.id === created!.id)).toBeTruthy();
 
       const byId = await persons.getPersonById(created.id);
       expect(byId).toBeDefined();
 
-      const found = await persons.getPersonsByName(user.id, "Friend");
+      const found = await persons.getPersonsByName(logbookId, "Friend");
       expect(found.length).toBeGreaterThan(0);
 
       const updated = await persons.updatePerson(created.id, "Buddy");
@@ -35,10 +36,12 @@ describe("persons queries", () => {
 
   it("create person with birth date fields", async () => {
     let user;
+    let logbookId: string;
     let created: Person | undefined;
     try {
-      user = (await createTestUser("person-birth")).user;
+      ({ user, logbookId } = await createTestUser("person-birth"));
       created = await persons.createPerson(
+        logbookId,
         user.id,
         "Birthday Person",
         6,
@@ -56,10 +59,11 @@ describe("persons queries", () => {
 
   it("update person birth date fields", async () => {
     let user;
+    let logbookId: string;
     let created: Person | undefined;
     try {
-      user = (await createTestUser("person-birth-update")).user;
-      created = await persons.createPerson(user.id, "No Birthday");
+      ({ user, logbookId } = await createTestUser("person-birth-update"));
+      created = await persons.createPerson(logbookId, user.id, "No Birthday");
       expect(created.birthMonth).toBeNull();
 
       const updated = await persons.updatePerson(

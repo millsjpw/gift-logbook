@@ -3,11 +3,12 @@ import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 vi.mock("../../db/queries/persons.js", () => ({
   createPerson: vi.fn(),
   getPersonById: vi.fn(),
-  getPersonsByUserId: vi.fn(),
+  getPersonsByLogbookId: vi.fn(),
+  getPersonsByLogbookIds: vi.fn(),
   getPersonsByName: vi.fn(),
   updatePerson: vi.fn(),
   deletePerson: vi.fn(),
-  deletePersonsByUserId: vi.fn(),
+  deletePersonsByLogbookId: vi.fn(),
 }));
 vi.mock("../../db/queries/person_tags.js", () => ({
   getTagsByPersonId: vi.fn().mockResolvedValue([]),
@@ -28,8 +29,13 @@ vi.mock("../../db/queries/person_exclusions.js", () => ({
   getExclusionsByPersonIds: vi.fn().mockResolvedValue([]),
   deleteAllExclusionsForPerson: vi.fn().mockResolvedValue(undefined),
 }));
+vi.mock("../../db/queries/logbook_members.js", () => ({
+  isMember: vi.fn(),
+  getLogbookIdsForUser: vi.fn(),
+}));
 import * as personsService from "../persons.js";
 import * as personsDb from "../../db/queries/persons.js";
+import * as logbookMembersDb from "../../db/queries/logbook_members.js";
 import { NotFoundError, UserForbiddenError } from "../../api/errors.js";
 
 beforeEach(() => vi.clearAllMocks());
@@ -42,21 +48,23 @@ describe("persons service", () => {
     ).rejects.toThrow(NotFoundError);
   });
 
-  it("updatePerson throws UserForbiddenError when not owner", async () => {
+  it("updatePerson throws UserForbiddenError when not a logbook member", async () => {
     (personsDb.getPersonById as any).mockResolvedValue({
       id: "p1",
-      userId: "other",
+      logbookId: "lb1",
     });
+    (logbookMembersDb.isMember as any).mockResolvedValue(false);
     await expect(
       personsService.updatePerson("u1", "p1", "Name"),
     ).rejects.toThrow(UserForbiddenError);
   });
 
-  it("updatePerson calls db when owner", async () => {
+  it("updatePerson calls db when a member", async () => {
     (personsDb.getPersonById as any).mockResolvedValue({
       id: "p1",
-      userId: "u1",
+      logbookId: "lb1",
     });
+    (logbookMembersDb.isMember as any).mockResolvedValue(true);
     (personsDb.updatePerson as any).mockResolvedValue({
       id: "p1",
       name: "New",
@@ -75,8 +83,9 @@ describe("persons service", () => {
   it("updatePerson passes birth date fields to db", async () => {
     (personsDb.getPersonById as any).mockResolvedValue({
       id: "p1",
-      userId: "u1",
+      logbookId: "lb1",
     });
+    (logbookMembersDb.isMember as any).mockResolvedValue(true);
     (personsDb.updatePerson as any).mockResolvedValue({
       id: "p1",
       name: "Name",
@@ -104,7 +113,15 @@ describe("persons service", () => {
 });
 
 describe("addPerson", () => {
+  it("throws UserForbiddenError when not a member of the logbook", async () => {
+    (logbookMembersDb.isMember as any).mockResolvedValue(false);
+    await expect(
+      personsService.addPerson("u1", "lb1", "Alice"),
+    ).rejects.toThrow(UserForbiddenError);
+  });
+
   it("passes birth date fields through to db", async () => {
+    (logbookMembersDb.isMember as any).mockResolvedValue(true);
     (personsDb.createPerson as any).mockResolvedValue({
       id: "p1",
       name: "Alice",
@@ -112,8 +129,9 @@ describe("addPerson", () => {
       birthDay: 15,
       birthYear: 1995,
     });
-    await personsService.addPerson("u1", "Alice", 6, 15, 1995);
+    await personsService.addPerson("u1", "lb1", "Alice", 6, 15, 1995);
     expect(personsDb.createPerson).toHaveBeenCalledWith(
+      "lb1",
       "u1",
       "Alice",
       6,
@@ -123,12 +141,14 @@ describe("addPerson", () => {
   });
 
   it("passes null birth fields when not provided", async () => {
+    (logbookMembersDb.isMember as any).mockResolvedValue(true);
     (personsDb.createPerson as any).mockResolvedValue({
       id: "p1",
       name: "Bob",
     });
-    await personsService.addPerson("u1", "Bob");
+    await personsService.addPerson("u1", "lb1", "Bob");
     expect(personsDb.createPerson).toHaveBeenCalledWith(
+      "lb1",
       "u1",
       "Bob",
       undefined,
@@ -143,6 +163,7 @@ describe("getUpcomingBirthdays", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date(2026, 4, 6)); // month is 0-indexed
+    (logbookMembersDb.getLogbookIdsForUser as any).mockResolvedValue(["lb1"]);
   });
 
   afterEach(() => {
@@ -150,11 +171,11 @@ describe("getUpcomingBirthdays", () => {
   });
 
   it("returns empty array when no people have birth dates set", async () => {
-    (personsDb.getPersonsByUserId as any).mockResolvedValue([
+    (personsDb.getPersonsByLogbookIds as any).mockResolvedValue([
       {
         id: "p1",
         name: "Alice",
-        userId: "u1",
+        logbookId: "lb1",
         birthMonth: null,
         birthDay: null,
         birthYear: null,
@@ -165,11 +186,11 @@ describe("getUpcomingBirthdays", () => {
   });
 
   it("formats birthday without year when birthYear is null", async () => {
-    (personsDb.getPersonsByUserId as any).mockResolvedValue([
+    (personsDb.getPersonsByLogbookIds as any).mockResolvedValue([
       {
         id: "p1",
         name: "Alice",
-        userId: "u1",
+        logbookId: "lb1",
         birthMonth: 5,
         birthDay: 10,
         birthYear: null,
@@ -180,11 +201,11 @@ describe("getUpcomingBirthdays", () => {
   });
 
   it("formats birthday without ordinal when birth year is placeholder 1900", async () => {
-    (personsDb.getPersonsByUserId as any).mockResolvedValue([
+    (personsDb.getPersonsByLogbookIds as any).mockResolvedValue([
       {
         id: "p1",
         name: "Bob",
-        userId: "u1",
+        logbookId: "lb1",
         birthMonth: 5,
         birthDay: 10,
         birthYear: 1900,
@@ -196,11 +217,11 @@ describe("getUpcomingBirthdays", () => {
 
   it("formats birthday with ordinal age when birth year is set", async () => {
     // May 10, 1990 → turning 36 in 2026
-    (personsDb.getPersonsByUserId as any).mockResolvedValue([
+    (personsDb.getPersonsByLogbookIds as any).mockResolvedValue([
       {
         id: "p1",
         name: "Carol",
-        userId: "u1",
+        logbookId: "lb1",
         birthMonth: 5,
         birthDay: 10,
         birthYear: 1990,
@@ -212,11 +233,11 @@ describe("getUpcomingBirthdays", () => {
 
   it("uses 11th/12th/13th (not 11st/12nd/13rd) for teen ordinals", async () => {
     // May 10, 2015 → turning 11 in 2026
-    (personsDb.getPersonsByUserId as any).mockResolvedValue([
+    (personsDb.getPersonsByLogbookIds as any).mockResolvedValue([
       {
         id: "p1",
         name: "Dave",
-        userId: "u1",
+        logbookId: "lb1",
         birthMonth: 5,
         birthDay: 10,
         birthYear: 2015,
@@ -227,11 +248,11 @@ describe("getUpcomingBirthdays", () => {
   });
 
   it("includes today's birthday with daysUntil of 0", async () => {
-    (personsDb.getPersonsByUserId as any).mockResolvedValue([
+    (personsDb.getPersonsByLogbookIds as any).mockResolvedValue([
       {
         id: "p1",
         name: "Eve",
-        userId: "u1",
+        logbookId: "lb1",
         birthMonth: 5,
         birthDay: 6,
         birthYear: null,
@@ -243,11 +264,11 @@ describe("getUpcomingBirthdays", () => {
 
   it("rolls to next year for birthdays already passed", async () => {
     // April 30 has already passed (today is May 6)
-    (personsDb.getPersonsByUserId as any).mockResolvedValue([
+    (personsDb.getPersonsByLogbookIds as any).mockResolvedValue([
       {
         id: "p1",
         name: "Frank",
-        userId: "u1",
+        logbookId: "lb1",
         birthMonth: 4,
         birthDay: 30,
         birthYear: null,
@@ -255,7 +276,7 @@ describe("getUpcomingBirthdays", () => {
       {
         id: "p2",
         name: "Grace",
-        userId: "u1",
+        logbookId: "lb1",
         birthMonth: 5,
         birthDay: 10,
         birthYear: null,
@@ -269,11 +290,11 @@ describe("getUpcomingBirthdays", () => {
   });
 
   it("sorts by days until upcoming (sooner first)", async () => {
-    (personsDb.getPersonsByUserId as any).mockResolvedValue([
+    (personsDb.getPersonsByLogbookIds as any).mockResolvedValue([
       {
         id: "p2",
         name: "Zara",
-        userId: "u1",
+        logbookId: "lb1",
         birthMonth: 5,
         birthDay: 20,
         birthYear: null,
@@ -281,7 +302,7 @@ describe("getUpcomingBirthdays", () => {
       {
         id: "p1",
         name: "Amy",
-        userId: "u1",
+        logbookId: "lb1",
         birthMonth: 5,
         birthDay: 10,
         birthYear: null,
@@ -293,11 +314,11 @@ describe("getUpcomingBirthdays", () => {
   });
 
   it("respects limit parameter", async () => {
-    (personsDb.getPersonsByUserId as any).mockResolvedValue([
+    (personsDb.getPersonsByLogbookIds as any).mockResolvedValue([
       {
         id: "p1",
         name: "A",
-        userId: "u1",
+        logbookId: "lb1",
         birthMonth: 5,
         birthDay: 10,
         birthYear: null,
@@ -305,7 +326,7 @@ describe("getUpcomingBirthdays", () => {
       {
         id: "p2",
         name: "B",
-        userId: "u1",
+        logbookId: "lb1",
         birthMonth: 5,
         birthDay: 11,
         birthYear: null,
@@ -313,7 +334,7 @@ describe("getUpcomingBirthdays", () => {
       {
         id: "p3",
         name: "C",
-        userId: "u1",
+        logbookId: "lb1",
         birthMonth: 5,
         birthDay: 12,
         birthYear: null,
@@ -327,23 +348,23 @@ describe("getUpcomingBirthdays", () => {
     const people = Array.from({ length: 7 }, (_, i) => ({
       id: `p${i}`,
       name: `Person${i}`,
-      userId: "u1",
+      logbookId: "lb1",
       birthMonth: 5,
       birthDay: 10 + i,
       birthYear: null,
     }));
-    (personsDb.getPersonsByUserId as any).mockResolvedValue(people);
+    (personsDb.getPersonsByLogbookIds as any).mockResolvedValue(people);
     const res = await personsService.getUpcomingBirthdays("u1");
     expect(res).toHaveLength(5);
   });
 
   it("excludes birthdays beyond daysAhead", async () => {
-    (personsDb.getPersonsByUserId as any).mockResolvedValue([
+    (personsDb.getPersonsByLogbookIds as any).mockResolvedValue([
       // 4 days away — within 10 day window
       {
         id: "p1",
         name: "Near",
-        userId: "u1",
+        logbookId: "lb1",
         birthMonth: 5,
         birthDay: 10,
         birthYear: null,
@@ -352,7 +373,7 @@ describe("getUpcomingBirthdays", () => {
       {
         id: "p2",
         name: "Far",
-        userId: "u1",
+        logbookId: "lb1",
         birthMonth: 6,
         birthDay: 5,
         birthYear: null,
@@ -365,12 +386,12 @@ describe("getUpcomingBirthdays", () => {
 
   it("defaults to daysAhead of 180", async () => {
     // 181 days from May 6, 2026 is Nov 3, 2026
-    (personsDb.getPersonsByUserId as any).mockResolvedValue([
+    (personsDb.getPersonsByLogbookIds as any).mockResolvedValue([
       // Nov 2 = 180 days ahead — included
       {
         id: "p1",
         name: "InWindow",
-        userId: "u1",
+        logbookId: "lb1",
         birthMonth: 11,
         birthDay: 2,
         birthYear: null,
@@ -379,7 +400,7 @@ describe("getUpcomingBirthdays", () => {
       {
         id: "p2",
         name: "OutOfWindow",
-        userId: "u1",
+        logbookId: "lb1",
         birthMonth: 11,
         birthDay: 4,
         birthYear: null,

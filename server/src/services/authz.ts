@@ -24,3 +24,13 @@ export function assertListAccess(
       : "You do not have permission to view this list",
   );
 }
+
+/**
+ * Logbook membership is the only access level — every member gets full
+ * read/write, so unlike assertListAccess there's no read/write distinction.
+ */
+export function assertLogbookAccess(isMember: boolean): void {
+  if (!isMember) {
+    throw new UserForbiddenError("You are not a member of this logbook");
+  }
+}

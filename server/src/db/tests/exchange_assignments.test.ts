@@ -11,15 +11,16 @@ import {
 describe("exchange_assignments queries", () => {
   it("add and remove assignments", async () => {
     let user;
+    let logbookId: string;
     let ex;
     let p1;
     let p2;
     let assign;
     try {
-      user = (await createTestUser("ea")).user;
+      ({ user, logbookId } = await createTestUser("ea"));
       ex = await exchanges.createExchange(user.id, "Assignment Test");
-      p1 = await createTestPerson(user.id, "Giver");
-      p2 = await createTestPerson(user.id, "Receiver");
+      p1 = await createTestPerson(logbookId, user.id, "Giver");
+      p2 = await createTestPerson(logbookId, user.id, "Receiver");
       assign = await assignments.addAssignmentToExchange(ex.id, p1.id, p2.id);
       expect(assign).toBeDefined();
 

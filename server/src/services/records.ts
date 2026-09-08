@@ -1,8 +1,11 @@
 import * as recordsDb from "../db/queries/records.js";
 import * as recordTagsDb from "../db/queries/record_tags.js";
 import * as tagsDb from "../db/queries/tags.js";
+import * as logbookMembersDb from "../db/queries/logbook_members.js";
+import * as personsDb from "../db/queries/persons.js";
 import { GiftRecord, Tag } from "../db/schema.js";
-import { NotFoundError, UserForbiddenError } from "../api/errors.js";
+import { NotFoundError, BadRequestError } from "../api/errors.js";
+import { assertLogbookAccess } from "./authz.js";
 
 export type RecordWithTags = GiftRecord & { tags: Tag[] };
 
@@ -28,13 +31,22 @@ async function resolveAndSyncRecordTags(
 
 export async function addRecord(
   userId: string,
+  logbookId: string,
   personId: string,
   itemText: string,
   amount?: number,
   date?: Date,
   tags?: string[],
 ): Promise<RecordWithTags> {
+  assertLogbookAccess(await logbookMembersDb.isMember(logbookId, userId));
+
+  const person = await personsDb.getPersonById(personId);
+  if (!person || person.logbookId !== logbookId) {
+    throw new BadRequestError("The specified person is not in this logbook");
+  }
+
   const record = await recordsDb.addRecord(
+    logbookId,
     userId,
     personId,
     itemText,
@@ -48,33 +60,43 @@ export async function addRecord(
 }
 
 export async function getRecordById(
+  userId: string,
   id: string,
 ): Promise<RecordWithTags | null> {
   const record = await recordsDb.getRecordById(id);
   if (!record) return null;
+  assertLogbookAccess(
+    await logbookMembersDb.isMember(record.logbookId!, userId),
+  );
   return hydrateRecord(record);
 }
 
-export async function getRecordsByUserId(
+export async function getRecordsByLogbook(
   userId: string,
+  logbookId: string,
 ): Promise<RecordWithTags[]> {
-  const records = await recordsDb.getRecordsByUserId(userId);
+  assertLogbookAccess(await logbookMembersDb.isMember(logbookId, userId));
+  const records = await recordsDb.getRecordsByLogbookId(logbookId);
   return Promise.all(records.map(hydrateRecord));
 }
 
 export async function getRecordsByPersonId(
   userId: string,
+  logbookId: string,
   personId: string,
 ): Promise<RecordWithTags[]> {
-  const records = await recordsDb.getRecordsByPersonId(userId, personId);
+  assertLogbookAccess(await logbookMembersDb.isMember(logbookId, userId));
+  const records = await recordsDb.getRecordsByPersonId(logbookId, personId);
   return Promise.all(records.map(hydrateRecord));
 }
 
 export async function getRecordsByItemText(
   userId: string,
+  logbookId: string,
   itemText: string,
 ): Promise<RecordWithTags[]> {
-  const records = await recordsDb.getRecordsByItemText(userId, itemText);
+  assertLogbookAccess(await logbookMembersDb.isMember(logbookId, userId));
+  const records = await recordsDb.getRecordsByItemText(logbookId, itemText);
   return Promise.all(records.map(hydrateRecord));
 }
 
@@ -90,11 +112,9 @@ export async function updateRecord(
   if (!record) {
     throw new NotFoundError("Record not found");
   }
-  if (record.userId !== userId) {
-    throw new UserForbiddenError(
-      "You do not have permission to update this record",
-    );
-  }
+  assertLogbookAccess(
+    await logbookMembersDb.isMember(record.logbookId!, userId),
+  );
   const updated = await recordsDb.updateRecord(id, itemText, amount, date);
   const resolvedTags =
     tags !== undefined
@@ -108,31 +128,27 @@ export async function deleteRecord(userId: string, id: string): Promise<void> {
   if (!record) {
     return; // record already doesn't exist, so consider it deleted
   }
-  if (record.userId !== userId) {
-    throw new UserForbiddenError(
-      "You do not have permission to delete this record",
-    );
-  }
+  assertLogbookAccess(
+    await logbookMembersDb.isMember(record.logbookId!, userId),
+  );
   await recordsDb.deleteRecord(id);
 }
 
-export async function deleteRecordsByUserId(userId: string): Promise<void> {
-  await recordsDb.deleteRecordsByUserId(userId);
+export async function deleteRecordsByLogbook(
+  userId: string,
+  logbookId: string,
+): Promise<void> {
+  assertLogbookAccess(await logbookMembersDb.isMember(logbookId, userId));
+  await recordsDb.deleteRecordsByLogbookId(logbookId);
 }
 
 export async function deleteRecordsByPersonId(
   userId: string,
+  logbookId: string,
   personId: string,
 ): Promise<void> {
-  const records = await recordsDb.getRecordsByPersonId(userId, personId);
-  for (const record of records) {
-    if (record.userId !== userId) {
-      throw new UserForbiddenError(
-        "You do not have permission to delete one or more of these records",
-      );
-    }
-  }
-  await recordsDb.deleteRecordsByPersonId(userId, personId);
+  assertLogbookAccess(await logbookMembersDb.isMember(logbookId, userId));
+  await recordsDb.deleteRecordsByPersonId(logbookId, personId);
 }
 
 export async function addTagToRecord(
@@ -144,11 +160,9 @@ export async function addTagToRecord(
   if (!record) {
     throw new NotFoundError("Record not found");
   }
-  if (record.userId !== userId) {
-    throw new UserForbiddenError(
-      "You do not have permission to modify this record",
-    );
-  }
+  assertLogbookAccess(
+    await logbookMembersDb.isMember(record.logbookId!, userId),
+  );
   return await recordTagsDb.addTagToRecord(recordId, tag);
 }
 
@@ -161,11 +175,9 @@ export async function removeTagFromRecord(
   if (!record) {
     throw new NotFoundError("Record not found");
   }
-  if (record.userId !== userId) {
-    throw new UserForbiddenError(
-      "You do not have permission to modify this record",
-    );
-  }
+  assertLogbookAccess(
+    await logbookMembersDb.isMember(record.logbookId!, userId),
+  );
   await recordTagsDb.removeTagFromRecord(recordId, tagId);
 }
 
@@ -177,10 +189,8 @@ export async function getTagsForRecord(
   if (!record) {
     throw new NotFoundError("Record not found");
   }
-  if (record.userId !== userId) {
-    throw new UserForbiddenError(
-      "You do not have permission to view this record",
-    );
-  }
+  assertLogbookAccess(
+    await logbookMembersDb.isMember(record.logbookId!, userId),
+  );
   return await recordTagsDb.getTagsByRecordId(recordId);
 }

@@ -4,9 +4,25 @@ import * as listItemTagsDb from "../db/queries/list_item_tags.js";
 import * as tagsDb from "../db/queries/tags.js";
 import * as listSharesDb from "../db/queries/list_shares.js";
 import * as userDb from "../db/queries/users.js";
+import * as personsDb from "../db/queries/persons.js";
+import * as logbookMembersDb from "../db/queries/logbook_members.js";
 import { List, ListItem, Tag } from "../db/schema.js";
 import { NotFoundError, BadRequestError } from "../api/errors.js";
-import { assertListAccess } from "./authz.js";
+import { assertListAccess, assertLogbookAccess } from "./authz.js";
+
+/** A list's personId may point to a person in any logbook the caller
+ * belongs to, not just their active one — verify via that logbook's
+ * membership rather than list ownership. */
+async function assertPersonAccessible(
+  userId: string,
+  personId: string,
+): Promise<void> {
+  const person = await personsDb.getPersonById(personId);
+  if (!person) throw new BadRequestError("The specified person does not exist");
+  assertLogbookAccess(
+    await logbookMembersDb.isMember(person.logbookId!, userId),
+  );
+}
 
 type ListItemInput = {
   id?: string;
@@ -39,6 +55,7 @@ export async function createList(
   personId?: string,
   items?: ListItemInput[],
 ): Promise<FullList> {
+  if (personId) await assertPersonAccessible(userId, personId);
   const list = await listsDb.createList(userId, name, personId);
   if (items && items.length > 0) {
     const created = await listItemsDb.bulkInsertListItems(
@@ -128,6 +145,7 @@ export async function updateList(
 ): Promise<FullList> {
   assertListAccess(userId, list, "write");
   const { id, name, personId } = list;
+  if (personId) await assertPersonAccessible(userId, personId);
   const updatedList = await listsDb.updateList(id, name, personId ?? undefined);
   for (const item of list.items) {
     let savedItem: ListItem | undefined;

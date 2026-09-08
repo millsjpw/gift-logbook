@@ -4,6 +4,7 @@ import type { List } from "../models/List";
 import type { Person } from "../models/Person";
 import { apiFetch } from "../api/client";
 import { useAuth } from "../context/AuthContext";
+import { useLogbook } from "../context/LogbookContext";
 import Layout from "../components/Layout";
 import PageLoader from "../components/PageLoader";
 import PersonTypeahead from "../components/PersonTypeahead";
@@ -23,6 +24,7 @@ export default function ListView() {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
   const { user } = useAuth();
+  const { activeLogbookId } = useLogbook();
   const [list, setList] = useState<List | null>(location.state?.list ?? null);
   const [persons, setPersons] = useState<Person[]>([]);
   const [loading, setLoading] = useState(!location.state?.list);
@@ -47,7 +49,7 @@ export default function ListView() {
 
   useEffect(() => {
     const loadData = async () => {
-      const fetches: Promise<any>[] = [apiFetch("/persons")];
+      const fetches: Promise<any>[] = [apiFetch("/persons/accessible")];
       if (!list) fetches.unshift(apiFetch(`/lists/${id}`));
 
       try {
@@ -57,7 +59,7 @@ export default function ListView() {
           setList(listData);
           setPersons(personsData);
         } else {
-          const personsData = await apiFetch("/persons");
+          const personsData = await apiFetch("/persons/accessible");
           setPersons(personsData);
         }
       } catch (err: any) {
@@ -135,10 +137,13 @@ export default function ListView() {
         if (match) {
           personId = match.id;
         } else {
-          const newPerson: Person = await apiFetch("/persons", {
-            method: "POST",
-            body: JSON.stringify({ name: trimmed }),
-          });
+          const newPerson: Person = await apiFetch(
+            `/logbooks/${activeLogbookId}/persons`,
+            {
+              method: "POST",
+              body: JSON.stringify({ name: trimmed }),
+            },
+          );
           personId = newPerson.id;
           setPersons((prev) => [...prev, newPerson]);
         }

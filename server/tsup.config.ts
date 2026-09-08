@@ -1,7 +1,11 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entry: ["src/index.ts", "src/scripts/migrate.ts"],
+  entry: [
+    "src/index.ts",
+    "src/scripts/migrate.ts",
+    "src/scripts/backfill-logbooks.ts",
+  ],
   outDir: "dist",
   format: ["cjs"],
   platform: "node",

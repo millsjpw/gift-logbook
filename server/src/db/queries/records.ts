@@ -3,14 +3,16 @@ import { NewGiftRecord, records } from "../schema.js";
 import { eq, and, like } from "drizzle-orm";
 
 export async function addRecord(
-  userId: string,
+  logbookId: string,
+  createdByUserId: string,
   personId: string,
   itemText: string,
   amount?: number,
   date?: Date,
 ) {
   const record: NewGiftRecord = {
-    userId,
+    logbookId,
+    userId: createdByUserId,
     personId,
     itemText,
     amount: amount !== undefined ? String(amount) : null,
@@ -20,11 +22,11 @@ export async function addRecord(
   return createdRecord;
 }
 
-export async function getRecordsByUserId(userId: string) {
+export async function getRecordsByLogbookId(logbookId: string) {
   const recordsList = await db
     .select()
     .from(records)
-    .where(eq(records.userId, userId));
+    .where(eq(records.logbookId, logbookId));
   return recordsList;
 }
 
@@ -37,20 +39,31 @@ export async function getRecordById(id: string) {
   return record;
 }
 
-export async function getRecordsByPersonId(userId: string, personId: string) {
-  const recordsList = await db
-    .select()
-    .from(records)
-    .where(and(eq(records.userId, userId), eq(records.personId, personId)));
-  return recordsList;
-}
-
-export async function getRecordsByItemText(userId: string, itemText: string) {
+export async function getRecordsByPersonId(
+  logbookId: string,
+  personId: string,
+) {
   const recordsList = await db
     .select()
     .from(records)
     .where(
-      and(eq(records.userId, userId), like(records.itemText, `%${itemText}%`)),
+      and(eq(records.logbookId, logbookId), eq(records.personId, personId)),
+    );
+  return recordsList;
+}
+
+export async function getRecordsByItemText(
+  logbookId: string,
+  itemText: string,
+) {
+  const recordsList = await db
+    .select()
+    .from(records)
+    .where(
+      and(
+        eq(records.logbookId, logbookId),
+        like(records.itemText, `%${itemText}%`),
+      ),
     );
   return recordsList;
 }
@@ -79,15 +92,17 @@ export async function deleteRecord(id: string) {
   await db.delete(records).where(eq(records.id, id));
 }
 
-export async function deleteRecordsByUserId(userId: string) {
-  await db.delete(records).where(eq(records.userId, userId));
+export async function deleteRecordsByLogbookId(logbookId: string) {
+  await db.delete(records).where(eq(records.logbookId, logbookId));
 }
 
 export async function deleteRecordsByPersonId(
-  userId: string,
+  logbookId: string,
   personId: string,
 ) {
   await db
     .delete(records)
-    .where(and(eq(records.userId, userId), eq(records.personId, personId)));
+    .where(
+      and(eq(records.logbookId, logbookId), eq(records.personId, personId)),
+    );
 }
