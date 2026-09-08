@@ -1,5 +1,17 @@
 # gift-logbook
 
+## 4.1.0
+
+### Minor Changes
+
+- [#123](https://github.com/millsjpw/gift-logbook/pull/123) [`a4cc3f3`](https://github.com/millsjpw/gift-logbook/commit/a4cc3f33282aec0e772dc9f8bc4dea596a3e1bb1) Thanks [@millsjpw](https://github.com/millsjpw)! - Added read-only list sharing: the owner of a list can share it with another registered user by email, and that user can view it (but not edit) under a new "Shared with me" section. Adds a `list_shares` table, new `/lists/:id/shares` endpoints, and a share dialog on the list page.
+
+- [#124](https://github.com/millsjpw/gift-logbook/pull/124) [`e59cabf`](https://github.com/millsjpw/gift-logbook/commit/e59cabf67c8c1c88c03266f1c09f7842f9b0b3db) Thanks [@millsjpw](https://github.com/millsjpw)! - Added shared logbooks: gift recipients ("persons") and gift-purchase history ("records") now live in a logbook rather than being owned directly by a single user. Every account gets a personal default logbook automatically, and any member can invite another registered user to share it — all members get full read/write access to that logbook's persons and records. A logbook switcher appears in the navbar once you belong to more than one, and a new "Logbooks" manager (from the user menu) lets you rename logbooks, invite or remove members, and create additional logbooks. Existing accounts were migrated automatically: each user's existing persons and records were moved into their new default logbook, preserving all data.
+
+### Patch Changes
+
+- [#121](https://github.com/millsjpw/gift-logbook/pull/121) [`b3150ba`](https://github.com/millsjpw/gift-logbook/commit/b3150ba8e4411815d43f897522517c56906dbf38) Thanks [@millsjpw](https://github.com/millsjpw)! - Fixed two authorization gaps: `GET /lists/:id` now requires the requester to own the list (previously any authenticated user could view any list by id), and the `/users/:id` endpoints now require the requester to be acting on their own account (previously any authenticated user could read, update, or delete any other account). Introduced a small `authz.ts` helper (`assertSelf`, `assertListAccess`) to centralize these checks ahead of upcoming list-sharing and shared-logbook features.
+
 ## 4.0.1
 
 ### Patch Changes
